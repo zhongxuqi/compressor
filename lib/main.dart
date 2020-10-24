@@ -114,6 +114,7 @@ class _MainPageState extends State<MainPage> {
                   padding: EdgeInsets.all(10.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       GestureDetector(
                         child: Container(
