@@ -4,6 +4,7 @@ import './localization/localization.dart';
 import 'package:flutter/services.dart';
 import './utils/colors.dart';
 import 'utils/iconfonts.dart';
+import 'compressor.dart';
 
 void main() {
   runApp(MyApp());
@@ -129,7 +130,14 @@ class _MainPageState extends State<MainPage> {
                             size: 20.0,
                           ),
                         ),
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) =>
+                              CompressorPage(),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),

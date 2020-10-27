@@ -16,6 +16,10 @@ class AppLocalizations {
       "en": "File Manager",
       "zh": "文件管理",
     },
+    "compress_title": {
+      "en": "File Compression",
+      "zh": "文件压缩",
+    },
   };
 
   String getLanguageText(String textID) {
