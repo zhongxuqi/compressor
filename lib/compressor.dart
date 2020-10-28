@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'utils/iconfonts.dart';
 import './utils/colors.dart';
 import './localization/localization.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 class CompressorPage extends StatefulWidget {
   @override
@@ -26,14 +28,19 @@ class _CompressorPageState extends State<CompressorPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 45,
-                    height: 45,
-                    child: Icon(
-                      IconFonts.back,
-                      color: ColorUtils.themeColor,
-                      size: 20.0,
+                  InkWell(
+                    child: Container(
+                      width: 45,
+                      height: 45,
+                      child: Icon(
+                        IconFonts.back,
+                        color: ColorUtils.themeColor,
+                        size: 20.0,
+                      ),
                     ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
                   ),
                   Container(
                     width: 45,
@@ -59,17 +66,51 @@ class _CompressorPageState extends State<CompressorPage> {
                       ),
                     ),
                   ),
-                  Container(
-                    width: 45,
-                    height: 45,
-                    child: Icon(
-                      IconFonts.right,
-                      color: ColorUtils.themeColor,
-                      size: 20.0,
+                  InkWell(
+                    child: Container(
+                      width: 45,
+                      height: 45,
+                      child: Icon(
+                        IconFonts.right,
+                        color: ColorUtils.themeColor,
+                        size: 20.0,
+                      ),
+                    ),
+                    onTap: () {
+
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(),
+            ),
+            InkWell(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      color: ColorUtils.primaryColor.shade400,
+                      child: Icon(
+                        IconFonts.add,
+                        color: Colors.white,
+                        size: 20.0,
+                      ),
                     ),
                   ),
                 ],
               ),
+              onTap: () async {
+                FilePickerResult result = await FilePicker.platform.pickFiles(allowMultiple: true);
+                if(result != null) {
+                  List<File> files = result.paths.map((path) => File(path)).toList();
+                } else {
+                  // User canceled the picker
+                }
+              },
             ),
           ],
         ),
