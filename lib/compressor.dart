@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'utils/iconfonts.dart';
 import './utils/colors.dart';
 import './localization/localization.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:io';
+import './utils/platfomr_custom.dart';
+import './utils/permission.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CompressorPage extends StatefulWidget {
   @override
@@ -13,6 +14,25 @@ class CompressorPage extends StatefulWidget {
 }
 
 class _CompressorPageState extends State<CompressorPage> {
+  final fileTypes = <FilePicker>[
+    FilePicker(FileType.file, 'images/file_txt.png', 'file'),
+    FilePicker(FileType.image, 'images/file_pic.png', 'image'),
+    FilePicker(FileType.video, 'images/file_video.png', 'video'),
+  ];
+
+  void pick(FileType fileType) async {
+    if (!await checkPermission(<Permission>[Permission.storage])) {
+      return;
+    }
+    switch (fileType) {
+      case FileType.file:
+        print(await pickFile());
+        break;
+      default:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -104,12 +124,39 @@ class _CompressorPageState extends State<CompressorPage> {
                 ],
               ),
               onTap: () async {
-                FilePickerResult result = await FilePicker.platform.pickFiles(allowMultiple: true);
-                if(result != null) {
-                  List<File> files = result.paths.map((path) => File(path)).toList();
-                } else {
-                  // User canceled the picker
-                }
+                showModalBottomSheet(context: context, builder: (context) {
+                  return Container(
+                    color: Colors.white,
+                    height: 120,
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: fileTypes.map((e) => Expanded(
+                        flex: 1,
+                        child: InkWell(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(e.icon, height: 50.0, width: 50.0,),
+                              Container(
+                                margin: EdgeInsets.only(top: 5),
+                                child: Text(
+                                  AppLocalizations.of(context).getLanguageText(e.name),
+                                  style: TextStyle(
+                                      fontSize: 15
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            pick(e.fileType);
+                          },
+                        ),
+                      )).toList(),
+                    ),
+                  );
+                });
               },
             ),
           ],
@@ -117,4 +164,16 @@ class _CompressorPageState extends State<CompressorPage> {
       ),
     );
   }
+}
+
+enum FileType {
+  file, image, video
+}
+
+class FilePicker {
+  final FileType fileType;
+  final String icon;
+  final String name;
+
+  FilePicker(this.fileType, this.icon, this.name);
 }

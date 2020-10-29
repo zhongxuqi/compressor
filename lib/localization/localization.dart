@@ -20,6 +20,18 @@ class AppLocalizations {
       "en": "File Compression",
       "zh": "文件压缩",
     },
+    "file": {
+      "en": "File",
+      "zh": "文件",
+    },
+    "image": {
+      "en": "Image",
+      "zh": "图片",
+    },
+    "video": {
+      "en": "Video",
+      "zh": "视频",
+    },
   };
 
   String getLanguageText(String textID) {
