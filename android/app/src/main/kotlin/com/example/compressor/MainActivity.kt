@@ -23,6 +23,7 @@ class MainActivity: FlutterActivity() {
             override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
                 if (call.method == "pick_file") {
                     val intent = Intent(Intent.ACTION_GET_CONTENT)
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                     intent.type = "*/*"
                     startActivityForResult(intent, PICK_FILE)
                     resultCallback = result
