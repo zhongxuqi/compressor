@@ -8,6 +8,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
+import org.json.JSONArray
 
 
 class MainActivity: FlutterActivity() {
@@ -37,7 +38,16 @@ class MainActivity: FlutterActivity() {
         when (requestCode) {
             PICK_FILE -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    resultCallback?.success("success")
+                    val clipData = data?.clipData
+                    val jsonArray = JSONArray()
+                    if (clipData != null && clipData.itemCount > 0) {
+                        for (i in 0 until clipData.itemCount) {
+                            jsonArray.put(clipData.getItemAt(i).uri.toString())
+                        }
+                    } else {
+                        jsonArray.put(data?.data.toString())
+                    }
+                    resultCallback?.success(jsonArray.toString())
                 }
             }
         }
