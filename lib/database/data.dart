@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 
 enum FileType {
   none,
@@ -21,12 +22,40 @@ class File {
   int id;
   FileType type;
   String name;
+  String uri;
   int parentID;
   String contentType;
   String extra;
   int createTime;
   int updateTime;
 
-  File(this.id, this.type, this.name, this.parentID, this.contentType,
+  File(this.id, this.type, this.name, this.uri, this.parentID, this.contentType,
       this.extra, this.createTime, this.updateTime);
+
+  FileExtra _extraObj;
+
+  FileExtra get extraObj {
+    if (_extraObj == null) {
+      _extraObj = FileExtra.fromMap(json.decode(extra));
+    }
+    return _extraObj;
+  }
+}
+
+class FileExtra {
+  int lastModified;
+  int fileSize;
+
+  FileExtra(this.lastModified, this.fileSize);
+
+  Map toMap() {
+    return {
+      'last_modified': lastModified,
+      'file_size': fileSize,
+    };
+  }
+
+  static FileExtra fromMap(Map m) {
+    return FileExtra(m['last_modified'], m['file_size']);
+  }
 }

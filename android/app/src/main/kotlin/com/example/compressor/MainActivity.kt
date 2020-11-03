@@ -2,6 +2,7 @@ package com.example.compressor
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -9,6 +10,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 import org.json.JSONArray
+import org.json.JSONObject
 
 
 class MainActivity: FlutterActivity() {
@@ -42,14 +44,30 @@ class MainActivity: FlutterActivity() {
                     val jsonArray = JSONArray()
                     if (clipData != null && clipData.itemCount > 0) {
                         for (i in 0 until clipData.itemCount) {
-                            jsonArray.put(clipData.getItemAt(i).uri.toString())
+                            val fileJsonObj = getFileObjByUri(clipData.getItemAt(i).uri)
+                            if (fileJsonObj != null) {
+                                jsonArray.put(fileJsonObj)
+                            }
                         }
                     } else {
-                        jsonArray.put(data?.data.toString())
+                        if (data != null) {
+                            val fileJsonObj = getFileObjByUri(data.data!!)
+                            if (fileJsonObj != null) {
+                                jsonArray.put(fileJsonObj)
+                            }
+                        }
                     }
                     resultCallback?.success(jsonArray.toString())
                 }
             }
         }
+    }
+
+    fun getFileObjByUri(uri: Uri): JSONObject? {
+        val fileObj = FileUtils.getPathFromUri(this, uri) ?: return null
+        val fileJsonObj = JSONObject()
+        fileJsonObj.put("file_name", fileObj.fileName)
+        fileJsonObj.put("uri", fileObj.uri)
+        return fileJsonObj
     }
 }

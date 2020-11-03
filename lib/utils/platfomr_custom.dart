@@ -3,10 +3,33 @@ import 'dart:convert';
 
 const platform = const MethodChannel('com.musketeer.compressor');
 
-Future<List<dynamic>> pickFile() async {
+class FileResult {
+  String fileName;
+  String uri;
+
+  FileResult(this.fileName, this.uri);
+
+  Map toMap() {
+    return {
+      'file_name': fileName,
+      'uri': uri,
+    };
+  }
+
+  static FileResult fromMap(Map m) {
+    return FileResult(m['file_name'], m['uri']);
+  }
+}
+
+Future<List<FileResult>> pickFile() async {
   try {
     var result = await platform.invokeMethod('pick_file', {});
-    return json.decode(result.toString());
+    final rawResultList = json.decode(result.toString());
+    final fileResultList = List<FileResult>();
+    for (var item in rawResultList) {
+      fileResultList.add(FileResult.fromMap(item));
+    }
+    return fileResultList;
   } on PlatformException catch (e) {
     print("error: ${e.message}.");
   }

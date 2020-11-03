@@ -12,6 +12,7 @@ Future<Database> getDatabase() async {
           "`id` integer NOT NULL PRIMARY KEY autoincrement, " +
           "`type` bigint NOT NULL, " +
           "`name` varchar(256) NOT NULL, " +
+          "`uri` varchar(512) NOT NULL, " +
           "`parent_id` bigint NOT NULL, " +
           "`content_type` varchar(64) NOT NULL, " +
           "`extra` varchar(1024) NUT NULL," +

@@ -16,10 +16,11 @@ class FileModel {
   insertFile(File fileObj) async {
     await this.database.transaction((txn) async {
       int id = await txn.rawInsert(
-          'insert into file(`type`, `name`, `parent_id`,`content_type`,`extra`,`create_time`,`update_time`) VALUES(?, ?, ?, ?, ?, ?, ?)',
+          'insert into file(`type`, `name`, `uri`, `parent_id`,`content_type`,`extra`,`create_time`,`update_time`) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
           [
             fileType2Int(fileObj.type),
             fileObj.name,
+            fileObj.uri,
             fileObj.parentID,
             fileObj.contentType,
             fileObj.extra,
@@ -33,8 +34,8 @@ class FileModel {
   updateFile(File fileObj) async {
     await this.database.transaction((txn) async {
       int count = await txn.rawUpdate(
-          'update file set `name` = ?, `parent_id` = ?, `content_type` = ?, `extra` = ? WHERE `id` = ?',
-          [fileObj.name, fileObj.parentID, fileObj.contentType, fileObj.extra]);
+          'update file set `name` = ?, `uri` = ?, `parent_id` = ?, `content_type` = ?, `extra` = ? WHERE `id` = ?',
+          [fileObj.name, fileObj.uri, fileObj.parentID, fileObj.contentType, fileObj.extra]);
       print("updated: $count");
     });
   }
@@ -49,6 +50,7 @@ class FileModel {
         list[0]['id'],
         list[0]['type'],
         list[0]['name'],
+        list[0]['uri'],
         list[0]['parent_id'],
         list[0]['content_type'],
         list[0]['extra'],
@@ -66,6 +68,7 @@ class FileModel {
           item['id'],
           item['type'],
           item['name'],
+          item['uri'],
           item['parent_id'],
           item['content_type'],
           item['extra'],

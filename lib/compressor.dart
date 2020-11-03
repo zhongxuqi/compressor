@@ -5,6 +5,13 @@ import './localization/localization.dart';
 import './utils/platfomr_custom.dart';
 import './utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
+import 'package:mime/mime.dart';
+import 'database/data.dart' as data;
+import 'utils/common.dart';
+import 'dart:convert';
+import 'components/file_item.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CompressorPage extends StatefulWidget {
   @override
@@ -19,6 +26,7 @@ class _CompressorPageState extends State<CompressorPage> {
     FilePicker(FileType.image, 'images/file_pic.png', 'image'),
     FilePicker(FileType.video, 'images/file_video.png', 'video'),
   ];
+  var files = List<data.File>();
 
   void pick(FileType fileType) async {
     if (!await checkPermission(<Permission>[Permission.storage])) {
@@ -26,7 +34,27 @@ class _CompressorPageState extends State<CompressorPage> {
     }
     switch (fileType) {
       case FileType.file:
-        print(await pickFile());
+        final fileResultList = await pickFile();
+        for (var fileResult in fileResultList) {
+          print(fileResult.uri);
+          final f = File.fromUri(Uri.parse(fileResult.uri));
+          print(f.lastModifiedSync());
+          print(f.lengthSync());
+          files.add(data.File(
+            0,
+            data.FileType.file,
+            fileResult.fileName,
+            fileResult.uri,
+            0,
+            lookupMimeType(fileResult.uri),
+            json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync()).toMap()),
+            CommonUtils.getTimestamp(),
+            CommonUtils.getTimestamp(),
+          ));
+        }
+        setState(() {
+
+        });
         break;
       default:
         break;
@@ -35,7 +63,6 @@ class _CompressorPageState extends State<CompressorPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -43,69 +70,90 @@ class _CompressorPageState extends State<CompressorPage> {
         child: Column(
           children: <Widget>[
             Container(
-              height: 45.0,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
+              height: 46.0,
+              child: Column(
                 children: [
-                  InkWell(
-                    child: Container(
-                      width: 45,
-                      height: 45,
-                      child: Icon(
-                        IconFonts.back,
-                        color: ColorUtils.themeColor,
-                        size: 20.0,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      InkWell(
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          child: Icon(
+                            IconFonts.back,
+                            color: ColorUtils.themeColor,
+                            size: 20.0,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
                       ),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  Container(
-                    width: 45,
-                    height: 45,
-                    alignment: Alignment.center,
-                    child: Icon(
-                      IconFonts.zip,
-                      color: Colors.black,
-                      size: 25.0,
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        AppLocalizations.of(context)
-                            .getLanguageText('compress_title'),
-                        style: TextStyle(
-                          color: ColorUtils.textColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        width: 45,
+                        height: 45,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          IconFonts.zip,
+                          color: Colors.black,
+                          size: 25.0,
                         ),
                       ),
-                    ),
-                  ),
-                  InkWell(
-                    child: Container(
-                      width: 45,
-                      height: 45,
-                      child: Icon(
-                        IconFonts.right,
-                        color: ColorUtils.themeColor,
-                        size: 20.0,
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .getLanguageText('compress_title'),
+                            style: TextStyle(
+                              color: ColorUtils.textColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    onTap: () {
+                      InkWell(
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          child: Icon(
+                            IconFonts.right,
+                            color: ColorUtils.themeColor,
+                            size: 20.0,
+                          ),
+                        ),
+                        onTap: () {
 
-                    },
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          height: 1,
+                          color: ColorUtils.divider,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
             Expanded(
               flex: 1,
-              child: Container(),
+              child: Container(
+                child: Column(
+                  children: files.map((e) => FileItem(
+                    fileData: e,
+                  )).toList(),
+                ),
+              ),
             ),
             InkWell(
               child: Row(
@@ -113,7 +161,7 @@ class _CompressorPageState extends State<CompressorPage> {
                   Expanded(
                     child: Container(
                       height: 45,
-                      color: ColorUtils.primaryColor.shade400,
+                      color: ColorUtils.themeColor,
                       child: Icon(
                         IconFonts.add,
                         color: Colors.white,
