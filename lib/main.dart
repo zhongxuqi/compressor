@@ -68,40 +68,55 @@ class _MainPageState extends State<MainPage> {
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         child: Column(children: <Widget>[
           Container(
-            height: 45.0,
-            child: Row(
+            height: 46.0,
+            child: Column(
               children: [
-                Container(
-                  width: 45,
-                  height: 45,
-                  child: Icon(
-                    IconFonts.search,
-                    color: ColorUtils.themeColor,
-                    size: 20.0,
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      AppLocalizations.of(context)
-                          .getLanguageText('main_title'),
-                      style: TextStyle(
-                        color: ColorUtils.textColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Container(
+                      width: 45,
+                      height: 45,
+                      child: Icon(
+                        IconFonts.search,
+                        color: ColorUtils.themeColor,
+                        size: 20.0,
                       ),
                     ),
-                  ),
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .getLanguageText('main_title'),
+                          style: TextStyle(
+                            color: ColorUtils.textColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 45,
+                      height: 45,
+                      child: Icon(
+                        IconFonts.sort,
+                        color: ColorUtils.themeColor,
+                        size: 20.0,
+                      ),
+                    ),
+                  ],
                 ),
-                Container(
-                  width: 45,
-                  height: 45,
-                  child: Icon(
-                    IconFonts.sort,
-                    color: ColorUtils.themeColor,
-                    size: 20.0,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        height: 1,
+                        color: ColorUtils.divider,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

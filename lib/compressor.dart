@@ -12,6 +12,7 @@ import 'utils/common.dart';
 import 'dart:convert';
 import 'components/file_item.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
 
 class CompressorPage extends StatefulWidget {
   @override
@@ -36,10 +37,8 @@ class _CompressorPageState extends State<CompressorPage> {
       case FileType.file:
         final fileResultList = await pickFile();
         for (var fileResult in fileResultList) {
-          print(fileResult.uri);
           final f = File.fromUri(Uri.parse(fileResult.uri));
-          print(f.lastModifiedSync());
-          print(f.lengthSync());
+          print(lookupMimeType(fileResult.uri));
           files.add(data.File(
             0,
             data.FileType.file,
@@ -47,7 +46,7 @@ class _CompressorPageState extends State<CompressorPage> {
             fileResult.uri,
             0,
             lookupMimeType(fileResult.uri),
-            json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync()).toMap()),
+            json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync(), lookupMimeType(fileResult.uri)).toMap()),
             CommonUtils.getTimestamp(),
             CommonUtils.getTimestamp(),
           ));

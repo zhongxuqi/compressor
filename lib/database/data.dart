@@ -45,17 +45,19 @@ class File {
 class FileExtra {
   int lastModified;
   int fileSize;
+  String mimeType;
 
-  FileExtra(this.lastModified, this.fileSize);
+  FileExtra(this.lastModified, this.fileSize, this.mimeType);
 
   Map toMap() {
     return {
       'last_modified': lastModified,
       'file_size': fileSize,
+      'mime_type': mimeType,
     };
   }
 
   static FileExtra fromMap(Map m) {
-    return FileExtra(m['last_modified'], m['file_size']);
+    return FileExtra(m['last_modified'], m['file_size'], m['mime_type']);
   }
 }

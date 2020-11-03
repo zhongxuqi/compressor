@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../database/data.dart' as data;
 import '../utils/colors.dart';
 import '../utils/common.dart';
+import '../utils/mime.dart';
 
 class FileItem extends StatelessWidget {
   final data.File fileData;
@@ -18,7 +19,7 @@ class FileItem extends StatelessWidget {
           children: [
             Container(
               margin: EdgeInsets.only(right: 8, top: 8, bottom: 8, left: 10),
-              child: Image.asset('images/file_pic.png', height: 40.0, width: 40.0,),
+              child: Image.asset(MimeUtils.getIconByMime(fileData.extraObj.mimeType), height: 40.0, width: 40.0,),
             ),
             Expanded(
               flex: 1,
