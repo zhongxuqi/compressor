@@ -4,10 +4,19 @@ import '../utils/colors.dart';
 import '../utils/common.dart';
 import '../utils/mime.dart';
 
-class FileItem extends StatelessWidget {
+class FileItem extends StatefulWidget {
   final data.File fileData;
+  final VoidCallback onClick;
 
-  FileItem({Key key, this.fileData}): super(key: key);
+  FileItem({Key key, @required this.fileData, @required this.onClick}):super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _FileItemState();
+  }
+}
+
+class _FileItemState extends State<FileItem> {
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +28,7 @@ class FileItem extends StatelessWidget {
           children: [
             Container(
               margin: EdgeInsets.only(right: 8, top: 8, bottom: 8, left: 10),
-              child: Image.asset(MimeUtils.getIconByMime(fileData.extraObj.mimeType), height: 40.0, width: 40.0,),
+              child: Image.asset(MimeUtils.getIconByMime(widget.fileData.extraObj.mimeType), height: 40.0, width: 40.0,),
             ),
             Expanded(
               flex: 1,
@@ -35,7 +44,7 @@ class FileItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            fileData.name,
+                            widget.fileData.name,
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               fontSize: 16,
@@ -49,7 +58,7 @@ class FileItem extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                CommonUtils.formatMilliseconds(fileData.extraObj.lastModified),
+                                CommonUtils.formatMilliseconds(widget.fileData.extraObj.lastModified),
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: ColorUtils.deepGrey,
@@ -57,7 +66,7 @@ class FileItem extends StatelessWidget {
                               ),
                               Container(width: 10,),
                               Text(
-                                CommonUtils.formatFileSize(fileData.extraObj.fileSize),
+                                CommonUtils.formatFileSize(widget.fileData.extraObj.fileSize),
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: ColorUtils.primaryColor,
@@ -87,7 +96,7 @@ class FileItem extends StatelessWidget {
         ),
       ),
       onTap: () {
-
+        widget.onClick();
       },
     );
   }

@@ -13,6 +13,7 @@ import 'dart:convert';
 import 'components/file_item.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
+import './file_detail.dart';
 
 class CompressorPage extends StatefulWidget {
   @override
@@ -96,7 +97,7 @@ class _CompressorPageState extends State<CompressorPage> {
                         alignment: Alignment.center,
                         child: Icon(
                           IconFonts.zip,
-                          color: Colors.black,
+                          color: ColorUtils.textColor,
                           size: 25.0,
                         ),
                       ),
@@ -104,8 +105,7 @@ class _CompressorPageState extends State<CompressorPage> {
                         child: Container(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            AppLocalizations.of(context)
-                                .getLanguageText('compress_title'),
+                            AppLocalizations.of(context).getLanguageText('compress_title'),
                             style: TextStyle(
                               color: ColorUtils.textColor,
                               fontSize: 18,
@@ -150,6 +150,12 @@ class _CompressorPageState extends State<CompressorPage> {
                 child: Column(
                   children: files.map((e) => FileItem(
                     fileData: e,
+                    onClick: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e)),
+                      );
+                    },
                   )).toList(),
                 ),
               ),

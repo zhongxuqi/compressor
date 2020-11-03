@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 
+class _MimeItem {
+  final String mimeType;
+  final String mimeIcon;
+
+  _MimeItem({this.mimeType, this.mimeIcon});
+}
+
 class MimeUtils {
-  static final _mime2IconMap = {
-    'text': 'images/file_txt.png',
-    'image': 'images/file_pic.png',
-    'video': 'images/file_video.png',
-  };
+  static final _mimeList = <_MimeItem>[
+    _MimeItem(mimeType: 'text', mimeIcon: 'images/file_txt.png'),
+    _MimeItem(mimeType: 'image', mimeIcon: 'images/file_pic.png'),
+    _MimeItem(mimeType: 'video', mimeIcon: 'images/file_video.png'),
+  ];
 
   static String getIconByMime(String mimeType) {
-    for (var key in _mime2IconMap.keys) {
-      if (mimeType.startsWith(key)) {
-        return _mime2IconMap[key];
+    for (var mimeItem in _mimeList) {
+      if (mimeType.startsWith(mimeItem.mimeType)) {
+        return mimeItem.mimeIcon;
       }
     }
-    return 'images/file_unknow.png';
+    return 'images/file_unknown.png';
   }
 }
