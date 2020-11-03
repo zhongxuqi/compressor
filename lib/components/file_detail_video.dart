@@ -34,12 +34,19 @@ class _FileDetailVideoState extends State<FileDetailVideo> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final leftDuration = _controller.value.initialized ? _controller.value.duration - _controller.value.position : Duration();
     return Container(
       color: Colors.black,
       child: Column(
         children: [
+          Container(height: 3,),
           Expanded(
             flex: 1,
             child: _controller.value.initialized ? AspectRatio(aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller)) : Container(),
