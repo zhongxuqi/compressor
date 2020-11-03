@@ -3,7 +3,9 @@ import 'database/data.dart' as data;
 import 'utils/colors.dart';
 import 'utils/iconfonts.dart';
 import 'utils/mime.dart';
-import 'components/file_detail_unknow.dart';
+import 'components/file_detail_unknown.dart';
+import 'components/file_detail_image.dart';
+import 'components/file_detail_video.dart';
 
 class FileDetailPage extends StatefulWidget {
   final data.File fileData;
@@ -18,6 +20,11 @@ class FileDetailPage extends StatefulWidget {
 
 class _FileDetailPageState extends State<FileDetailPage> {
   Widget getWidgetByFile() {
+    if (widget.fileData.extraObj.mimeType.startsWith("image")) {
+      return FileDetailImage(fileData: widget.fileData);
+    } else if (widget.fileData.extraObj.mimeType.startsWith("video")) {
+      return FileDetailVideo(fileData: widget.fileData);
+    }
     return FileDetailUnknown();
   }
 

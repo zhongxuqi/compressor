@@ -32,6 +32,10 @@ class AppLocalizations {
       "en": "Video",
       "zh": "视频",
     },
+    "unknown_file_type": {
+      "en": "Unknown File Type",
+      "zh": "未知文件类型",
+    },
   };
 
   String getLanguageText(String textID) {

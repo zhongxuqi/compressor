@@ -11,4 +11,6 @@ class IconFonts {
   static const IconData right = IconData(0xe601, fontFamily: 'iconfont');
   static const IconData checked = IconData(0xe624, fontFamily: 'iconfont');
   static const IconData unchecked = IconData(0xe7b5, fontFamily: 'iconfont');
+  static const IconData play = IconData(0xf07e, fontFamily: 'iconfont');
+  static const IconData pause = IconData(0xe670, fontFamily: 'iconfont');
 }

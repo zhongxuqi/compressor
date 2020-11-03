@@ -37,6 +37,7 @@ class _CompressorPageState extends State<CompressorPage> {
     switch (fileType) {
       case FileType.file:
         final fileResultList = await pickFile();
+        Navigator.of(context).pop();
         for (var fileResult in fileResultList) {
           final f = File.fromUri(Uri.parse(fileResult.uri));
           print(lookupMimeType(fileResult.uri));
