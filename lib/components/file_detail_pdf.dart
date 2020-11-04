@@ -50,21 +50,33 @@ class _FileDetailPDFState extends State<FileDetailPDF> {
 
   @override
   Widget build(BuildContext context) {
+    // return Container(
+    //   child: pdfContent != null ? PhotoViewGallery.builder(
+    //     scrollPhysics: const BouncingScrollPhysics(),
+    //     gaplessPlayback: true,
+    //     itemCount: pdfContent.pagesCount,
+    //     scrollDirection: Axis.horizontal,
+    //     backgroundDecoration: const BoxDecoration(
+    //       color: Colors.black,
+    //     ),
+    //     pageController: pageController,
+    //     builder: (BuildContext context, int index) {
+    //       return PhotoViewGalleryPageOptions(
+    //         imageProvider: CustomImageProvider(pdfContent: pdfContent, index: index),
+    //         heroAttributes: PhotoViewHeroAttributes(tag: index),
+    //       );
+    //     },
+    //   ):Container(),
+    // );
     return Container(
-      child: pdfContent != null ? PhotoViewGallery.builder(
-        scrollPhysics: const ScrollPhysics(),
-        itemCount: pdfContent.pagesCount,
-        scrollDirection: Axis.vertical,
-        backgroundDecoration: const BoxDecoration(
-          color: Colors.black,
-        ),
-        pageController: pageController,
-        builder: (BuildContext context, int index) {
-          return PhotoViewGalleryPageOptions(
+      color: Colors.black,
+      child: pdfContent != null ? PageView.builder(
+        itemBuilder: (context, index){
+          return PhotoView(
             imageProvider: CustomImageProvider(pdfContent: pdfContent, index: index),
-            heroAttributes: PhotoViewHeroAttributes(tag: index),
           );
         },
+        itemCount: pdfContent.pagesCount,
       ):Container(),
     );
   }
