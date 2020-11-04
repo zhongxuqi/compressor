@@ -6,6 +6,8 @@ import 'utils/mime.dart';
 import 'components/file_detail_unknown.dart';
 import 'components/file_detail_image.dart';
 import 'components/file_detail_video.dart';
+import 'components/file_detail_text.dart';
+import 'components/file_detail_pdf.dart';
 
 class FileDetailPage extends StatefulWidget {
   final data.File fileData;
@@ -24,6 +26,10 @@ class _FileDetailPageState extends State<FileDetailPage> {
       return FileDetailImage(fileData: widget.fileData);
     } else if (widget.fileData.extraObj.mimeType.startsWith("video")) {
       return FileDetailVideo(fileData: widget.fileData);
+    } else if (widget.fileData.extraObj.mimeType.startsWith("text")) {
+      return FileDetailText(fileData: widget.fileData);
+    } else if (widget.fileData.extraObj.mimeType.startsWith("application/pdf")) {
+      return FileDetailPDF(fileData: widget.fileData);
     }
     return FileDetailUnknown();
   }

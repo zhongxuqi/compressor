@@ -40,7 +40,6 @@ class _CompressorPageState extends State<CompressorPage> {
         Navigator.of(context).pop();
         for (var fileResult in fileResultList) {
           final f = File.fromUri(Uri.parse(fileResult.uri));
-          print(lookupMimeType(fileResult.uri));
           files.add(data.File(
             0,
             data.FileType.file,

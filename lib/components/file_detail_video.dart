@@ -26,6 +26,7 @@ class _FileDetailVideoState extends State<FileDetailVideo> {
     _controller = VideoPlayerController.file(File(widget.fileData.uri))..initialize().then((_) {
       setState(() {});
     });
+    _controller.setLooping(false);
     _controller.addListener(() {
       setState(() {
         progress = 100 * _controller.value.position.inSeconds / _controller.value.duration.inSeconds;
@@ -85,7 +86,8 @@ class _FileDetailVideoState extends State<FileDetailVideo> {
                       setState(() {
                         if (!_controller.value.initialized) return;
                         progress = val;
-                        _controller.seekTo(Duration(seconds: (progress * _controller.value.duration.inSeconds / 100.0).toInt()));
+                        _controller.seekTo(Duration(seconds: progress * _controller.value.duration.inSeconds ~/ 100));
+                        _controller.play();
                       });
                     },
                   ),
