@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
@@ -21,9 +22,11 @@ class FileResult {
   }
 }
 
-Future<List<FileResult>> pickFile() async {
+Future<List<FileResult>> pickFile({@required String mimeType}) async {
   try {
-    var result = await platform.invokeMethod('pick_file', {});
+    var result = await platform.invokeMethod('pick_file', {
+      'mime_type': mimeType,
+    });
     final rawResultList = json.decode(result.toString());
     final fileResultList = List<FileResult>();
     for (var item in rawResultList) {

@@ -11,7 +11,6 @@ import 'database/data.dart' as data;
 import 'utils/common.dart';
 import 'dart:convert';
 import 'components/file_item.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import './file_detail.dart';
 
@@ -36,29 +35,39 @@ class _CompressorPageState extends State<CompressorPage> {
     }
     switch (fileType) {
       case FileType.file:
-        final fileResultList = await pickFile();
-        Navigator.of(context).pop();
-        for (var fileResult in fileResultList) {
-          final f = File.fromUri(Uri.parse(fileResult.uri));
-          files.add(data.File(
-            0,
-            data.FileType.file,
-            fileResult.fileName,
-            fileResult.uri,
-            0,
-            lookupMimeType(fileResult.uri),
-            json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync(), lookupMimeType(fileResult.uri)).toMap()),
-            CommonUtils.getTimestamp(),
-            CommonUtils.getTimestamp(),
-          ));
-        }
-        setState(() {
-
-        });
+        _pickFileByMimeType(mimeType: '*/*');
+        break;
+      case FileType.image:
+        _pickFileByMimeType(mimeType: 'image/*');
+        break;
+      case FileType.video:
+        _pickFileByMimeType(mimeType: 'video/*');
         break;
       default:
         break;
     }
+  }
+
+  void _pickFileByMimeType({@required String mimeType}) async {
+    final fileResultList = await pickFile(mimeType: mimeType);
+    Navigator.of(context).pop();
+    for (var fileResult in fileResultList) {
+      final f = File.fromUri(Uri.parse(fileResult.uri));
+      files.add(data.File(
+        0,
+        data.FileType.file,
+        fileResult.fileName,
+        fileResult.uri,
+        0,
+        lookupMimeType(fileResult.uri),
+        json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync(), lookupMimeType(fileResult.uri)).toMap()),
+        CommonUtils.getTimestamp(),
+        CommonUtils.getTimestamp(),
+      ));
+    }
+    setState(() {
+
+    });
   }
 
   @override

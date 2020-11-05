@@ -25,9 +25,10 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor, CHANNEL).setMethodCallHandler(object: MethodChannel.MethodCallHandler{
             override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
                 if (call.method == "pick_file") {
+                    val req = call.arguments as HashMap<String, String>
                     val intent = Intent(Intent.ACTION_GET_CONTENT)
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                    intent.type = "*/*"
+                    intent.type = req["mime_type"]!!
                     startActivityForResult(intent, PICK_FILE)
                     resultCallback = result
                 }
