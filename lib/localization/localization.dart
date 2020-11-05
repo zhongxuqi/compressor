@@ -53,8 +53,16 @@ class AppLocalizations {
       'zh': '压缩文件密码（选填）',
     },
     'input_password_hint': {
-      'en': 'Please input password.',
-      'zh': '请输入密码',
+      'en': 'Please input archive password.',
+      'zh': '请输入压缩密码',
+    },
+    'cancel': {
+      'en': 'Cancel',
+      'zh': '取消',
+    },
+    'confirm': {
+      'en': 'Confirm',
+      'zh': '确认',
     },
   };
 

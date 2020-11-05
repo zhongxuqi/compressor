@@ -129,7 +129,8 @@ class _CompressorPageState extends State<CompressorPage> {
 
               },
             ),
-          ),Container(
+          ),
+          Container(
             padding: EdgeInsets.only(top: 0, left: 15, right: 15),
             child: FormTextInput(
               keyName: AppLocalizations.of(context).getLanguageText('archive_password'),
@@ -139,6 +140,58 @@ class _CompressorPageState extends State<CompressorPage> {
               onChange: (value) {
 
               },
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: GestureDetector(
+                    child: Container(
+                      margin: EdgeInsets.only(right: 10.0),
+                      padding: EdgeInsets.all(5.0),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context).getLanguageText('cancel'),
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: GestureDetector(
+                    child: Container(
+                      padding: EdgeInsets.all(5.0),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: ColorUtils.themeColor,
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context).getLanguageText('confirm'),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
