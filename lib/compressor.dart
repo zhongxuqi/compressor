@@ -11,8 +11,9 @@ import 'database/data.dart' as data;
 import 'utils/common.dart';
 import 'dart:convert';
 import 'components/file_item.dart';
-import 'package:mime/mime.dart';
 import './file_detail.dart';
+import 'components/form_text_input.dart';
+import 'localization/localization.dart';
 
 class CompressorPage extends StatefulWidget {
   @override
@@ -67,6 +68,81 @@ class _CompressorPageState extends State<CompressorPage> {
     }
     setState(() {
 
+    });
+  }
+
+  void compressFiles() async {
+    showDialog(context: context, builder: (BuildContext context) {
+      return SimpleDialog(
+        contentPadding: EdgeInsets.only(bottom: 10),
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(left: 10),
+                    child: Text(AppLocalizations.of(context).getLanguageText('zip_file_info'),
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: ColorUtils.textColor,
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  child: Container(
+                    height: 40,
+                    width: 50,
+                    child: Icon(
+                      IconFonts.close,
+                      color: ColorUtils.textColor,
+                      size: 22,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 1,
+                  color: ColorUtils.deepGrey,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: EdgeInsets.only(top: 0, left: 15, right: 15),
+            child: FormTextInput(
+              keyName: AppLocalizations.of(context).getLanguageText('file_name'),
+              value: '',
+              hintText: AppLocalizations.of(context).getLanguageText('input_file_name_hint'),
+              maxLines: 1,
+              onChange: (value) {
+
+              },
+            ),
+          ),Container(
+            padding: EdgeInsets.only(top: 0, left: 15, right: 15),
+            child: FormTextInput(
+              keyName: AppLocalizations.of(context).getLanguageText('archive_password'),
+              value: '',
+              hintText: AppLocalizations.of(context).getLanguageText('input_password_hint'),
+              maxLines: 1,
+              onChange: (value) {
+
+              },
+            ),
+          ),
+        ],
+      );
     });
   }
 
@@ -134,7 +210,7 @@ class _CompressorPageState extends State<CompressorPage> {
                           ),
                         ),
                         onTap: () {
-
+                          compressFiles();
                         },
                       ),
                     ],

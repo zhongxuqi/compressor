@@ -36,6 +36,26 @@ class AppLocalizations {
       "en": "Unknown File Type",
       "zh": "未知文件类型",
     },
+    'zip_file_info': {
+      'en': 'Archive File Info',
+      'zh': '压缩文件信息',
+    },
+    'file_name': {
+      'en': 'File Name',
+      'zh': '文件名',
+    },
+    'input_file_name_hint': {
+      'en': 'Please input file name.',
+      'zh': '请输入文件名',
+    },
+    'archive_password': {
+      'en': 'Archive File Password (Optional)',
+      'zh': '压缩文件密码（选填）',
+    },
+    'input_password_hint': {
+      'en': 'Please input password.',
+      'zh': '请输入密码',
+    },
   };
 
   String getLanguageText(String textID) {
