@@ -108,17 +108,15 @@ class MainActivity: FlutterActivity() {
         } else {
             ZipFile(zipFile)
         }
+        val targetFiles = ArrayList<File>()
         for (fileData in files) {
             val targetFile = File(fileDir.path, fileData.FileName)
             val fileItem = File(fileData.Uri)
             fileItem.copyRecursively(targetFile)
-            if (targetFile.isDirectory) {
-                zipFileObj.addFolder(targetFile)
-            } else {
-                zipFileObj.addFile(targetFile)
-            }
             targetFile.deleteOnExit()
+            targetFiles.add(targetFile)
         }
+        zipFileObj.addFiles(targetFiles)
         val fileJsonObj = JSONObject()
         fileJsonObj.put("file_name", fileName)
         fileJsonObj.put("uri", zipFile.path)
