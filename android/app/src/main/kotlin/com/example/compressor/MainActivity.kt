@@ -3,6 +3,7 @@ package com.example.compressor
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
 import android.util.Log
 import androidx.annotation.NonNull
 import com.alibaba.fastjson.JSON
@@ -17,6 +18,7 @@ import net.lingala.zip4j.model.ZipParameters
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.util.concurrent.Executors
 
 
 class FileItem {
@@ -34,6 +36,10 @@ class MainActivity: FlutterActivity() {
 
     private val PICK_FILE = 1
     private var resultCallback: MethodChannel.Result? = null
+    private val executor = Executors.newSingleThreadExecutor()
+    private val mainExecutor: Handler by lazy {
+        Handler(context.mainLooper)
+    }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
@@ -50,7 +56,16 @@ class MainActivity: FlutterActivity() {
                 } else if (call.method == "create_archive") {
                     val req = call.arguments as HashMap<String, String>
                     val files = JSON.parseArray(req["files"]!!, FileItem::class.java)
-                    result.success(createArchiveFile(req["file_name"]!!, req["password"]!!, files).toString())
+                    executor.submit(object: Runnable{
+                        override fun run() {
+                            val fileResult = createArchiveFile(req["file_name"]!!, req["password"]!!, files)
+                            mainExecutor.post(object: Runnable{
+                                override fun run() {
+                                    result.success(fileResult.toString())
+                                }
+                            })
+                        }
+                    })
                 }
             }
         })
