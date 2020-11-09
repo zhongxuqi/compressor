@@ -36,4 +36,17 @@ Future<List<FileResult>> pickFile({@required String mimeType}) async {
   } on PlatformException catch (e) {
     print("error: ${e.message}.");
   }
+  return List<FileResult>();
+}
+
+Future<FileResult> createArchiveFile(params) async {
+  try {
+    var result = await platform.invokeMethod('create_archive', params);
+    print(result.toString());
+    // final fileResult = json.decode(result.toString());
+    // return FileResult(fileResult['file_name'], fileResult['uri']);
+  } on PlatformException catch (e) {
+    print("error: ${e.message}.");
+  }
+  return FileResult("", "");
 }

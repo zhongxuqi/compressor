@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../utils/colors.dart';
 
 class FormTextInput extends StatefulWidget {
@@ -7,6 +8,7 @@ class FormTextInput extends StatefulWidget {
   final int maxLines;
   final ValueChanged<String> onChange;
   final String hintText;
+  final List<TextInputFormatter> inputFormatters;
 
   FormTextInput({
     Key key,
@@ -15,6 +17,7 @@ class FormTextInput extends StatefulWidget {
     @required this.hintText,
     this.maxLines = 1,
     @required this.onChange,
+    this.inputFormatters,
   }): super(key: key);
 
   @override
@@ -92,6 +95,7 @@ class FormTextInputState extends State<FormTextInput> {
                       maxLines: widget.maxLines,
                       minLines: widget.maxLines==null?2:1,
                       scrollPadding: EdgeInsets.all(0),
+                      inputFormatters: widget.inputFormatters,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                         enabledBorder: OutlineInputBorder(

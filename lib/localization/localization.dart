@@ -53,8 +53,8 @@ class AppLocalizations {
       'zh': '压缩文件密码（选填）',
     },
     'input_password_hint': {
-      'en': 'Please input archive password.',
-      'zh': '请输入压缩密码',
+      'en': 'Please input password (only number and letters).',
+      'zh': '请输入压缩密码（只能数字和字母）',
     },
     'cancel': {
       'en': 'Cancel',
@@ -63,6 +63,10 @@ class AppLocalizations {
     'confirm': {
       'en': 'Confirm',
       'zh': '确认',
+    },
+    'required': {
+      'en': 'Required',
+      'zh': '必填',
     },
   };
 

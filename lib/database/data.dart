@@ -40,6 +40,20 @@ class File {
     }
     return _extraObj;
   }
+
+  Map toMap() {
+    return {
+      'id': id,
+      'type': type,
+      'name': name,
+      'uri': uri,
+      'parent_id': parentID,
+      'content_type': contentType,
+      'extra': extra,
+      'create_time': createTime,
+      'update_time': updateTime,
+    };
+  }
 }
 
 class FileExtra {

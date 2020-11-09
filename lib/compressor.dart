@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'utils/iconfonts.dart';
 import './utils/colors.dart';
 import './localization/localization.dart';
@@ -28,7 +29,13 @@ class _CompressorPageState extends State<CompressorPage> {
     FilePicker(FileType.image, 'images/file_pic.png', 'image'),
     FilePicker(FileType.video, 'images/file_video.png', 'video'),
   ];
+  final GlobalKey<FormTextInputState> _fileNameInputKey = GlobalKey<FormTextInputState>();
+
   var files = List<data.File>();
+  var fileName = '';
+  var fileNameError = '';
+  var password = '';
+  var inSubmit = false;
 
   void pick(FileType fileType) async {
     if (!await checkPermission(<Permission>[Permission.storage])) {
@@ -69,6 +76,34 @@ class _CompressorPageState extends State<CompressorPage> {
     setState(() {
 
     });
+  }
+
+  void createArchive() async {
+    if (inSubmit) return;
+    inSubmit = true;
+    var hasErr = false;
+    if (fileName == "") {
+      _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('required'));
+      hasErr = true;
+    }
+    if (hasErr) {
+      setState(() {});
+      inSubmit = false;
+      return;
+    }
+    final Map<String, String> params = {
+      'archive_type': 'zip',
+      'file_name': fileName,
+      'password': password,
+      'files': json.encode(files.map((e) {
+        return {
+          'file_name': e.name,
+          'uri': e.uri,
+        };
+      }).toList()),
+    };
+    createArchiveFile(params);
+    inSubmit = false;
   }
 
   void compressFiles() async {
@@ -121,12 +156,14 @@ class _CompressorPageState extends State<CompressorPage> {
           Container(
             padding: EdgeInsets.only(top: 0, left: 15, right: 15),
             child: FormTextInput(
+              key: _fileNameInputKey,
               keyName: AppLocalizations.of(context).getLanguageText('file_name'),
-              value: '',
+              value: fileName,
               hintText: AppLocalizations.of(context).getLanguageText('input_file_name_hint'),
               maxLines: 1,
               onChange: (value) {
-
+                fileName = value;
+                _fileNameInputKey.currentState.setTextError('');
               },
             ),
           ),
@@ -134,11 +171,15 @@ class _CompressorPageState extends State<CompressorPage> {
             padding: EdgeInsets.only(top: 0, left: 15, right: 15),
             child: FormTextInput(
               keyName: AppLocalizations.of(context).getLanguageText('archive_password'),
-              value: '',
+              value: password,
               hintText: AppLocalizations.of(context).getLanguageText('input_password_hint'),
               maxLines: 1,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp("[a-zA-Z]|[0-9]")),
+                LengthLimitingTextInputFormatter(16),//最大长度
+              ],
               onChange: (value) {
-
+                password = value;
               },
             ),
           ),
@@ -187,7 +228,7 @@ class _CompressorPageState extends State<CompressorPage> {
                       ),
                     ),
                     onTap: () {
-                      Navigator.of(context).pop();
+                      createArchive();
                     },
                   ),
                 ),
