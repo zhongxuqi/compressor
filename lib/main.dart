@@ -1,3 +1,4 @@
+import 'package:compressor/database/file_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './localization/localization.dart';
@@ -58,7 +59,17 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   @override
-  void initState() {}
+  void initState() {
+    super.initState();
+    initData();
+  }
+
+  void initData() async {
+    final files = await getFileModel().listFileByParentID(0);
+    for (var fileItem in files) {
+      print("===>>> ${fileItem.toMap()}");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +160,9 @@ class _MainPageState extends State<MainPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) =>
-                              CompressorPage(),
+                              CompressorPage(callback: () {
+                                initData();
+                              }),
                             ),
                           );
                         },

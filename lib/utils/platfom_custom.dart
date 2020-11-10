@@ -5,20 +5,22 @@ import 'dart:convert';
 const platform = const MethodChannel('com.musketeer.compressor');
 
 class FileResult {
+  String archiveType;
   String fileName;
   String uri;
 
-  FileResult(this.fileName, this.uri);
+  FileResult(this.archiveType, this.fileName, this.uri);
 
   Map toMap() {
     return {
+      'archive_type': archiveType,
       'file_name': fileName,
       'uri': uri,
     };
   }
 
   static FileResult fromMap(Map m) {
-    return FileResult(m['file_name'], m['uri']);
+    return FileResult(m['archive_type'], m['file_name'], m['uri']);
   }
 }
 
@@ -42,11 +44,10 @@ Future<List<FileResult>> pickFile({@required String mimeType}) async {
 Future<FileResult> createArchiveFile(params) async {
   try {
     var result = await platform.invokeMethod('create_archive', params);
-    print(result.toString());
-    // final fileResult = json.decode(result.toString());
-    // return FileResult(fileResult['file_name'], fileResult['uri']);
+    final fileResult = json.decode(result.toString());
+    return FileResult(fileResult['archive_type'], fileResult['file_name'], fileResult['uri']);
   } on PlatformException catch (e) {
     print("error: ${e.message}.");
   }
-  return FileResult("", "");
+  return FileResult("", "", "");
 }

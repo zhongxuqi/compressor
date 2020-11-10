@@ -15,9 +15,9 @@ Future<Database> getDatabase() async {
           "`uri` varchar(512) NOT NULL, " +
           "`parent_id` bigint NOT NULL, " +
           "`content_type` varchar(64) NOT NULL, " +
-          "`extra` varchar(1024) NUT NULL," +
-          "`create_time` bigint NUT NULL" +
-          "`update_time` bigint NUT NULL" +
+          "`extra` varchar(1024) NOT NULL," +
+          "`create_time` bigint NOT NULL," +
+          "`update_time` bigint NOT NULL" +
           ")");
     }, onUpgrade: (Database db, int oldVersion, int newVersion) async {});
   }

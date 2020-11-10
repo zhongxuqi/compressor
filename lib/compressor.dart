@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'utils/iconfonts.dart';
 import './utils/colors.dart';
 import './localization/localization.dart';
-import './utils/platfomr_custom.dart';
+import './utils/platfom_custom.dart';
 import './utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
@@ -15,8 +15,14 @@ import 'components/file_item.dart';
 import './file_detail.dart';
 import 'components/form_text_input.dart';
 import 'localization/localization.dart';
+import 'components/loading_dialog.dart';
+import 'database/file_model.dart';
 
 class CompressorPage extends StatefulWidget {
+  final VoidCallback callback;
+
+  CompressorPage({Key key, @required this.callback}): super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return _CompressorPageState();
@@ -61,14 +67,15 @@ class _CompressorPageState extends State<CompressorPage> {
     Navigator.of(context).pop();
     for (var fileResult in fileResultList) {
       final f = File.fromUri(Uri.parse(fileResult.uri));
+      final contentType = lookupMimeType(fileResult.uri);
       files.add(data.File(
         0,
         data.FileType.file,
         fileResult.fileName,
         fileResult.uri,
         0,
-        lookupMimeType(fileResult.uri),
-        json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync(), lookupMimeType(fileResult.uri)).toMap()),
+        contentType,
+        json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync()).toMap()),
         CommonUtils.getTimestamp(),
         CommonUtils.getTimestamp(),
       ));
@@ -93,7 +100,7 @@ class _CompressorPageState extends State<CompressorPage> {
     }
     final Map<String, String> params = {
       'archive_type': 'zip',
-      'file_name': fileName,
+      'file_name': "$fileName.zip",
       'password': password,
       'files': json.encode(files.map((e) {
         return {
@@ -102,7 +109,15 @@ class _CompressorPageState extends State<CompressorPage> {
         };
       }).toList()),
     };
-    createArchiveFile(params);
+    Navigator.of(context).pop();
+    showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('compressing'), barrierDismissible: true);
+    final fileResult = await createArchiveFile(params);
+    if (fileResult.archiveType.isNotEmpty) {
+      await getFileModel().createFileByFileResult(fileResult);
+    }
+    Navigator.of(context).pop();
+    widget.callback();
+    Navigator.of(context).pop();
     inSubmit = false;
   }
 

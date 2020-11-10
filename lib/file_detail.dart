@@ -22,13 +22,13 @@ class FileDetailPage extends StatefulWidget {
 
 class _FileDetailPageState extends State<FileDetailPage> {
   Widget getWidgetByFile() {
-    if (widget.fileData.extraObj.mimeType.startsWith("image")) {
+    if (widget.fileData.contentType.startsWith("image")) {
       return FileDetailImage(fileData: widget.fileData);
-    } else if (widget.fileData.extraObj.mimeType.startsWith("video")) {
+    } else if (widget.fileData.contentType.startsWith("video")) {
       return FileDetailVideo(fileData: widget.fileData);
-    } else if (widget.fileData.extraObj.mimeType.startsWith("text")) {
+    } else if (widget.fileData.contentType.startsWith("text")) {
       return FileDetailText(fileData: widget.fileData);
-    } else if (widget.fileData.extraObj.mimeType.startsWith("application/pdf")) {
+    } else if (widget.fileData.contentType.startsWith("application/pdf")) {
       return FileDetailPDF(fileData: widget.fileData);
     }
     return FileDetailUnknown();
@@ -67,7 +67,7 @@ class _FileDetailPageState extends State<FileDetailPage> {
                       Container(
                         margin: EdgeInsets.only(right: 5),
                         child: Image.asset(
-                          MimeUtils.getIconByMime(widget.fileData.extraObj.mimeType),
+                          MimeUtils.getIconByMime(widget.fileData.contentType),
                           height: 30.0,
                           width: 30.0,
                         ),

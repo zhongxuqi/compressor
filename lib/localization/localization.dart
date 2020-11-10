@@ -68,6 +68,10 @@ class AppLocalizations {
       'en': 'Required',
       'zh': '必填',
     },
+    'compressing': {
+      'en': 'Compressing',
+      'zh': '压缩中',
+    },
   };
 
   String getLanguageText(String textID) {

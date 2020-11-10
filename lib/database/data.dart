@@ -18,6 +18,17 @@ int fileType2Int(FileType fileType) {
   }
 }
 
+FileType int2FileType(int fileType) {
+  switch (fileType) {
+    case 1:
+      return FileType.file;
+    case 2:
+      return FileType.directory;
+    default:
+      return FileType.none;
+  }
+}
+
 class File {
   int id;
   FileType type;
@@ -59,19 +70,17 @@ class File {
 class FileExtra {
   int lastModified;
   int fileSize;
-  String mimeType;
 
-  FileExtra(this.lastModified, this.fileSize, this.mimeType);
+  FileExtra(this.lastModified, this.fileSize);
 
   Map toMap() {
     return {
       'last_modified': lastModified,
       'file_size': fileSize,
-      'mime_type': mimeType,
     };
   }
 
   static FileExtra fromMap(Map m) {
-    return FileExtra(m['last_modified'], m['file_size'], m['mime_type']);
+    return FileExtra(m['last_modified'], m['file_size']);
   }
 }

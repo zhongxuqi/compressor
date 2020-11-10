@@ -28,7 +28,7 @@ class _FileItemState extends State<FileItem> {
           children: [
             Container(
               margin: EdgeInsets.only(right: 8, top: 8, bottom: 8, left: 10),
-              child: Image.asset(MimeUtils.getIconByMime(widget.fileData.extraObj.mimeType), height: 40.0, width: 40.0,),
+              child: Image.asset(MimeUtils.getIconByMime(widget.fileData.contentType), height: 40.0, width: 40.0,),
             ),
             Expanded(
               flex: 1,

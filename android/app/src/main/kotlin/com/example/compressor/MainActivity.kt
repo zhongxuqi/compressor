@@ -58,7 +58,7 @@ class MainActivity: FlutterActivity() {
                     val files = JSON.parseArray(req["files"]!!, FileItem::class.java)
                     executor.submit(object: Runnable{
                         override fun run() {
-                            val fileResult = createArchiveFile(req["file_name"]!!, req["password"]!!, files)
+                            val fileResult = createArchiveFile(req["archive_type"]!!, req["file_name"]!!, req["password"]!!, files)
                             mainExecutor.post(object: Runnable{
                                 override fun run() {
                                     result.success(fileResult.toString())
@@ -107,7 +107,16 @@ class MainActivity: FlutterActivity() {
         return fileJsonObj
     }
 
-    fun createArchiveFile(fileName: String, password: String, files: List<FileItem>): JSONObject {
+    fun createArchiveFile(archiveType: String, fileName: String, password: String, files: List<FileItem>): JSONObject {
+        when (archiveType) {
+            "zip" -> {
+                return createZipFile(fileName, password, files)
+            }
+        }
+        return JSONObject()
+    }
+
+    fun createZipFile(fileName: String, password: String, files: List<FileItem>): JSONObject {
         val fileDir = File(context.cacheDir.path, "file_dir")
         if (fileDir.exists()) {
             fileDir.deleteRecursively()
@@ -133,6 +142,7 @@ class MainActivity: FlutterActivity() {
         }
         zipFileObj.addFiles(targetFiles)
         val fileJsonObj = JSONObject()
+        fileJsonObj.put("archive_type", "zip")
         fileJsonObj.put("file_name", fileName)
         fileJsonObj.put("uri", zipFile.path)
         return fileJsonObj
