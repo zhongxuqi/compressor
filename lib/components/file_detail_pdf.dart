@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../database/data.dart' as data;
+import '../common/data.dart' as data;
 import 'package:native_pdf_renderer/native_pdf_renderer.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'dart:ui' as ui show Codec;

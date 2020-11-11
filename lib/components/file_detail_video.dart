@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../database/data.dart' as data;
+import '../common/data.dart' as data;
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 import '../utils/iconfonts.dart';

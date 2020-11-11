@@ -72,6 +72,18 @@ class AppLocalizations {
       'en': 'Compressing',
       'zh': '压缩中',
     },
+    'save_failure': {
+      'en': 'Save Failure',
+      'zh': '保存失败',
+    },
+    'file_exists': {
+      'en': 'File Exists',
+      'zh': '文件已存在',
+    },
+    'list_file_failure': {
+      'en': 'List File Failure',
+      'zh': '列举文件失败',
+    },
   };
 
   String getLanguageText(String textID) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import '../database/data.dart' as data;
+import '../common/data.dart' as data;
 
 class FileDetailImage extends StatefulWidget {
   final data.File fileData;

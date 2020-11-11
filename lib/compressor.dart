@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'utils/iconfonts.dart';
 import './utils/colors.dart';
-import './localization/localization.dart';
 import './utils/platform_custom.dart';
 import './utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:mime/mime.dart';
-import 'database/data.dart' as data;
+import 'common/data.dart' as data;
 import 'utils/common.dart';
 import 'dart:convert';
 import 'components/file_item.dart';
@@ -16,10 +15,11 @@ import './file_detail.dart';
 import 'components/form_text_input.dart';
 import 'localization/localization.dart';
 import 'components/loading_dialog.dart';
-import 'database/file_model.dart';
+import 'utils/file.dart' as fileUtils;
+import 'utils/toast.dart' as toastUtils;
 
 class CompressorPage extends StatefulWidget {
-  final VoidCallback callback;
+  final ValueChanged<data.File> callback;
 
   CompressorPage({Key key, @required this.callback}): super(key: key);
 
@@ -69,15 +69,10 @@ class _CompressorPageState extends State<CompressorPage> {
       final f = File.fromUri(Uri.parse(fileResult.uri));
       final contentType = lookupMimeType(fileResult.uri);
       files.add(data.File(
-        0,
-        data.FileType.file,
         fileResult.fileName,
         fileResult.uri,
-        0,
         contentType,
         json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync()).toMap()),
-        CommonUtils.getTimestamp(),
-        CommonUtils.getTimestamp(),
       ));
     }
     setState(() {
@@ -91,6 +86,10 @@ class _CompressorPageState extends State<CompressorPage> {
     var hasErr = false;
     if (fileName == "") {
       _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('required'));
+      hasErr = true;
+    }
+    if (await fileUtils.checkFileExists("$fileName.zip")) {
+      _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
       hasErr = true;
     }
     if (hasErr) {
@@ -113,10 +112,14 @@ class _CompressorPageState extends State<CompressorPage> {
     showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('compressing'), barrierDismissible: true);
     final fileResult = await createArchiveFile(params);
     if (fileResult.archiveType.isNotEmpty) {
-      await getFileModel().createFileByFileResult(fileResult);
+      final fileObj = await fileUtils.createFileByFileResult(fileResult);
+      if (fileObj == null) {
+        toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('save_failure'));
+        return;
+      }
+      widget.callback(fileObj);
     }
     Navigator.of(context).pop();
-    widget.callback();
     Navigator.of(context).pop();
     inSubmit = false;
   }

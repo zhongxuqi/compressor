@@ -122,7 +122,7 @@ class MainActivity: FlutterActivity() {
             fileDir.deleteRecursively()
         }
         fileDir.mkdir()
-        val zipFile = File(context.cacheDir.path, "${fileName}.zip")
+        val zipFile = File(context.cacheDir.path, fileName)
         if (zipFile.exists()) {
             zipFile.deleteRecursively()
         }

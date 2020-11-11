@@ -1,4 +1,3 @@
-import 'package:compressor/database/file_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './localization/localization.dart';
@@ -6,9 +5,11 @@ import 'package:flutter/services.dart';
 import './utils/colors.dart';
 import 'utils/iconfonts.dart';
 import 'compressor.dart';
-import './database/data.dart';
+import './common/data.dart';
 import './file_detail.dart';
 import 'components/file_item.dart';
+import 'utils/file.dart' as fileUtils;
+import 'utils/toast.dart' as toastUtils;
 
 void main() {
   runApp(MyApp());
@@ -70,7 +71,11 @@ class _MainPageState extends State<MainPage> {
   }
 
   void initData() async {
-    final files = await getFileModel().listFileByParentID(0);
+    final files = await fileUtils.listFile('');
+    if (files == null) {
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
+      return;
+    }
     setState(() {
       this.files.clear();
       this.files.addAll(files);
@@ -178,8 +183,10 @@ class _MainPageState extends State<MainPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) =>
-                              CompressorPage(callback: () {
-                                initData();
+                              CompressorPage(callback: (fileObj) {
+                                setState(() {
+                                  this.files.add(fileObj);
+                                });
                               }),
                             ),
                           );

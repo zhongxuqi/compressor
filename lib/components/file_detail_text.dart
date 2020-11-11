@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../database/data.dart' as data;
+import '../common/data.dart' as data;
 import 'dart:io';
 import '../utils/colors.dart';
 
