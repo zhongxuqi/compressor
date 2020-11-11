@@ -3,7 +3,7 @@ import 'package:mime/mime.dart';
 import 'package:sqflite/sqflite.dart';
 import 'data.dart';
 import 'database.dart';
-import '../utils/platfom_custom.dart';
+import '../utils/platform_custom.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../utils/time.dart';
@@ -41,7 +41,7 @@ class FileModel {
     (await getDataBase()).transaction((txn) async {
       int count = await txn.rawUpdate(
           'update file set `name` = ?, `uri` = ?, `parent_id` = ?, `content_type` = ?, `extra` = ? WHERE `id` = ?',
-          [fileObj.name, fileObj.uri, fileObj.parentID, fileObj.contentType, fileObj.extra]);
+          [fileObj.name, fileObj.uri, fileObj.parentID, fileObj.contentType, fileObj.extra, fileObj.id]);
       print("updated: $count");
     });
   }

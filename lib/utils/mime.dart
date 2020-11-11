@@ -13,6 +13,7 @@ class MimeUtils {
     _MimeItem(mimeType: 'image', mimeIcon: 'images/file_pic.png'),
     _MimeItem(mimeType: 'video', mimeIcon: 'images/file_video.png'),
     _MimeItem(mimeType: 'application/pdf', mimeIcon: 'images/file_pdf.png'),
+    _MimeItem(mimeType: 'application/zip', mimeIcon: 'images/file_zip.png'),
   ];
 
   static String getIconByMime(String mimeType) {

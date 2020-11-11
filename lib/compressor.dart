@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'utils/iconfonts.dart';
 import './utils/colors.dart';
 import './localization/localization.dart';
-import './utils/platfom_custom.dart';
+import './utils/platform_custom.dart';
 import './utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';

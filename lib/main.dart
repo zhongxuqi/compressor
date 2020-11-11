@@ -6,6 +6,9 @@ import 'package:flutter/services.dart';
 import './utils/colors.dart';
 import 'utils/iconfonts.dart';
 import 'compressor.dart';
+import './database/data.dart';
+import './file_detail.dart';
+import 'components/file_item.dart';
 
 void main() {
   runApp(MyApp());
@@ -58,6 +61,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final List<File> files = List<File>();
+
   @override
   void initState() {
     super.initState();
@@ -66,9 +71,10 @@ class _MainPageState extends State<MainPage> {
 
   void initData() async {
     final files = await getFileModel().listFileByParentID(0);
-    for (var fileItem in files) {
-      print("===>>> ${fileItem.toMap()}");
-    }
+    setState(() {
+      this.files.clear();
+      this.files.addAll(files);
+    });
   }
 
   @override
@@ -97,8 +103,7 @@ class _MainPageState extends State<MainPage> {
                       child: Container(
                         alignment: Alignment.center,
                         child: Text(
-                          AppLocalizations.of(context)
-                              .getLanguageText('main_title'),
+                          AppLocalizations.of(context).getLanguageText('main_title'),
                           style: TextStyle(
                             color: ColorUtils.textColor,
                             fontSize: 18,
@@ -136,6 +141,19 @@ class _MainPageState extends State<MainPage> {
             flex: 1,
             child: Stack(
               children: [
+                Container(
+                  child: Column(
+                    children: files.map((e) => FileItem(
+                      fileData: e,
+                      onClick: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e)),
+                        );
+                      },
+                    )).toList(),
+                  ),
+                ),
                 Container(
                   alignment: Alignment.bottomCenter,
                   padding: EdgeInsets.all(10.0),
