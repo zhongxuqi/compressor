@@ -8,12 +8,33 @@ import '../common/data.dart';
 import 'package:mime/mime.dart' as mime;
 import 'common.dart';
 
-String lookupMimeType(String path) {
-  final dir = io.Directory("/storage/emulated/0/Android");
+bool isDirectory(String path) {
+  final dir = io.Directory(path);
   if (dir.existsSync()) {
+    return true;
+  }
+  return false;
+}
+
+String lookupMimeType(String path) {
+  if (isDirectory(path)) {
     return 'directory';
   }
   return mime.lookupMimeType(path);
+}
+
+int lastModified(String path) {
+  if (isDirectory(path)) {
+    return 0;
+  }
+  return io.File(path).lastModifiedSync().millisecondsSinceEpoch ~/ 1000;
+}
+
+int length(String path) {
+  if (isDirectory(path)) {
+    return 0;
+  }
+  return io.File(path).lengthSync();
 }
 
 Future<String> getTargetPath(String relativePath) async {
@@ -40,6 +61,7 @@ Future<File> createFileByFileResult(FileResult fileResult) async {
       newFile.lastModifiedSync().millisecondsSinceEpoch ~/ 1000,
       newFile.lengthSync(),
     ).toMap()),
+    null,
   );
 }
 
@@ -57,9 +79,10 @@ Future<List<File>> listFile(String relativePath) async {
         f.path,
         lookupMimeType(f.path),
         json.encode(FileExtra(
-          f.lastModifiedSync().millisecondsSinceEpoch ~/ 1000,
-          f.lengthSync(),
+          lastModified(value.path),
+          length(value.path),
         ).toMap()),
+        null,
       );
     }).toList();
   } catch (e) {

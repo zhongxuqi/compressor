@@ -28,6 +28,13 @@ class FileItem {
     var Uri: String = ""
 }
 
+class FileHeader {
+    @JSONField(name="file_name")
+    var FileName: String = ""
+    @JSONField(name="is_directory")
+    var IsDirectory: Boolean = false
+}
+
 class MainActivity: FlutterActivity() {
     companion object {
         val TAG = "MainActivity"
@@ -66,6 +73,8 @@ class MainActivity: FlutterActivity() {
                             })
                         }
                     })
+                } else if (call.method == "get_file_headers") {
+
                 }
             }
         })
@@ -146,5 +155,20 @@ class MainActivity: FlutterActivity() {
         fileJsonObj.put("file_name", fileName)
         fileJsonObj.put("uri", zipFile.path)
         return fileJsonObj
+    }
+
+    fun getFileHeaders(uri: String, password: String): List<FileHeader> {
+        val zipFile = File(uri)
+        val zipFileObj = if (!password.isEmpty()) {
+            ZipFile(zipFile, password.toCharArray())
+        } else {
+            ZipFile(zipFile)
+        }
+        return zipFileObj.fileHeaders.map { zipFileHeader ->
+            val fileHeader = FileHeader()
+            fileHeader.FileName = zipFileHeader.fileName
+            fileHeader.IsDirectory = zipFileHeader.isDirectory
+            fileHeader
+        }
     }
 }

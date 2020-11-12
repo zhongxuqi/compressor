@@ -84,6 +84,14 @@ class AppLocalizations {
       'en': 'List File Failure',
       'zh': '列举文件失败',
     },
+    'directory': {
+      'en': 'Directory',
+      'zh': '文件夹',
+    },
+    'create_directory': {
+      'en': 'Create Directory',
+      'zh': '创建文件夹',
+    },
   };
 
   String getLanguageText(String textID) {

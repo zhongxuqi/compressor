@@ -6,8 +6,12 @@ class File {
   String uri;
   String contentType;
   String extra;
+  Map<String, File> files;
+  File parent;
 
-  File(this.name, this.uri, this.contentType, this.extra);
+  File(this.name, this.uri, this.contentType, this.extra, this.parent) {
+    files = Map<String, File>();
+  }
 
   FileExtra _extraObj;
 
@@ -24,6 +28,9 @@ class File {
       'uri': uri,
       'content_type': contentType,
       'extra': extra,
+      'files': files.map((key, value) {
+        return MapEntry(key, value.toMap());
+      }),
     };
   }
 }

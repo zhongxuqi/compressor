@@ -11,6 +11,7 @@ class CommonUtils {
   }
 
   static String formatMilliseconds(int milliseconds) {
+    if (milliseconds <= 0) return '';
     final lastModifiedDatetime = DateTime.fromMillisecondsSinceEpoch(milliseconds);
     return "${lastModifiedDatetime.year.toString()}-"
         "${lastModifiedDatetime.month.toString().padLeft(2,'0')}-"
@@ -21,6 +22,7 @@ class CommonUtils {
   }
 
   static String formatFileSize(int fileSize) {
+    if (fileSize <= 0) return '';
     if (fileSize < 1024) {
       return "${fileSize.toStringAsFixed(1)}B";
     } else if (fileSize < 1024 * 1024) {

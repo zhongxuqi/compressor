@@ -39,8 +39,16 @@ class _FileItemState extends State<FileItem> {
                   Expanded(
                     flex: 1,
                     child: Container(
+                      alignment: Alignment.centerLeft,
                       padding: EdgeInsets.only(top: 8, bottom: 8),
-                      child: Column(
+                      child: widget.fileData.contentType=='directory'?Text(
+                        widget.fileData.name,
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: ColorUtils.textColor,
+                        ),
+                      ):Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
