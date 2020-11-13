@@ -1,10 +1,9 @@
-package com.example.compressor
+package com.musketeer.compressor
 
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
-import android.util.Log
 import androidx.annotation.NonNull
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.annotation.JSONField
@@ -14,7 +13,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 import net.lingala.zip4j.ZipFile
-import net.lingala.zip4j.model.ZipParameters
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File

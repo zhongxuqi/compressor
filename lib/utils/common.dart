@@ -10,9 +10,9 @@ class CommonUtils {
     return basename(Uri.decodeFull(uri));
   }
 
-  static String formatMilliseconds(int milliseconds) {
-    if (milliseconds <= 0) return '';
-    final lastModifiedDatetime = DateTime.fromMillisecondsSinceEpoch(milliseconds);
+  static String formatTimestamp(int timestamp) {
+    if (timestamp <= 0) return '';
+    final lastModifiedDatetime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     return "${lastModifiedDatetime.year.toString()}-"
         "${lastModifiedDatetime.month.toString().padLeft(2,'0')}-"
         "${lastModifiedDatetime.day.toString().padLeft(2,'0')} "

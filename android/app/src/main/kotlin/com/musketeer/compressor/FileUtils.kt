@@ -1,4 +1,4 @@
-package com.example.compressor
+package com.musketeer.compressor
 
 import android.content.Context
 import android.net.Uri

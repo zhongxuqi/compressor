@@ -66,7 +66,7 @@ class _FileItemState extends State<FileItem> {
                           Row(
                             children: [
                               Text(
-                                CommonUtils.formatMilliseconds(widget.fileData.extraObj.lastModified),
+                                CommonUtils.formatTimestamp(widget.fileData.extraObj.lastModified),
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: ColorUtils.deepGrey,
