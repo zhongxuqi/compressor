@@ -18,14 +18,19 @@ import net.lingala.zip4j.model.ZipParameters
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.lang.Exception
 import java.util.concurrent.Executors
 
 
-class FileItem {
-    @JSONField(name="file_name")
-    var FileName: String = ""
+class FileInfo {
+    @JSONField(name="name")
+    var Name: String = ""
     @JSONField(name="uri")
     var Uri: String = ""
+    @JSONField(name="content_type")
+    var ContentType: String = ""
+    @JSONField(name="files")
+    var files = HashMap<String, FileInfo>()
 }
 
 class FileHeader {
@@ -53,28 +58,32 @@ class MainActivity: FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor, CHANNEL).setMethodCallHandler(object: MethodChannel.MethodCallHandler{
             override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-                if (call.method == "pick_file") {
-                    val req = call.arguments as HashMap<String, String>
-                    val intent = Intent(Intent.ACTION_GET_CONTENT)
-                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                    intent.type = req["mime_type"]!!
-                    startActivityForResult(intent, PICK_FILE)
-                    resultCallback = result
-                } else if (call.method == "create_archive") {
-                    val req = call.arguments as HashMap<String, String>
-                    val files = JSON.parseArray(req["files"]!!, FileItem::class.java)
-                    executor.submit(object: Runnable{
-                        override fun run() {
-                            val fileResult = createArchiveFile(req["archive_type"]!!, req["file_name"]!!, req["password"]!!, files)
-                            mainExecutor.post(object: Runnable{
-                                override fun run() {
-                                    result.success(fileResult.toString())
-                                }
-                            })
-                        }
-                    })
-                } else if (call.method == "get_file_headers") {
+                when (call.method) {
+                    "pick_file" -> {
+                        val req = call.arguments as HashMap<String, String>
+                        val intent = Intent(Intent.ACTION_GET_CONTENT)
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                        intent.type = req["mime_type"]!!
+                        startActivityForResult(intent, PICK_FILE)
+                        resultCallback = result
+                    }
+                    "create_archive" -> {
+                        val req = call.arguments as HashMap<String, String>
+                        val fileInfos = JSONObject(req["files"]!!)
+                        executor.submit(object: Runnable{
+                            override fun run() {
+                                val fileResult = createArchiveFile(req["archive_type"]!!, req["file_name"]!!, req["password"]!!, fileInfos)
+                                mainExecutor.post(object: Runnable{
+                                    override fun run() {
+                                        result.success(fileResult.toString())
+                                    }
+                                })
+                            }
+                        })
+                    }
+                    "get_file_headers" -> {
 
+                    }
                 }
             }
         })
@@ -116,16 +125,20 @@ class MainActivity: FlutterActivity() {
         return fileJsonObj
     }
 
-    fun createArchiveFile(archiveType: String, fileName: String, password: String, files: List<FileItem>): JSONObject {
-        when (archiveType) {
-            "zip" -> {
-                return createZipFile(fileName, password, files)
+    fun createArchiveFile(archiveType: String, fileName: String, password: String, fileInfos: JSONObject): JSONObject {
+        try {
+            when (archiveType) {
+                "zip" -> {
+                    return createZipFile(fileName, password, fileInfos)
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         return JSONObject()
     }
 
-    fun createZipFile(fileName: String, password: String, files: List<FileItem>): JSONObject {
+    fun createZipFile(fileName: String, password: String, fileInfos: JSONObject): JSONObject {
         val fileDir = File(context.cacheDir.path, "file_dir")
         if (fileDir.exists()) {
             fileDir.deleteRecursively()
@@ -141,20 +154,39 @@ class MainActivity: FlutterActivity() {
         } else {
             ZipFile(zipFile)
         }
-        val targetFiles = ArrayList<File>()
-        for (fileData in files) {
-            val targetFile = File(fileDir.path, fileData.FileName)
-            val fileItem = File(fileData.Uri)
-            fileItem.copyRecursively(targetFile)
-            targetFile.deleteOnExit()
-            targetFiles.add(targetFile)
+        for (key in fileInfos.keys()) {
+            cloneFile(fileDir, JSON.parseObject(fileInfos.get(key).toString(), FileInfo::class.java))
         }
-        zipFileObj.addFiles(targetFiles)
+        val targetFiles = fileDir.listFiles()
+        if (targetFiles != null) {
+            for (fileItem in targetFiles) {
+                if (fileItem.isDirectory) {
+                    zipFileObj.addFolder(fileItem)
+                } else {
+                    zipFileObj.addFile(fileItem)
+                }
+            }
+        }
         val fileJsonObj = JSONObject()
         fileJsonObj.put("archive_type", "zip")
         fileJsonObj.put("file_name", fileName)
         fileJsonObj.put("uri", zipFile.path)
         return fileJsonObj
+    }
+
+    fun cloneFile(fileDir: File, fileInfo: FileInfo) {
+        val targetFile = File(fileDir.path, fileInfo.Name)
+        if (fileInfo.ContentType == "directory") {
+            if (targetFile.mkdir()) {
+                for (entry in fileInfo.files.entries) {
+                    cloneFile(targetFile, entry.value)
+                }
+            }
+            return
+        }
+        val fileItem = File(fileInfo.Uri)
+        fileItem.copyRecursively(targetFile)
+        targetFile.deleteOnExit()
     }
 
     fun getFileHeaders(uri: String, password: String): List<FileHeader> {

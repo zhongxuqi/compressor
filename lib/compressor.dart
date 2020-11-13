@@ -128,6 +128,9 @@ class _CompressorPageState extends State<CompressorPage> {
       json.encode(data.FileExtra(0, 0).toMap()),
       currentFile,
     );
+    setState(() {
+
+    });
     Navigator.of(context).pop();
     Navigator.of(context).pop();
   }
@@ -289,15 +292,12 @@ class _CompressorPageState extends State<CompressorPage> {
       })),
     };
     Navigator.of(context).pop();
-    showLoadingDialog(
-        context, AppLocalizations.of(context).getLanguageText('compressing'),
-        barrierDismissible: true);
+    showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('compressing'), barrierDismissible: true);
     final fileResult = await createArchiveFile(params);
     if (fileResult.archiveType.isNotEmpty) {
       final fileObj = await fileUtils.createFileByFileResult(fileResult);
       if (fileObj == null) {
-        toastUtils.showErrorToast(
-            AppLocalizations.of(context).getLanguageText('save_failure'));
+        toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('save_failure'));
         return;
       }
       widget.callback(fileObj);
