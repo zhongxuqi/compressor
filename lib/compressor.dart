@@ -21,8 +21,9 @@ import 'components/directory_dialog.dart' as directory_dialog;
 
 class CompressorPage extends StatefulWidget {
   final ValueChanged<data.File> callback;
+  final Directory dir;
 
-  CompressorPage({Key key, @required this.callback}) : super(key: key);
+  CompressorPage({Key key, @required this.callback, @required this.dir}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -149,7 +150,7 @@ class _CompressorPageState extends State<CompressorPage> {
     showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('compressing'), barrierDismissible: true);
     final fileResult = await createArchiveFile(params);
     if (fileResult.archiveType.isNotEmpty) {
-      final fileObj = await fileUtils.createFileByFileResult(fileResult);
+      final fileObj = await fileUtils.createFileByFileResult(widget.dir, fileResult);
       if (fileObj == null) {
         toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('save_failure'));
         return;

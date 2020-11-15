@@ -46,9 +46,9 @@ Future<bool> checkFileExists(String relativePath) async {
   return await io.File(await getTargetPath(relativePath)).exists();
 }
 
-Future<File> createFileByFileResult(FileResult fileResult) async {
+Future<File> createFileByFileResult(io.Directory dir, FileResult fileResult) async {
   final f = io.File(fileResult.uri);
-  final targetPath = await getTargetPath(fileResult.fileName);
+  final targetPath = path.join(dir.path, fileResult.fileName);
   if (await io.File(targetPath).exists()) {
     return null;
   }

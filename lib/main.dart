@@ -10,6 +10,11 @@ import './file_detail.dart';
 import 'components/file_item.dart';
 import 'utils/file.dart' as fileUtils;
 import 'utils/toast.dart' as toastUtils;
+import 'components/directory_dialog.dart' as directory_dialog;
+import 'components/location.dart';
+import 'dart:io' as io;
+import 'package:path/path.dart' as path;
+import './utils/file.dart' as FileUtils;
 
 void main() {
   runApp(MyApp());
@@ -66,6 +71,7 @@ class _MainPageState extends State<MainPage> {
     Action(ActionType.directory, 'images/directory.png', 'create_directory'),
     Action(ActionType.archive, 'images/file_zip.png', 'create_archive'),
   ];
+  final List<String> paths = [];
   final List<File> files = List<File>();
 
   @override
@@ -75,7 +81,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   void initData() async {
-    final files = await fileUtils.listFile('');
+    final files = await fileUtils.listFile(paths.join("/"));
     if (files == null) {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
       return;
@@ -86,23 +92,39 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  void doAction(ActionType t) {
+  void doAction(ActionType t) async {
     switch (t) {
       case ActionType.directory:
+        createDirectory();
         break;
       case ActionType.archive:
+        final dir = await FileUtils.getTargetPath(paths.join("/"));
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) =>
-              CompressorPage(callback: (fileObj) {
-                setState(() {
-                  this.files.add(fileObj);
-                });
-              }),
+            CompressorPage(callback: (fileObj) {
+              setState(() {
+                this.files.add(fileObj);
+              });
+            }, dir: io.Directory(dir)),
           ),
         );
         break;
     }
+  }
+
+  void doCreateDirectory(String directoryName) async {
+    if (directoryName.isEmpty) return;
+    final currentFile = io.Directory(path.join(await FileUtils.getTargetPath(paths.join("/")), directoryName));
+    if (currentFile.existsSync()) return;
+    currentFile.createSync();
+    initData();
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+  }
+
+  void createDirectory() async {
+    directory_dialog.createDirectory(context: context, callback: doCreateDirectory, excludedNames: files.map((e) => e.name).toList());
   }
 
   @override
@@ -165,6 +187,14 @@ class _MainPageState extends State<MainPage> {
               ],
             ),
           ),
+          Location(
+            directories: paths,
+            goBack: () {
+              if (paths.length <= 0) return;
+              paths.removeLast();
+              initData();
+            },
+          ),
           Expanded(
             flex: 1,
             child: Stack(
@@ -176,6 +206,11 @@ class _MainPageState extends State<MainPage> {
                           files.map((e) => FileItem(
                             fileData: e,
                             onClick: () {
+                              if (e.contentType == 'directory') {
+                                paths.add(e.name);
+                                initData();
+                                return;
+                              }
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e)),
