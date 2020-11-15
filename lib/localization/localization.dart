@@ -92,6 +92,10 @@ class AppLocalizations {
       'en': 'Create Directory',
       'zh': '创建文件夹',
     },
+    'create_archive': {
+      'en': 'Create Archive',
+      'zh': '压缩文件',
+    },
   };
 
   String getLanguageText(String textID) {

@@ -8,7 +8,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:mime/mime.dart';
 import 'common/data.dart' as data;
-import 'utils/common.dart';
 import 'dart:convert';
 import 'components/file_item.dart';
 import './file_detail.dart';
@@ -18,6 +17,7 @@ import 'components/loading_dialog.dart';
 import 'utils/file.dart' as fileUtils;
 import 'utils/toast.dart' as toastUtils;
 import 'components/location.dart';
+import 'components/directory_dialog.dart' as directory_dialog;
 
 class CompressorPage extends StatefulWidget {
   final ValueChanged<data.File> callback;
@@ -37,12 +37,8 @@ class _CompressorPageState extends State<CompressorPage> {
     FilePicker(FileType.image, 'images/file_pic.png', 'image'),
     FilePicker(FileType.video, 'images/file_video.png', 'video'),
   ];
-  final GlobalKey<FormTextInputState> _directoryNameInputKey =
-      GlobalKey<FormTextInputState>();
-  final GlobalKey<FormTextInputState> _fileNameInputKey =
-      GlobalKey<FormTextInputState>();
+  final GlobalKey<FormTextInputState> _fileNameInputKey = GlobalKey<FormTextInputState>();
 
-  var directoryName = '';
   var files = Map<String, data.File>();
   var fileName = '';
   var fileNameError = '';
@@ -96,31 +92,14 @@ class _CompressorPageState extends State<CompressorPage> {
         fileResult.fileName,
         fileResult.uri,
         contentType,
-        json.encode(data.FileExtra(
-                f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync())
-            .toMap()),
+        json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync()).toMap()),
         currentFile,
       );
     }
     setState(() {});
   }
 
-  void doCreateDirectory() async {
-    var hasErr = false;
-    if (directoryName == "") {
-      _directoryNameInputKey.currentState.setTextError(
-          AppLocalizations.of(context).getLanguageText('required'));
-      hasErr = true;
-    }
-    if (getFiles().containsKey(directoryName)) {
-      _directoryNameInputKey.currentState.setTextError(
-          AppLocalizations.of(context).getLanguageText('file_exists'));
-      hasErr = true;
-    }
-    if (hasErr) {
-      setState(() {});
-      return;
-    }
+  void doCreateDirectory(String directoryName) async {
     getFiles()[directoryName] = data.File(
       directoryName,
       '',
@@ -136,132 +115,7 @@ class _CompressorPageState extends State<CompressorPage> {
   }
 
   void createDirectory() async {
-    directoryName = '';
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-            contentPadding: EdgeInsets.only(bottom: 10),
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(left: 10),
-                        child: Text(
-                          AppLocalizations.of(context)
-                              .getLanguageText('create_directory'),
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: ColorUtils.textColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      child: Container(
-                        height: 40,
-                        width: 50,
-                        child: Icon(
-                          IconFonts.close,
-                          color: ColorUtils.textColor,
-                          size: 22,
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color: ColorUtils.deepGrey,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 0, left: 15, right: 15),
-                child: FormTextInput(
-                  key: _directoryNameInputKey,
-                  keyName:
-                      AppLocalizations.of(context).getLanguageText('file_name'),
-                  value: directoryName,
-                  hintText: AppLocalizations.of(context)
-                      .getLanguageText('input_file_name_hint'),
-                  maxLines: 1,
-                  onChange: (value) {
-                    directoryName = value;
-                    _directoryNameInputKey.currentState.setTextError('');
-                  },
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, left: 10, right: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        child: Container(
-                          margin: EdgeInsets.only(right: 10.0),
-                          padding: EdgeInsets.all(5.0),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(5.0)),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)
-                                .getLanguageText('cancel'),
-                            style: TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        child: Container(
-                          padding: EdgeInsets.all(5.0),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: ColorUtils.themeColor,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(5.0)),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)
-                                .getLanguageText('confirm'),
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          doCreateDirectory();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        });
+    directory_dialog.createDirectory(context: context, callback: doCreateDirectory, excludedNames: getFiles().entries.map((e) => e.value.name).toList());
   }
 
   void createArchive() async {
@@ -591,46 +445,45 @@ class _CompressorPageState extends State<CompressorPage> {
               ),
               onTap: () async {
                 showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return Container(
-                        color: Colors.white,
-                        height: 120,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: fileTypes
-                              .map((e) => Expanded(
-                                    flex: 1,
-                                    child: InkWell(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(
-                                            e.icon,
-                                            height: 50.0,
-                                            width: 50.0,
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(top: 5),
-                                            child: Text(
-                                              AppLocalizations.of(context)
-                                                  .getLanguageText(e.name),
-                                              style: TextStyle(fontSize: 15),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      onTap: () {
-                                        pick(e.fileType);
-                                      },
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
-                      );
-                    });
+                  context: context,
+                  builder: (context) {
+                    return Container(
+                      color: Colors.white,
+                      height: 120,
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: fileTypes.map((e) => Expanded(
+                          flex: 1,
+                          child: InkWell(
+                            child: Column(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  e.icon,
+                                  height: 50.0,
+                                  width: 50.0,
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(top: 5),
+                                  child: Text(
+                                    AppLocalizations.of(context)
+                                        .getLanguageText(e.name),
+                                    style: TextStyle(fontSize: 15),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              pick(e.fileType);
+                            },
+                          ),
+                        )).toList(),
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ],

@@ -62,6 +62,10 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final actions = <Action>[
+    Action(ActionType.directory, 'images/directory.png', 'create_directory'),
+    Action(ActionType.archive, 'images/file_zip.png', 'create_archive'),
+  ];
   final List<File> files = List<File>();
 
   @override
@@ -80,6 +84,25 @@ class _MainPageState extends State<MainPage> {
       this.files.clear();
       this.files.addAll(files);
     });
+  }
+
+  void doAction(ActionType t) {
+    switch (t) {
+      case ActionType.directory:
+        break;
+      case ActionType.archive:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>
+              CompressorPage(callback: (fileObj) {
+                setState(() {
+                  this.files.add(fileObj);
+                });
+              }),
+          ),
+        );
+        break;
+    }
   }
 
   @override
@@ -146,18 +169,22 @@ class _MainPageState extends State<MainPage> {
             flex: 1,
             child: Stack(
               children: [
-                Container(
-                  child: Column(
-                    children: files.map((e) => FileItem(
-                      fileData: e,
-                      onClick: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e)),
-                        );
-                      },
-                    )).toList(),
-                  ),
+                CustomScrollView(
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildListDelegate(
+                          files.map((e) => FileItem(
+                            fileData: e,
+                            onClick: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e)),
+                              );
+                            },
+                          )).toList()
+                      ),
+                    ),
+                  ],
                 ),
                 Container(
                   alignment: Alignment.bottomCenter,
@@ -180,15 +207,45 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ),
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                              CompressorPage(callback: (fileObj) {
-                                setState(() {
-                                  this.files.add(fileObj);
-                                });
-                              }),
-                            ),
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return Container(
+                                color: Colors.white,
+                                height: 120,
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: actions.map((e) => Expanded(
+                                    flex: 1,
+                                    child: InkWell(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(
+                                            e.icon,
+                                            height: 50.0,
+                                            width: 50.0,
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.only(top: 5),
+                                            child: Text(
+                                              AppLocalizations.of(context)
+                                                  .getLanguageText(e.name),
+                                              style: TextStyle(fontSize: 15),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        doAction(e.actionType);
+                                      },
+                                    ),
+                                  )).toList(),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),
@@ -202,4 +259,14 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
+}
+
+enum ActionType { directory, archive }
+
+class Action {
+  final ActionType actionType;
+  final String icon;
+  final String name;
+
+  Action(this.actionType, this.icon, this.name);
 }
