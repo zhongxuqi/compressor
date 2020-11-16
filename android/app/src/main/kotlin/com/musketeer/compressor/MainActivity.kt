@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
+import android.util.Log
 import androidx.annotation.NonNull
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.annotation.JSONField
@@ -17,6 +18,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.lang.Exception
+import java.net.URLConnection
 import java.util.concurrent.Executors
 
 
@@ -36,6 +38,12 @@ class FileHeader {
     var FileName: String = ""
     @JSONField(name="is_directory")
     var IsDirectory: Boolean = false
+    @JSONField(name="content_type")
+    var ContentType: String = ""
+    @JSONField(name="last_modified")
+    var LastModified: Long = 0
+    @JSONField(name="file_size")
+    var FileSize: Long = 0
 }
 
 class MainActivity: FlutterActivity() {
@@ -80,7 +88,9 @@ class MainActivity: FlutterActivity() {
                         })
                     }
                     "get_file_headers" -> {
-
+                        val req = call.arguments as HashMap<String, String>
+                        val fileHeaders = getFileHeaders(req["uri"]!!, req["password"]!!)
+                        result.success(JSON.toJSONString(fileHeaders))
                     }
                 }
             }
@@ -198,6 +208,13 @@ class MainActivity: FlutterActivity() {
             val fileHeader = FileHeader()
             fileHeader.FileName = zipFileHeader.fileName
             fileHeader.IsDirectory = zipFileHeader.isDirectory
+            if (fileHeader.IsDirectory) {
+                fileHeader.ContentType = "directory"
+            } else {
+                fileHeader.ContentType = URLConnection.getFileNameMap().getContentTypeFor(fileHeader.FileName)
+            }
+            fileHeader.LastModified = zipFileHeader.lastModifiedTimeEpoch
+            fileHeader.FileSize = zipFileHeader.uncompressedSize
             fileHeader
         }
     }

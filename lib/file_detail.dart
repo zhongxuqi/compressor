@@ -8,6 +8,7 @@ import 'components/file_detail_image.dart';
 import 'components/file_detail_video.dart';
 import 'components/file_detail_text.dart';
 import 'components/file_detail_pdf.dart';
+import 'components/file_detail_zip.dart';
 
 class FileDetailPage extends StatefulWidget {
   final data.File fileData;
@@ -30,6 +31,8 @@ class _FileDetailPageState extends State<FileDetailPage> {
       return FileDetailText(fileData: widget.fileData);
     } else if (widget.fileData.contentType.startsWith("application/pdf")) {
       return FileDetailPDF(fileData: widget.fileData);
+    } else if (widget.fileData.contentType.startsWith("application/zip")) {
+      return FileDetailZip(fileData: widget.fileData);
     }
     return FileDetailUnknown();
   }

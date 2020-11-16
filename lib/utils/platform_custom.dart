@@ -51,3 +51,35 @@ Future<FileResult> createArchiveFile(params) async {
   }
   return FileResult("", "", "");
 }
+
+class FileHeader {
+  final String fileName;
+  final bool isDirectory;
+  final String contentType;
+  final int lastModified;
+  final int fileSize;
+
+  FileHeader({@required this.fileName, @required this.isDirectory, @required this.contentType, @required this.lastModified, @required this.fileSize});
+}
+
+Future<List<FileHeader>> getFileHeaders(String uri, String password) async {
+  try {
+    var result = await platform.invokeMethod('get_file_headers', {
+      'uri': uri,
+      'password': password,
+    });
+    final rawFileHeaders = json.decode(result.toString()) as List<dynamic>;
+    return rawFileHeaders.map((e) {
+      return FileHeader(
+        fileName: e['fileName'],
+        isDirectory: e['isDirectory'],
+        contentType: e['contentType'],
+        lastModified: e['lastModified'],
+        fileSize: e['fileSize'],
+      );
+    }).toList();
+  } on PlatformException catch (e) {
+    print("error: ${e.message}.");
+  }
+  return List<FileHeader>();
+}
