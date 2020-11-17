@@ -42,10 +42,6 @@ Future<String> getTargetPath(String relativePath) async {
   return path.join(appDocDir.path, relativePath);
 }
 
-Future<bool> checkFileExists(String relativePath) async {
-  return await io.File(await getTargetPath(relativePath)).exists();
-}
-
 Future<File> createFileByFileResult(io.Directory dir, FileResult fileResult) async {
   final f = io.File(fileResult.uri);
   final targetPath = path.join(dir.path, fileResult.fileName);

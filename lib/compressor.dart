@@ -18,6 +18,7 @@ import 'utils/file.dart' as fileUtils;
 import 'utils/toast.dart' as toastUtils;
 import 'components/location.dart';
 import 'components/directory_dialog.dart' as directory_dialog;
+import 'package:path/path.dart' as path;
 
 class CompressorPage extends StatefulWidget {
   final ValueChanged<data.File> callback;
@@ -119,6 +120,10 @@ class _CompressorPageState extends State<CompressorPage> {
     directory_dialog.createDirectory(context: context, callback: doCreateDirectory, excludedNames: getFiles().entries.map((e) => e.value.name).toList());
   }
 
+  Future<bool> checkFileExists(String fileName) async {
+    return await File(path.join(widget.dir.path, fileName)).exists();
+  }
+
   void createArchive() async {
     if (inSubmit) return;
     inSubmit = true;
@@ -128,7 +133,7 @@ class _CompressorPageState extends State<CompressorPage> {
           AppLocalizations.of(context).getLanguageText('required'));
       hasErr = true;
     }
-    if (await fileUtils.checkFileExists("$fileName.zip")) {
+    if (await checkFileExists("$fileName.zip")) {
       _fileNameInputKey.currentState.setTextError(
           AppLocalizations.of(context).getLanguageText('file_exists'));
       hasErr = true;
