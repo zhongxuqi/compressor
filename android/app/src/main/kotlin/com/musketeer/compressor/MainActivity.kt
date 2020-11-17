@@ -233,18 +233,23 @@ class MainActivity: FlutterActivity() {
     }
 
     fun extractFile(uri: String, password: String, fileName: String): String {
-        val zipFile = File(uri)
-        val zipFileObj = if (!password.isEmpty()) {
-            ZipFile(zipFile, password.toCharArray())
-        } else {
-            ZipFile(zipFile)
+        try {
+            val zipFile = File(uri)
+            val zipFileObj = if (password.isNotEmpty()) {
+                ZipFile(zipFile, password.toCharArray())
+            } else {
+                ZipFile(zipFile)
+            }
+            val destPath = File(externalCacheDir!!.absolutePath, fileName)
+            if (destPath.exists()) {
+                destPath.deleteRecursively()
+            }
+            zipFileObj.extractFile(fileName, externalCacheDir!!.absolutePath)
+            destPath.deleteOnExit()
+            return destPath.path
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        val destPath = File(externalCacheDir!!.absolutePath, fileName)
-        if (destPath.exists()) {
-            destPath.delete()
-        }
-        zipFileObj.extractFile(fileName, externalCacheDir!!.absolutePath)
-        destPath.deleteOnExit()
-        return destPath.path
+        return ""
     }
 }

@@ -132,7 +132,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
                           });
                           return;
                         }
-                        showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('compressing'), barrierDismissible: true);
+                        showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('extracting'), barrierDismissible: true);
                         final destPath = await extractFile(widget.fileData.uri, '', e.uri);
                         Navigator.of(context).pop();
                         if (destPath.isNotEmpty) {
