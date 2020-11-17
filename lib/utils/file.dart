@@ -69,19 +69,23 @@ Future<List<File>> listFile(String relativePath) async {
   }
   try {
     return (await targetFile.list().toList()).map((value) {
-      final f = io.File(value.path);
-      return File(
-        CommonUtils.getFileNameByUri(f.path),
-        f.path,
-        lookupMimeType(f.path),
-        json.encode(FileExtra(
-          lastModified(value.path),
-          length(value.path),
-        ).toMap()),
-        null,
-      );
+      return path2File(value.path);
     }).toList();
   } catch (e) {
     return null;
   }
+}
+
+File path2File(String path) {
+  final f = io.File(path);
+  return File(
+    CommonUtils.getFileNameByUri(f.path),
+    f.path,
+    lookupMimeType(f.path),
+    json.encode(FileExtra(
+      lastModified(path),
+      length(path),
+    ).toMap()),
+    null,
+  );
 }

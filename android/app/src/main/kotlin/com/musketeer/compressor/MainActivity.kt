@@ -92,6 +92,19 @@ class MainActivity: FlutterActivity() {
                         val fileHeaders = getFileHeaders(req["uri"]!!, req["password"]!!)
                         result.success(JSON.toJSONString(fileHeaders))
                     }
+                    "extract_file" -> {
+                        val req = call.arguments as HashMap<String, String>
+                        executor.submit(object: Runnable{
+                            override fun run() {
+                                val destPath = extractFile(req["uri"]!!, req["password"]!!, req["file_name"]!!)
+                                mainExecutor.post(object: Runnable{
+                                    override fun run() {
+                                        result.success(destPath)
+                                    }
+                                })
+                            }
+                        })
+                    }
                 }
             }
         })
@@ -213,9 +226,25 @@ class MainActivity: FlutterActivity() {
             } else {
                 fileHeader.ContentType = URLConnection.getFileNameMap().getContentTypeFor(fileHeader.FileName)
             }
-            fileHeader.LastModified = zipFileHeader.lastModifiedTimeEpoch
+            fileHeader.LastModified = zipFileHeader.lastModifiedTimeEpoch / 1000
             fileHeader.FileSize = zipFileHeader.uncompressedSize
             fileHeader
         }
+    }
+
+    fun extractFile(uri: String, password: String, fileName: String): String {
+        val zipFile = File(uri)
+        val zipFileObj = if (!password.isEmpty()) {
+            ZipFile(zipFile, password.toCharArray())
+        } else {
+            ZipFile(zipFile)
+        }
+        val destPath = File(externalCacheDir!!.absolutePath, fileName)
+        if (destPath.exists()) {
+            destPath.delete()
+        }
+        zipFileObj.extractFile(fileName, externalCacheDir!!.absolutePath)
+        destPath.deleteOnExit()
+        return destPath.path
     }
 }

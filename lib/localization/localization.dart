@@ -96,6 +96,10 @@ class AppLocalizations {
       'en': 'Create Archive',
       'zh': '压缩文件',
     },
+    'extracting': {
+      'en': 'Extracting',
+      'zh': '提取中',
+    },
   };
 
   String getLanguageText(String textID) {

@@ -6,6 +6,9 @@ import '../file_detail.dart';
 import 'location.dart';
 import '../utils/platform_custom.dart';
 import 'dart:convert';
+import 'loading_dialog.dart';
+import '../localization/localization.dart';
+import '../utils/file.dart' as fileUtils;
 
 class FileDetailZip extends StatefulWidget {
   final data.File fileData;
@@ -68,7 +71,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
           if (currentDir == null) {
             files[paths[i]] = data.File(
               paths[i],
-              paths.sublist(0, i + 1).join("/"),
+              e.fileName,
               e.contentType,
               json.encode(data.FileExtra(e.lastModified, e.fileSize).toMap()),
               currentDir,
@@ -76,7 +79,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
           } else if (currentDir != null) {
             currentDir.files[paths[i]] = data.File(
               paths[i],
-              paths.sublist(0, i + 1).join("/"),
+              e.fileName,
               e.contentType,
               json.encode(data.FileExtra(e.lastModified, e.fileSize).toMap()),
               currentDir,
@@ -122,17 +125,22 @@ class _FileDetailZipState extends State<FileDetailZip> {
                   delegate: SliverChildListDelegate(
                     getFiles().values.map((e) => FileItem(
                       fileData: e,
-                      onClick: () {
+                      onClick: () async {
                         if (e.contentType == 'directory') {
                           setState(() {
                             currentFile = e;
                           });
                           return;
                         }
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e)),
-                        // );
+                        showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('compressing'), barrierDismissible: true);
+                        final destPath = await extractFile(widget.fileData.uri, '', e.uri);
+                        Navigator.of(context).pop();
+                        if (destPath.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => FileDetailPage(fileData: fileUtils.path2File(destPath))),
+                          );
+                        }
                       },
                     )).toList(),
                   ),

@@ -83,3 +83,17 @@ Future<List<FileHeader>> getFileHeaders(String uri, String password) async {
   }
   return List<FileHeader>();
 }
+
+Future<String> extractFile(String uri, String password, String fileName) async {
+  try {
+    var result = await platform.invokeMethod('extract_file', {
+      'uri': uri,
+      'password': password,
+      'file_name': fileName,
+    });
+    return result.toString();
+  } on PlatformException catch (e) {
+    print("error: ${e.message}.");
+  }
+  return "";
+}

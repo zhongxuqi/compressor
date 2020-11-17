@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import '../common/data.dart' as data;
+import 'dart:io';
 
 class FileDetailImage extends StatefulWidget {
   final data.File fileData;
@@ -20,7 +21,7 @@ class _FileDetailImageState extends State<FileDetailImage> {
     return Container(
       alignment: Alignment.center,
       child: PhotoView(
-        imageProvider: AssetImage(widget.fileData.uri),
+        imageProvider: FileImage(File(widget.fileData.uri)),
       ),
     );
   }
