@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'loading_dialog.dart';
 import '../localization/localization.dart';
 import '../utils/file.dart' as fileUtils;
+import '../utils/colors.dart';
+import 'path_select_dialog.dart';
 
 class FileDetailZip extends StatefulWidget {
   final data.File fileData;
@@ -147,6 +149,38 @@ class _FileDetailZipState extends State<FileDetailZip> {
                 ),
               ],
             ),
+          ),
+          InkWell(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 45,
+                    color: ColorUtils.themeColor,
+                    alignment: Alignment.center,
+                    child: Text(
+                      AppLocalizations.of(context).getLanguageText('unzip'),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            onTap: () async {
+              final endIndex = widget.fileData.name.indexOf('.zip');
+              String defaultDirName = '';
+              if (endIndex >= 0) {
+                defaultDirName = widget.fileData.name.substring(0, endIndex);
+              } else {
+                defaultDirName = widget.fileData.name;
+              }
+              selectPath(context: context, callback: (p) {
+
+              }, defaultDirName: defaultDirName);
+            },
           ),
         ],
       ),

@@ -1,51 +1,58 @@
 import 'package:flutter/material.dart';
-import 'form_text_input.dart';
+import 'location.dart';
+import '../common/data.dart';
+import '../utils/file.dart' as fileUtils;
+import '../utils/toast.dart' as toastUtils;
 import '../localization/localization.dart';
+import 'file_item.dart';
 import '../utils/colors.dart';
 import '../utils/iconfonts.dart';
+import 'form_text_input.dart';
 
-void createDirectory({@required BuildContext context, @required ValueChanged<String> callback, @required List<String> excludedNames}) {
+void selectPath({@required BuildContext context, @required ValueChanged<String> callback, @required String defaultDirName}) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return CreateDirectoryDialog(callback: callback, excludedNames: excludedNames);
+      return PathSelectDialog(callback: callback, defaultDirName: defaultDirName);
     },
   );
 }
 
-class CreateDirectoryDialog extends StatefulWidget {
+class PathSelectDialog extends StatefulWidget {
   final ValueChanged<String> callback;
-  final List<String> excludedNames;
+  final String defaultDirName;
 
-  CreateDirectoryDialog({Key key, @required this.callback, @required this.excludedNames}):super(key: key);
+  PathSelectDialog({Key key, @required this.callback, @required this.defaultDirName}):super(key: key);
 
   @override
   State createState() {
-    return _CreateDirectoryDialogState();
+    return _PathSelectDialogState();
   }
 }
 
-class _CreateDirectoryDialogState extends State<CreateDirectoryDialog> {
+class _PathSelectDialogState extends State<PathSelectDialog> {
   final GlobalKey<FormTextInputState> _directoryNameInputKey = GlobalKey<FormTextInputState>();
   var directoryName = '';
+  final List<String> paths = [];
+  final List<File> files = List<File>();
 
-  void doCreateDirectory() async {
-    var hasErr = false;
-    if (directoryName == "") {
-      _directoryNameInputKey.currentState.setTextError(
-          AppLocalizations.of(context).getLanguageText('required'));
-      hasErr = true;
-    }
-    if (widget.excludedNames.contains(directoryName)) {
-      _directoryNameInputKey.currentState.setTextError(
-          AppLocalizations.of(context).getLanguageText('file_exists'));
-      hasErr = true;
-    }
-    if (hasErr) {
-      setState(() {});
+  @override
+  void initState() {
+    super.initState();
+    initData();
+    directoryName = widget.defaultDirName;
+  }
+
+  void initData() async {
+    final files = await fileUtils.listFile(paths.join("/"));
+    if (files == null) {
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
       return;
     }
-    widget.callback(directoryName);
+    setState(() {
+      this.files.clear();
+      this.files.addAll(files.where((element) => element.contentType == 'directory'));
+    });
   }
 
   @override
@@ -62,7 +69,7 @@ class _CreateDirectoryDialogState extends State<CreateDirectoryDialog> {
                   margin: EdgeInsets.only(left: 10),
                   child: Text(
                     AppLocalizations.of(context)
-                        .getLanguageText('create_directory'),
+                        .getLanguageText('select_target_directory'),
                     style: TextStyle(
                       fontSize: 18,
                       color: ColorUtils.textColor,
@@ -92,16 +99,16 @@ class _CreateDirectoryDialogState extends State<CreateDirectoryDialog> {
             Expanded(
               child: Container(
                 height: 1,
-                color: ColorUtils.deepGrey,
+                color: ColorUtils.divider,
               ),
             ),
           ],
         ),
         Container(
-          padding: EdgeInsets.only(top: 0, left: 15, right: 15),
+          padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
           child: FormTextInput(
             key: _directoryNameInputKey,
-            keyName: AppLocalizations.of(context).getLanguageText('file_name'),
+            keyName: AppLocalizations.of(context).getLanguageText('unzip_dir_name'),
             value: directoryName,
             hintText: AppLocalizations.of(context)
                 .getLanguageText('input_file_name_hint'),
@@ -110,6 +117,35 @@ class _CreateDirectoryDialogState extends State<CreateDirectoryDialog> {
               directoryName = value;
               _directoryNameInputKey.currentState.setTextError('');
             },
+          ),
+        ),
+        Location(
+          directories: paths,
+          goBack: () {
+            if (paths.length <= 0) return;
+            paths.removeLast();
+            initData();
+          },
+        ),
+        Container(
+          height: MediaQuery.of(context).size.height * 5 / 12,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  files.map((e) => FileItem(
+                    fileData: e,
+                    onClick: () {
+                      if (e.contentType == 'directory') {
+                        paths.add(e.name);
+                        initData();
+                        return;
+                      }
+                    },
+                  )).toList()
+                ),
+              ),
+            ],
           ),
         ),
         Container(
@@ -161,7 +197,11 @@ class _CreateDirectoryDialogState extends State<CreateDirectoryDialog> {
                     ),
                   ),
                   onTap: () {
-                    doCreateDirectory();
+                    if (files.map((e) => e.name).toList().contains(directoryName)) {
+                      _directoryNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
+                      return;
+                    }
+                    widget.callback(paths.join("/"));
                   },
                 ),
               ),

@@ -78,7 +78,7 @@ class AppLocalizations {
     },
     'file_exists': {
       'en': 'File Exists',
-      'zh': '文件已存在',
+      'zh': '文件名已存在',
     },
     'list_file_failure': {
       'en': 'List File Failure',
@@ -99,6 +99,18 @@ class AppLocalizations {
     'extracting': {
       'en': 'Extracting',
       'zh': '提取中',
+    },
+    'unzip': {
+      'en': 'Unzip',
+      'zh': '解压',
+    },
+    'select_target_directory': {
+      'en': 'Select Target Directory',
+      'zh': '请选择目标目录',
+    },
+    'unzip_dir_name': {
+      'en': 'Unzip Directory Name',
+      'zh': '解压目录名',
     },
   };
 

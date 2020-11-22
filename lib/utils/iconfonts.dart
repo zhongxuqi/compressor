@@ -15,4 +15,5 @@ class IconFonts {
   static const IconData pause = IconData(0xe670, fontFamily: 'iconfont');
   static const IconData close = IconData(0xe6d4, fontFamily: 'iconfont');
   static const IconData arrowLeft = IconData(0xe6c3, fontFamily: 'iconfont');
+  static const IconData export = IconData(0xe615, fontFamily: 'iconfont');
 }
