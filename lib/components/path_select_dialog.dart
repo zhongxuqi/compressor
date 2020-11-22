@@ -51,7 +51,7 @@ class _PathSelectDialogState extends State<PathSelectDialog> {
     }
     setState(() {
       this.files.clear();
-      this.files.addAll(files.where((element) => element.contentType == 'directory'));
+      this.files.addAll(files);
     });
   }
 
@@ -133,7 +133,7 @@ class _PathSelectDialogState extends State<PathSelectDialog> {
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildListDelegate(
-                  files.map((e) => FileItem(
+                  files.where((element) => element.contentType == 'directory').map((e) => FileItem(
                     fileData: e,
                     onClick: () {
                       if (e.contentType == 'directory') {
