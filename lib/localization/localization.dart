@@ -112,6 +112,10 @@ class AppLocalizations {
       'en': 'Unzip Directory Name',
       'zh': '解压目录名',
     },
+    'unzip_success': {
+      'en': 'Unzip Success',
+      'zh': '解压成功',
+    },
   };
 
   String getLanguageText(String textID) {

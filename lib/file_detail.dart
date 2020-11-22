@@ -11,9 +11,10 @@ import 'components/file_detail_pdf.dart';
 import 'components/file_detail_zip.dart';
 
 class FileDetailPage extends StatefulWidget {
+  final VoidCallback callback;
   final data.File fileData;
 
-  FileDetailPage({Key key, @required this.fileData}):super(key: key);
+  FileDetailPage({Key key, @required this.fileData, @required this.callback}):super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -32,7 +33,7 @@ class _FileDetailPageState extends State<FileDetailPage> {
     } else if (widget.fileData.contentType.startsWith("application/pdf")) {
       return FileDetailPDF(fileData: widget.fileData);
     } else if (widget.fileData.contentType.startsWith("application/zip")) {
-      return FileDetailZip(fileData: widget.fileData);
+      return FileDetailZip(fileData: widget.fileData, callback: widget.callback);
     }
     return FileDetailUnknown();
   }

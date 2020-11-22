@@ -21,7 +21,7 @@ import 'components/directory_dialog.dart' as directory_dialog;
 import 'package:path/path.dart' as path;
 
 class CompressorPage extends StatefulWidget {
-  final ValueChanged<data.File> callback;
+  final VoidCallback callback;
   final Directory dir;
 
   CompressorPage({Key key, @required this.callback, @required this.dir}) : super(key: key);
@@ -85,8 +85,8 @@ class _CompressorPageState extends State<CompressorPage> {
   }
 
   void _pickFileByMimeType({@required String mimeType}) async {
-    final fileResultList = await pickFile(mimeType: mimeType);
     Navigator.of(context).pop();
+    final fileResultList = await pickFile(mimeType: mimeType);
     for (var fileResult in fileResultList) {
       final f = File.fromUri(Uri.parse(fileResult.uri));
       final contentType = lookupMimeType(fileResult.uri);
@@ -113,10 +113,10 @@ class _CompressorPageState extends State<CompressorPage> {
 
     });
     Navigator.of(context).pop();
-    Navigator.of(context).pop();
   }
 
   void createDirectory() async {
+    Navigator.of(context).pop();
     directory_dialog.createDirectory(context: context, callback: doCreateDirectory, excludedNames: getFiles().entries.map((e) => e.value.name).toList());
   }
 
@@ -160,7 +160,7 @@ class _CompressorPageState extends State<CompressorPage> {
         toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('save_failure'));
         return;
       }
-      widget.callback(fileObj);
+      widget.callback();
     }
     Navigator.of(context).pop();
     Navigator.of(context).pop();

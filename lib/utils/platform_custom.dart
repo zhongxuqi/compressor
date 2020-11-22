@@ -97,3 +97,17 @@ Future<String> extractFile(String uri, String password, String fileName) async {
   }
   return "";
 }
+
+Future<String> extractAll(String uri, String password, String targetDir) async {
+  try {
+    var result = await platform.invokeMethod('extract_all', {
+      'uri': uri,
+      'password': password,
+      'target_dir': targetDir,
+    });
+    return result.toString();
+  } on PlatformException catch (e) {
+    print("error: ${e.message}.");
+  }
+  return "";
+}

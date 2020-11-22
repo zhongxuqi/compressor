@@ -99,13 +99,12 @@ class _MainPageState extends State<MainPage> {
         break;
       case ActionType.archive:
         final dir = await FileUtils.getTargetPath(paths.join("/"));
+        Navigator.of(context).pop();
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) =>
-            CompressorPage(callback: (fileObj) {
-              setState(() {
-                this.files.add(fileObj);
-              });
+            CompressorPage(callback: () {
+              initData();
             }, dir: io.Directory(dir)),
           ),
         );
@@ -120,10 +119,10 @@ class _MainPageState extends State<MainPage> {
     currentFile.createSync();
     initData();
     Navigator.of(context).pop();
-    Navigator.of(context).pop();
   }
 
   void createDirectory() async {
+    Navigator.of(context).pop();
     directory_dialog.createDirectory(context: context, callback: doCreateDirectory, excludedNames: files.map((e) => e.name).toList());
   }
 
@@ -213,7 +212,9 @@ class _MainPageState extends State<MainPage> {
                               }
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e)),
+                                MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {
+                                  initData();
+                                })),
                               );
                             },
                           )).toList()

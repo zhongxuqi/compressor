@@ -1,4 +1,5 @@
 import 'package:compressor/utils/platform_custom.dart';
+import 'package:compressor/utils/toast.dart';
 import 'package:flutter/material.dart';
 import '../common/data.dart' as data;
 import 'file_item.dart';
@@ -14,8 +15,9 @@ import 'path_select_dialog.dart';
 
 class FileDetailZip extends StatefulWidget {
   final data.File fileData;
+  final VoidCallback callback;
 
-  FileDetailZip({Key key, @required this.fileData}):super(key: key);
+  FileDetailZip({Key key, @required this.fileData, @required this.callback}):super(key: key);
 
   @override
   State createState() {
@@ -140,7 +142,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
                         if (destPath.isNotEmpty) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => FileDetailPage(fileData: fileUtils.path2File(destPath))),
+                            MaterialPageRoute(builder: (context) => FileDetailPage(fileData: fileUtils.path2File(destPath), callback: () {})),
                           );
                         }
                       },
@@ -177,8 +179,11 @@ class _FileDetailZipState extends State<FileDetailZip> {
               } else {
                 defaultDirName = widget.fileData.name;
               }
-              selectPath(context: context, callback: (p) {
-
+              selectPath(context: context, callback: (p) async {
+                await extractAll(widget.fileData.uri, '', await fileUtils.getTargetPath(p));
+                widget.callback();
+                Navigator.of(context).pop();
+                showSuccessToast(AppLocalizations.of(context).getLanguageText('unzip_success'));
               }, defaultDirName: defaultDirName);
             },
           ),

@@ -8,6 +8,7 @@ import 'file_item.dart';
 import '../utils/colors.dart';
 import '../utils/iconfonts.dart';
 import 'form_text_input.dart';
+import 'package:path/path.dart' as pathLib;
 
 void selectPath({@required BuildContext context, @required ValueChanged<String> callback, @required String defaultDirName}) {
   showDialog(
@@ -201,7 +202,8 @@ class _PathSelectDialogState extends State<PathSelectDialog> {
                       _directoryNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
                       return;
                     }
-                    widget.callback(paths.join("/"));
+                    widget.callback(pathLib.join(paths.join("/"), directoryName));
+                    initData();
                   },
                 ),
               ),

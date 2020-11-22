@@ -105,6 +105,19 @@ class MainActivity: FlutterActivity() {
                             }
                         })
                     }
+                    "extract_all" -> {
+                        val req = call.arguments as HashMap<String, String>
+                        executor.submit(object: Runnable{
+                            override fun run() {
+                                extractAll(req["uri"]!!, req["password"]!!, req["target_dir"]!!)
+                                mainExecutor.post(object: Runnable{
+                                    override fun run() {
+                                        result.success("")
+                                    }
+                                })
+                            }
+                        })
+                    }
                 }
             }
         })
@@ -247,6 +260,21 @@ class MainActivity: FlutterActivity() {
             zipFileObj.extractFile(fileName, externalCacheDir!!.absolutePath)
             destPath.deleteOnExit()
             return destPath.path
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
+    }
+
+    fun extractAll(uri: String, password: String, targetDir: String): String {
+        try {
+            val zipFile = File(uri)
+            val zipFileObj = if (password.isNotEmpty()) {
+                ZipFile(zipFile, password.toCharArray())
+            } else {
+                ZipFile(zipFile)
+            }
+            zipFileObj.extractAll(targetDir)
         } catch (e: Exception) {
             e.printStackTrace()
         }
