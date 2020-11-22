@@ -23,4 +23,5 @@ class ColorUtils {
   static const Color textColor = const Color(0xFF4D5156);
   static const Color divider = const Color(0xFFEEEEEE);
   static const Color formBackground = const Color(0xFFF2F4F8);
+  static const Color semiTransparent = const Color(0x33000000);
 }

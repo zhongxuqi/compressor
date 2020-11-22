@@ -1,6 +1,7 @@
 import 'package:compressor/utils/platform_custom.dart';
 import 'package:compressor/utils/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../common/data.dart' as data;
 import 'file_item.dart';
 import '../file_detail.dart';
@@ -12,6 +13,7 @@ import '../localization/localization.dart';
 import '../utils/file.dart' as fileUtils;
 import '../utils/colors.dart';
 import 'path_select_dialog.dart';
+import 'form_text_input.dart';
 
 class FileDetailZip extends StatefulWidget {
   final data.File fileData;
@@ -28,6 +30,8 @@ class FileDetailZip extends StatefulWidget {
 class _FileDetailZipState extends State<FileDetailZip> {
   var files = Map<String, data.File>();
   data.File currentFile;
+  var showPasswordInput = false;
+  var password = '';
 
   Map<String, data.File> getFiles() {
     return currentFile != null ? currentFile.files : files;
@@ -109,86 +113,167 @@ class _FileDetailZipState extends State<FileDetailZip> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Location(
-            directories: getDirectories(),
-            goBack: () {
-              if (currentFile == null) return;
-              setState(() {
-                currentFile = currentFile.parent;
-              });
-            },
-          ),
-          Expanded(
-            flex: 1,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    getFiles().values.map((e) => FileItem(
-                      fileData: e,
-                      onClick: () async {
-                        if (e.contentType == 'directory') {
-                          setState(() {
-                            currentFile = e;
-                          });
-                          return;
-                        }
-                        showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('extracting'), barrierDismissible: true);
-                        final destPath = await extractFile(widget.fileData.uri, '', e.uri);
-                        Navigator.of(context).pop();
-                        if (destPath.isNotEmpty) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => FileDetailPage(fileData: fileUtils.path2File(destPath), callback: () {})),
-                          );
-                        }
-                      },
-                    )).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          InkWell(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 45,
-                    color: ColorUtils.themeColor,
-                    alignment: Alignment.center,
-                    child: Text(
-                      AppLocalizations.of(context).getLanguageText('unzip'),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+    return Stack(
+      children: [
+        Container(
+          child: Column(
+            children: [
+              Location(
+                directories: getDirectories(),
+                goBack: () {
+                  if (currentFile == null) return;
+                  setState(() {
+                    currentFile = currentFile.parent;
+                  });
+                },
+              ),
+              Expanded(
+                flex: 1,
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildListDelegate(
+                        getFiles().values.map((e) => FileItem(
+                          fileData: e,
+                          onClick: () async {
+                            if (e.contentType == 'directory') {
+                              setState(() {
+                                currentFile = e;
+                              });
+                              return;
+                            }
+                            showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('extracting'), barrierDismissible: true);
+                            final extractRes = await extractFile(widget.fileData.uri, password, e.uri);
+                            Navigator.of(context).pop();
+                            if (extractRes.errCode.isNotEmpty) {
+                              if (extractRes.errCode == 'wrong_password') {
+                                showErrorToast(AppLocalizations.of(context).getLanguageText('wrong_password'));
+                                setState(() {
+                                  showPasswordInput = true;
+                                });
+                                return;
+                              }
+                              showErrorToast(AppLocalizations.of(context).getLanguageText('unzip_failure'));
+                              return;
+                            }
+                            if (extractRes.targetUri.isNotEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => FileDetailPage(fileData: fileUtils.path2File(extractRes.targetUri), callback: () {})),
+                              );
+                            }
+                          },
+                        )).toList(),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            onTap: () async {
-              final endIndex = widget.fileData.name.indexOf('.zip');
-              String defaultDirName = '';
-              if (endIndex >= 0) {
-                defaultDirName = widget.fileData.name.substring(0, endIndex);
-              } else {
-                defaultDirName = widget.fileData.name;
-              }
-              selectPath(context: context, callback: (p) async {
-                await extractAll(widget.fileData.uri, '', await fileUtils.getTargetPath(p));
-                widget.callback();
-                Navigator.of(context).pop();
-                showSuccessToast(AppLocalizations.of(context).getLanguageText('unzip_success'));
-              }, defaultDirName: defaultDirName);
-            },
+              ),
+              InkWell(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 45,
+                        color: ColorUtils.themeColor,
+                        alignment: Alignment.center,
+                        child: Text(
+                          AppLocalizations.of(context).getLanguageText('unzip'),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () async {
+                  final endIndex = widget.fileData.name.indexOf('.zip');
+                  String defaultDirName = '';
+                  if (endIndex >= 0) {
+                    defaultDirName = widget.fileData.name.substring(0, endIndex);
+                  } else {
+                    defaultDirName = widget.fileData.name;
+                  }
+                  selectPath(context: context, callback: (p) async {
+                    final extractRes = await extractAll(widget.fileData.uri, password, await fileUtils.getTargetPath(p));
+                    if (extractRes.errCode.isNotEmpty) {
+                      if (extractRes.errCode == 'wrong_password') {
+                        Navigator.of(context).pop();
+                        showErrorToast(AppLocalizations.of(context).getLanguageText('wrong_password'));
+                        setState(() {
+                          showPasswordInput = true;
+                        });
+                        return;
+                      }
+                      showErrorToast(AppLocalizations.of(context).getLanguageText('unzip_failure'));
+                      return;
+                    }
+                    widget.callback();
+                    Navigator.of(context).pop();
+                    showSuccessToast(AppLocalizations.of(context).getLanguageText('unzip_success'));
+                  }, defaultDirName: defaultDirName);
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        showPasswordInput?Container(
+          color: ColorUtils.semiTransparent,
+          child: SimpleDialog(
+            children: [
+              Container(
+                padding: EdgeInsets.only(top: 0, left: 15, right: 15),
+                child: FormTextInput(
+                  keyName: AppLocalizations.of(context)
+                      .getLanguageText('archive_password'),
+                  value: password,
+                  hintText: AppLocalizations.of(context)
+                      .getLanguageText('input_password_hint'),
+                  maxLines: 1,
+                  onChange: (value) {
+                    password = value;
+                  },
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                        child: Container(
+                          padding: EdgeInsets.all(5.0),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: ColorUtils.themeColor,
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(5.0)),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .getLanguageText('confirm'),
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            showPasswordInput = false;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ):Container(),
+      ],
     );
   }
 }

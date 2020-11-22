@@ -170,148 +170,149 @@ class _CompressorPageState extends State<CompressorPage> {
   void compressFiles() async {
     fileName = '';
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(
-            contentPadding: EdgeInsets.only(bottom: 10),
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(left: 10),
-                        child: Text(
-                          AppLocalizations.of(context)
-                              .getLanguageText('zip_file_info'),
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: ColorUtils.textColor,
-                          ),
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          contentPadding: EdgeInsets.only(bottom: 10),
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(left: 10),
+                      child: Text(
+                        AppLocalizations.of(context)
+                            .getLanguageText('zip_file_info'),
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: ColorUtils.textColor,
                         ),
                       ),
                     ),
-                    InkWell(
+                  ),
+                  InkWell(
+                    child: Container(
+                      height: 40,
+                      width: 50,
+                      child: Icon(
+                        IconFonts.close,
+                        color: ColorUtils.textColor,
+                        size: 22,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 1,
+                    color: ColorUtils.deepGrey,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 0, left: 15, right: 15),
+              child: FormTextInput(
+                key: _fileNameInputKey,
+                keyName:
+                    AppLocalizations.of(context).getLanguageText('file_name'),
+                value: fileName,
+                hintText: AppLocalizations.of(context)
+                    .getLanguageText('input_file_name_hint'),
+                maxLines: 1,
+                onChange: (value) {
+                  fileName = value;
+                  _fileNameInputKey.currentState.setTextError('');
+                },
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 0, left: 15, right: 15),
+              child: FormTextInput(
+                keyName: AppLocalizations.of(context)
+                    .getLanguageText('archive_password'),
+                value: password,
+                hintText: AppLocalizations.of(context)
+                    .getLanguageText('input_password_hint'),
+                maxLines: 1,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp("[a-zA-Z]|[0-9]")),
+                  LengthLimitingTextInputFormatter(16), //最大长度
+                ],
+                onChange: (value) {
+                  password = value;
+                },
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
                       child: Container(
-                        height: 40,
-                        width: 50,
-                        child: Icon(
-                          IconFonts.close,
-                          color: ColorUtils.textColor,
-                          size: 22,
+                        margin: EdgeInsets.only(right: 10.0),
+                        padding: EdgeInsets.all(5.0),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .getLanguageText('cancel'),
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       onTap: () {
                         Navigator.of(context).pop();
                       },
                     ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
+                  ),
                   Expanded(
-                    child: Container(
-                      height: 1,
-                      color: ColorUtils.deepGrey,
+                    flex: 1,
+                    child: GestureDetector(
+                      child: Container(
+                        padding: EdgeInsets.all(5.0),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: ColorUtils.themeColor,
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .getLanguageText('confirm'),
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      onTap: () {
+                        createArchive();
+                      },
                     ),
                   ),
                 ],
               ),
-              Container(
-                padding: EdgeInsets.only(top: 0, left: 15, right: 15),
-                child: FormTextInput(
-                  key: _fileNameInputKey,
-                  keyName:
-                      AppLocalizations.of(context).getLanguageText('file_name'),
-                  value: fileName,
-                  hintText: AppLocalizations.of(context)
-                      .getLanguageText('input_file_name_hint'),
-                  maxLines: 1,
-                  onChange: (value) {
-                    fileName = value;
-                    _fileNameInputKey.currentState.setTextError('');
-                  },
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 0, left: 15, right: 15),
-                child: FormTextInput(
-                  keyName: AppLocalizations.of(context)
-                      .getLanguageText('archive_password'),
-                  value: password,
-                  hintText: AppLocalizations.of(context)
-                      .getLanguageText('input_password_hint'),
-                  maxLines: 1,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp("[a-zA-Z]|[0-9]")),
-                    LengthLimitingTextInputFormatter(16), //最大长度
-                  ],
-                  onChange: (value) {
-                    password = value;
-                  },
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, left: 10, right: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        child: Container(
-                          margin: EdgeInsets.only(right: 10.0),
-                          padding: EdgeInsets.all(5.0),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(5.0)),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)
-                                .getLanguageText('cancel'),
-                            style: TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        child: Container(
-                          padding: EdgeInsets.all(5.0),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: ColorUtils.themeColor,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(5.0)),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)
-                                .getLanguageText('confirm'),
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          createArchive();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        });
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

@@ -14,10 +14,12 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
 import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.exception.ZipException
+import net.lingala.zip4j.model.ZipParameters
+import net.lingala.zip4j.model.enums.EncryptionMethod
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.lang.Exception
 import java.net.URLConnection
 import java.util.concurrent.Executors
 
@@ -44,6 +46,13 @@ class FileHeader {
     var LastModified: Long = 0
     @JSONField(name="file_size")
     var FileSize: Long = 0
+}
+
+class ExtractRes {
+    @JSONField(name="err_code")
+    var errCode: String = ""
+    @JSONField(name="target_uri")
+    var targetUri: String = ""
 }
 
 class MainActivity: FlutterActivity() {
@@ -96,10 +105,10 @@ class MainActivity: FlutterActivity() {
                         val req = call.arguments as HashMap<String, String>
                         executor.submit(object: Runnable{
                             override fun run() {
-                                val destPath = extractFile(req["uri"]!!, req["password"]!!, req["file_name"]!!)
+                                val res = extractFile(req["uri"]!!, req["password"]!!, req["file_name"]!!)
                                 mainExecutor.post(object: Runnable{
                                     override fun run() {
-                                        result.success(destPath)
+                                        result.success(JSON.toJSONString(res))
                                     }
                                 })
                             }
@@ -109,10 +118,10 @@ class MainActivity: FlutterActivity() {
                         val req = call.arguments as HashMap<String, String>
                         executor.submit(object: Runnable{
                             override fun run() {
-                                extractAll(req["uri"]!!, req["password"]!!, req["target_dir"]!!)
+                                val res = extractAll(req["uri"]!!, req["password"]!!, req["target_dir"]!!)
                                 mainExecutor.post(object: Runnable{
                                     override fun run() {
-                                        result.success("")
+                                        result.success(JSON.toJSONString(res))
                                     }
                                 })
                             }
@@ -183,7 +192,10 @@ class MainActivity: FlutterActivity() {
             zipFile.deleteRecursively()
         }
         zipFile.deleteOnExit()
-        val zipFileObj = if (!password.isEmpty()) {
+        val zipParameters = ZipParameters()
+        val zipFileObj = if (password.isNotEmpty()) {
+            zipParameters.isEncryptFiles = true
+            zipParameters.encryptionMethod = EncryptionMethod.ZIP_STANDARD
             ZipFile(zipFile, password.toCharArray())
         } else {
             ZipFile(zipFile)
@@ -195,9 +207,9 @@ class MainActivity: FlutterActivity() {
         if (targetFiles != null) {
             for (fileItem in targetFiles) {
                 if (fileItem.isDirectory) {
-                    zipFileObj.addFolder(fileItem)
+                    zipFileObj.addFolder(fileItem, zipParameters)
                 } else {
-                    zipFileObj.addFile(fileItem)
+                    zipFileObj.addFile(fileItem, zipParameters)
                 }
             }
         }
@@ -245,9 +257,11 @@ class MainActivity: FlutterActivity() {
         }
     }
 
-    fun extractFile(uri: String, password: String, fileName: String): String {
+    fun extractFile(uri: String, password: String, fileName: String): ExtractRes {
+        val res = ExtractRes()
         try {
             val zipFile = File(uri)
+            Log.d(TAG, "===>>> $password")
             val zipFileObj = if (password.isNotEmpty()) {
                 ZipFile(zipFile, password.toCharArray())
             } else {
@@ -259,14 +273,22 @@ class MainActivity: FlutterActivity() {
             }
             zipFileObj.extractFile(fileName, externalCacheDir!!.absolutePath)
             destPath.deleteOnExit()
-            return destPath.path
-        } catch (e: Exception) {
+            res.targetUri = destPath.path
+            return res
+        } catch (e: ZipException) {
             e.printStackTrace()
+            res.errCode = "unzip_error"
+            if (e.type == ZipException.Type.WRONG_PASSWORD) {
+                res.errCode = "wrong_password"
+            }
+        } catch (e: Exception) {
+            res.errCode = "unzip_error"
         }
-        return ""
+        return res
     }
 
-    fun extractAll(uri: String, password: String, targetDir: String): String {
+    fun extractAll(uri: String, password: String, targetDir: String): ExtractRes {
+        val res = ExtractRes()
         try {
             val zipFile = File(uri)
             val zipFileObj = if (password.isNotEmpty()) {
@@ -275,9 +297,18 @@ class MainActivity: FlutterActivity() {
                 ZipFile(zipFile)
             }
             zipFileObj.extractAll(targetDir)
-        } catch (e: Exception) {
+        } catch (e: ZipException) {
             e.printStackTrace()
+            res.errCode = "unzip_error"
+            if (e.type == ZipException.Type.WRONG_PASSWORD) {
+                res.errCode = "wrong_password"
+            }
+        } catch (e: Exception) {
+            res.errCode = "unzip_error"
         }
-        return ""
+        if (res.errCode.isNotEmpty()) {
+            File(targetDir).deleteRecursively()
+        }
+        return res
     }
 }

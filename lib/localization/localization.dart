@@ -116,6 +116,14 @@ class AppLocalizations {
       'en': 'Unzip Success',
       'zh': '解压成功',
     },
+    'unzip_failure': {
+      'en': 'Unzip Failure',
+      'zh': '解压失败',
+    },
+    'wrong_password': {
+      'en': 'Wrong Password',
+      'zh': '密码错误',
+    },
   };
 
   String getLanguageText(String textID) {

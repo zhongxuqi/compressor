@@ -84,30 +84,39 @@ Future<List<FileHeader>> getFileHeaders(String uri, String password) async {
   return List<FileHeader>();
 }
 
-Future<String> extractFile(String uri, String password, String fileName) async {
+class ExtractRes {
+  final String errCode;
+  final String targetUri;
+
+  ExtractRes({@required this.errCode, @required this. targetUri});
+}
+
+Future<ExtractRes> extractFile(String uri, String password, String fileName) async {
   try {
     var result = await platform.invokeMethod('extract_file', {
       'uri': uri,
       'password': password,
       'file_name': fileName,
     });
-    return result.toString();
+    final resJson = json.decode(result.toString()) as Map<String, dynamic>;
+    return ExtractRes(errCode: resJson['err_code'], targetUri: resJson['target_uri']);
   } on PlatformException catch (e) {
     print("error: ${e.message}.");
   }
-  return "";
+  return ExtractRes(errCode: 'unzip_error', targetUri: '');
 }
 
-Future<String> extractAll(String uri, String password, String targetDir) async {
+Future<ExtractRes> extractAll(String uri, String password, String targetDir) async {
   try {
     var result = await platform.invokeMethod('extract_all', {
       'uri': uri,
       'password': password,
       'target_dir': targetDir,
     });
-    return result.toString();
+    final resJson = json.decode(result.toString()) as Map<String, dynamic>;
+    return ExtractRes(errCode: resJson['err_code'], targetUri: resJson['target_uri']);
   } on PlatformException catch (e) {
     print("error: ${e.message}.");
   }
-  return "";
+  return ExtractRes(errCode: 'unzip_error', targetUri: '');
 }
