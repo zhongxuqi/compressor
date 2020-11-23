@@ -15,6 +15,8 @@ import 'components/location.dart';
 import 'dart:io' as io;
 import 'package:path/path.dart' as path;
 import './utils/file.dart' as FileUtils;
+import 'package:lpinyin/lpinyin.dart';
+import 'components/file_sort_dialog.dart';
 
 void main() {
   runApp(MyApp());
@@ -161,14 +163,21 @@ class _MainPageState extends State<MainPage> {
                         ),
                       ),
                     ),
-                    Container(
-                      width: 45,
-                      height: 45,
-                      child: Icon(
-                        IconFonts.sort,
-                        color: ColorUtils.themeColor,
-                        size: 20.0,
+                    InkWell(
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        child: Icon(
+                          IconFonts.sort,
+                          color: ColorUtils.themeColor,
+                          size: 20.0,
+                        ),
                       ),
+                      onTap: () {
+                        showFileSortDialog(context: context, sortBy: SortBy.name, sortType: SortType.asc, callback: (sortBy, sortType) {
+
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -202,88 +211,95 @@ class _MainPageState extends State<MainPage> {
                   slivers: <Widget>[
                     SliverList(
                       delegate: SliverChildListDelegate(
-                          files.map((e) => FileItem(
-                            fileData: e,
-                            onClick: () {
-                              if (e.contentType == 'directory') {
-                                paths.add(e.name);
+                        files.map((e) => FileItem(
+                          fileData: e,
+                          onClick: () {
+                            if (e.contentType == 'directory') {
+                              paths.add(e.name);
+                              initData();
+                              return;
+                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {
                                 initData();
-                                return;
-                              }
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {
-                                  initData();
-                                })),
-                              );
-                            },
-                          )).toList()
+                              })),
+                            );
+                          },
+                        )).toList()
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  alignment: Alignment.bottomCenter,
-                  padding: EdgeInsets.all(10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.end,
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Column(
                     children: [
-                      GestureDetector(
-                        child: Container(
-                          padding: EdgeInsets.all(15.0),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: ColorUtils.lightGrey,
-                          ),
-                          child: Icon(
-                            IconFonts.add,
-                            color: ColorUtils.themeColor,
-                            size: 20.0,
-                          ),
-                        ),
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return Container(
-                                color: Colors.white,
-                                height: 120,
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: actions.map((e) => Expanded(
-                                    flex: 1,
-                                    child: InkWell(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(
-                                            e.icon,
-                                            height: 50.0,
-                                            width: 50.0,
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(top: 5),
-                                            child: Text(
-                                              AppLocalizations.of(context)
-                                                  .getLanguageText(e.name),
-                                              style: TextStyle(fontSize: 15),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      onTap: () {
-                                        doAction(e.actionType);
-                                      },
-                                    ),
-                                  )).toList(),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            GestureDetector(
+                              child: Container(
+                                padding: EdgeInsets.all(15.0),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: ColorUtils.lightGrey,
                                 ),
-                              );
-                            },
-                          );
-                        },
+                                child: Icon(
+                                  IconFonts.add,
+                                  color: ColorUtils.themeColor,
+                                  size: 20.0,
+                                ),
+                              ),
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  builder: (context) {
+                                    return Container(
+                                      color: Colors.white,
+                                      height: 120,
+                                      padding: EdgeInsets.symmetric(horizontal: 20),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: actions.map((e) => Expanded(
+                                          flex: 1,
+                                          child: InkWell(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: [
+                                                Image.asset(
+                                                  e.icon,
+                                                  height: 50.0,
+                                                  width: 50.0,
+                                                ),
+                                                Container(
+                                                  margin: EdgeInsets.only(top: 5),
+                                                  child: Text(
+                                                    AppLocalizations.of(context).getLanguageText(e.name),
+                                                    style: TextStyle(fontSize: 15),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            onTap: () {
+                                              doAction(e.actionType);
+                                            },
+                                          ),
+                                        )).toList(),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

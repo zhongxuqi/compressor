@@ -124,6 +124,30 @@ class AppLocalizations {
       'en': 'Wrong Password',
       'zh': '密码错误',
     },
+    'sort_by': {
+      'en': 'Sort By',
+      'zh': '排序依据',
+    },
+    'sort_type': {
+      'en': 'Sort Type',
+      'zh': '排序类型',
+    },
+    'sort_by_file_name': {
+      'en': 'Sort By File Name',
+      'zh': '按文件名排序',
+    },
+    'sort_by_time': {
+      'en': 'Sort By Time',
+      'zh': '按时间排序',
+    },
+    'sort_type_asc': {
+      'en': 'Ascending',
+      'zh': '升序',
+    },
+    'sort_type_desc': {
+      'en': 'Descending',
+      'zh': '降序',
+    },
   };
 
   String getLanguageText(String textID) {
