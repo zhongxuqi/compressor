@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
+enum SortBy { name, time }
+
+enum SortType { asc, desc }
+
 class File {
   String name;
   String uri;

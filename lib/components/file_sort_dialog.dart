@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import '../localization/localization.dart';
 import '../utils/colors.dart';
-
-enum SortBy { name, time }
-
-enum SortType { asc, desc }
+import '../common/data.dart';
 
 typedef SortCallback = void Function(SortBy sortBy, SortType sortType);
 

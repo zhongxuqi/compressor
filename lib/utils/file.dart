@@ -72,6 +72,7 @@ Future<List<File>> listFile(String relativePath) async {
       return path2File(value.path);
     }).toList();
   } catch (e) {
+    print("error: ${e.toString()}");
     return null;
   }
 }

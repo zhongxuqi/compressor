@@ -17,6 +17,7 @@ import 'package:path/path.dart' as path;
 import './utils/file.dart' as FileUtils;
 import 'package:lpinyin/lpinyin.dart';
 import 'components/file_sort_dialog.dart';
+import 'utils/store.dart';
 
 void main() {
   runApp(MyApp());
@@ -75,6 +76,8 @@ class _MainPageState extends State<MainPage> {
   ];
   final List<String> paths = [];
   final List<File> files = List<File>();
+  var sortBy = SortBy.name;
+  var sortType = SortType.asc;
 
   @override
   void initState() {
@@ -82,12 +85,37 @@ class _MainPageState extends State<MainPage> {
     initData();
   }
 
+  String preprocessFileName(String fileName) {
+    return PinyinHelper.getPinyin(fileName, format: PinyinFormat.WITHOUT_TONE).replaceAll(' ', '').toLowerCase();
+  }
+
   void initData() async {
+    sortBy = await StoreUtils.getSortByKey();
+    sortType = await StoreUtils.getSortTypeKey();
     final files = await fileUtils.listFile(paths.join("/"));
     if (files == null) {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
       return;
     }
+    files.sort((a, b) {
+      switch (sortBy) {
+        case SortBy.name:
+          var factor = 1;
+          if (sortType == SortType.desc) {
+            factor = -1;
+          }
+          return factor * preprocessFileName(a.name).compareTo(preprocessFileName(b.name));
+          break;
+        case SortBy.time:
+          var factor = 1;
+          if (sortType == SortType.desc) {
+            factor = -1;
+          }
+          return factor * (a.extraObj.lastModified - b.extraObj.lastModified);
+          break;
+      }
+      return 0;
+    });
     setState(() {
       this.files.clear();
       this.files.addAll(files);
@@ -174,8 +202,13 @@ class _MainPageState extends State<MainPage> {
                         ),
                       ),
                       onTap: () {
-                        showFileSortDialog(context: context, sortBy: SortBy.name, sortType: SortType.asc, callback: (sortBy, sortType) {
-
+                        showFileSortDialog(context: context, sortBy: this.sortBy, sortType: this.sortType, callback: (sortBy, sortType) {
+                          this.sortBy = sortBy;
+                          this.sortType = sortType;
+                          StoreUtils.setSortByKey(sortBy);
+                          StoreUtils.setSortTypeKey(sortType);
+                          initData();
+                          Navigator.of(context).pop();
                         });
                       },
                     ),

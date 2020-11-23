@@ -7,7 +7,7 @@ class CommonUtils {
   }
 
   static String getFileNameByUri(String uri) {
-    return basename(Uri.decodeFull(uri));
+    return uri.split('/').last;
   }
 
   static String formatTimestamp(int timestamp) {
