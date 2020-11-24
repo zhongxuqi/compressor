@@ -70,6 +70,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final actions = <Action>[
     Action(ActionType.directory, 'images/directory.png', 'create_directory'),
     Action(ActionType.archive, 'images/file_zip.png', 'create_archive'),
@@ -159,6 +160,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
@@ -169,14 +171,19 @@ class _MainPageState extends State<MainPage> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      width: 45,
-                      height: 45,
-                      child: Icon(
-                        IconFonts.search,
-                        color: ColorUtils.themeColor,
-                        size: 20.0,
+                    InkWell(
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        child: Icon(
+                          IconFonts.menu,
+                          color: ColorUtils.themeColor,
+                          size: 20.0,
+                        ),
                       ),
+                      onTap: () {
+                        _scaffoldKey.currentState.openDrawer();
+                      },
                     ),
                     Expanded(
                       child: Container(
@@ -342,6 +349,23 @@ class _MainPageState extends State<MainPage> {
           ),
         ]),
       ),
+      drawer: Container(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        color: ColorUtils.white,
+        width: 200,
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+              child: SideMenuBtn(iconData: IconFonts.feedback,text: AppLocalizations.of(context).getLanguageText('feedback')),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+              child: SideMenuBtn(iconData: IconFonts.agreement,text: AppLocalizations.of(context).getLanguageText('agreement')),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -354,4 +378,40 @@ class Action {
   final String name;
 
   Action(this.actionType, this.icon, this.name);
+}
+
+class SideMenuBtn extends StatelessWidget {
+  final IconData iconData;
+  final String text;
+
+  SideMenuBtn({Key key, @required this.iconData, @required this.text}):super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RawMaterialButton(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.only(right: 10),
+              child: Icon(iconData, size: 22, color: ColorUtils.textColor),
+            ),
+            Text(text, style: TextStyle(
+              fontSize: 15,
+              color: ColorUtils.textColor,
+            )),
+          ],
+        ),
+      ),
+      onPressed: () {
+
+      },
+    );
+  }
 }

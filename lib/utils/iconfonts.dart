@@ -17,4 +17,7 @@ class IconFonts {
   static const IconData arrowLeft = IconData(0xe6c3, fontFamily: 'iconfont');
   static const IconData export = IconData(0xe615, fontFamily: 'iconfont');
   static const IconData share = IconData(0xe602, fontFamily: 'iconfont');
+  static const IconData menu = IconData(0xe636, fontFamily: 'iconfont');
+  static const IconData feedback = IconData(0xe894, fontFamily: 'iconfont');
+  static const IconData agreement = IconData(0xe675, fontFamily: 'iconfont');
 }

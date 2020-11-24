@@ -148,6 +148,14 @@ class AppLocalizations {
       'en': 'Descending',
       'zh': '降序',
     },
+    'feedback': {
+      'en': 'Feedback',
+      'zh': '评价反馈',
+    },
+    'agreement': {
+      'en': 'Agreement',
+      'zh': '用户协议与隐私协议',
+    },
   };
 
   String getLanguageText(String textID) {
