@@ -9,6 +9,7 @@ import 'components/file_detail_video.dart';
 import 'components/file_detail_text.dart';
 import 'components/file_detail_pdf.dart';
 import 'components/file_detail_zip.dart';
+import 'package:share/share.dart';
 
 class FileDetailPage extends StatefulWidget {
   final VoidCallback callback;
@@ -88,6 +89,20 @@ class _FileDetailPageState extends State<FileDetailPage> {
                             ),
                           ),
                         ),
+                      ),
+                      InkWell(
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          child: Icon(
+                            IconFonts.share,
+                            color: ColorUtils.themeColor,
+                            size: 20.0,
+                          ),
+                        ),
+                        onTap: () {
+                          Share.shareFiles([widget.fileData.uri]);
+                        },
                       ),
                     ],
                   ),
