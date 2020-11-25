@@ -3,6 +3,7 @@ package com.musketeer.compressor
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import androidx.annotation.NonNull
@@ -66,6 +67,15 @@ class MainActivity: FlutterActivity() {
     private val executor = Executors.newSingleThreadExecutor()
     private val mainExecutor: Handler by lazy {
         Handler(context.mainLooper)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        if (intent.getIntExtra("org.chromium.chrome.extra.TASK_ID", -1) == this.taskId) {
+            this.finish()
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+        super.onCreate(savedInstanceState)
     }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {

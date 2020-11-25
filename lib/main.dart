@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:compressor/utils/platform_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -20,6 +22,7 @@ import 'package:lpinyin/lpinyin.dart';
 import 'components/file_sort_dialog.dart';
 import 'utils/store.dart';
 import 'components/agreement_dialog.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 void main() {
   runApp(MyApp());
@@ -72,6 +75,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  StreamSubscription _intentDataStreamSubscription;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final actions = <Action>[
     Action(ActionType.directory, 'images/directory.png', 'create_directory'),
@@ -85,14 +89,32 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    initData();
+    initData().then((value) {
+      // For sharing images coming from outside the app while the app is in the memory
+      _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
+        if (value == null) return;
+        for (var item in value) {
+          print("===>>> memory ${item.path}");
+        }
+      }, onError: (err) {
+        print("getIntentDataStream error: $err");
+      });
+
+      // For sharing images coming from outside the app while the app is closed
+      ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
+        if (value == null) return;
+        for (var item in value) {
+          print("===>>> closed ${item.path}");
+        }
+      });
+    });
   }
 
   String preprocessFileName(String fileName) {
     return PinyinHelper.getPinyin(fileName, format: PinyinFormat.WITHOUT_TONE).replaceAll(' ', '').toLowerCase();
   }
 
-  void initData() async {
+  Future<void> initData() async {
     sortBy = await StoreUtils.getSortByKey();
     sortType = await StoreUtils.getSortTypeKey();
     final files = await fileUtils.listFile(paths.join("/"));
@@ -123,6 +145,7 @@ class _MainPageState extends State<MainPage> {
       this.files.clear();
       this.files.addAll(files);
     });
+    return;
   }
 
   void doAction(ActionType t) async {
@@ -373,6 +396,12 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _intentDataStreamSubscription.cancel();
+    super.dispose();
   }
 }
 

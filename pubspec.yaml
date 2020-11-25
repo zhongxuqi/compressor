@@ -40,6 +40,7 @@ dependencies:
   lpinyin: ^1.1.0
   shared_preferences: ^0.5.6+3
   share: ^0.6.5+4
+  receive_sharing_intent: ^1.4.2
 
 dev_dependencies:
   flutter_test:
