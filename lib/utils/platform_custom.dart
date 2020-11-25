@@ -120,3 +120,12 @@ Future<ExtractRes> extractAll(String uri, String password, String targetDir) asy
   }
   return ExtractRes(errCode: 'unzip_error', targetUri: '');
 }
+
+void feedback() async {
+  try {
+    var result = await platform.invokeMethod('feedback', {});
+    result.toString();
+  } on PlatformException catch (e) {
+    print("error: ${e.message}.");
+  }
+}

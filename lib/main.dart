@@ -1,3 +1,4 @@
+import 'package:compressor/utils/platform_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './localization/localization.dart';
@@ -18,6 +19,7 @@ import './utils/file.dart' as FileUtils;
 import 'package:lpinyin/lpinyin.dart';
 import 'components/file_sort_dialog.dart';
 import 'utils/store.dart';
+import 'components/agreement_dialog.dart';
 
 void main() {
   runApp(MyApp());
@@ -357,12 +359,16 @@ class _MainPageState extends State<MainPage> {
           children: [
             Container(
               padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-              child: SideMenuBtn(iconData: IconFonts.feedback,text: AppLocalizations.of(context).getLanguageText('feedback')),
+              child: SideMenuBtn(iconData: IconFonts.feedback,text: AppLocalizations.of(context).getLanguageText('feedback'), callback: () {
+                feedback();
+              }),
             ),
-            Container(
+            AppLocalizations.of(context).getLanguage()=='zh'?Container(
               padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-              child: SideMenuBtn(iconData: IconFonts.agreement,text: AppLocalizations.of(context).getLanguageText('agreement')),
-            ),
+              child: SideMenuBtn(iconData: IconFonts.agreement,text: AppLocalizations.of(context).getLanguageText('agreement'), callback: () {
+                showAgreementDialog(context);
+              }),
+            ):Container(),
           ],
         ),
       ),
@@ -383,8 +389,9 @@ class Action {
 class SideMenuBtn extends StatelessWidget {
   final IconData iconData;
   final String text;
+  final VoidCallback callback;
 
-  SideMenuBtn({Key key, @required this.iconData, @required this.text}):super(key: key);
+  SideMenuBtn({Key key, @required this.iconData, @required this.text, @required this.callback}):super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -410,7 +417,7 @@ class SideMenuBtn extends StatelessWidget {
         ),
       ),
       onPressed: () {
-
+        callback();
       },
     );
   }

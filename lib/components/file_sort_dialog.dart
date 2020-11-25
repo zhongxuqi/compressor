@@ -178,17 +178,23 @@ class FileSortMenuBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: Container(
-        color: active?ColorUtils.themeColor:ColorUtils.white,
-        padding: EdgeInsets.all(10),
-        margin: EdgeInsets.only(top: 5),
-        child: Text(text, style: TextStyle(
-          fontSize: 15,
-          color: active?ColorUtils.white:ColorUtils.themeColor,
-        )),
+    return Container(
+      padding: EdgeInsets.all(5),
+      child: GestureDetector(
+        child: Container(
+          padding: EdgeInsets.all(10),
+          margin: EdgeInsets.only(top: 5),
+          decoration: BoxDecoration(
+            color: active?ColorUtils.themeColor:ColorUtils.white,
+            borderRadius: BorderRadius.all(Radius.circular(6)),
+          ),
+          child: Text(text, style: TextStyle(
+            fontSize: 15,
+            color: active?ColorUtils.white:ColorUtils.themeColor,
+          )),
+        ),
+        onTap: onClick,
       ),
-      onTap: onClick,
     );
   }
 }

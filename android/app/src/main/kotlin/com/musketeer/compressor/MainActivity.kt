@@ -127,6 +127,13 @@ class MainActivity: FlutterActivity() {
                             }
                         })
                     }
+                    "feedback" -> {
+                        val mAddress = "market://details?id=com.musketeer.compressor"
+                        val marketIntent = Intent("android.intent.action.VIEW")
+                        marketIntent.data = Uri.parse(mAddress)
+                        startActivity(marketIntent)
+                        result.success("")
+                    }
                 }
             }
         })

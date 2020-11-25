@@ -156,6 +156,10 @@ class AppLocalizations {
       'en': 'Agreement',
       'zh': '用户协议与隐私协议',
     },
+    'read': {
+      'en': 'read',
+      'zh': '已读',
+    },
   };
 
   String getLanguageText(String textID) {
