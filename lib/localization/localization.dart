@@ -160,6 +160,10 @@ class AppLocalizations {
       'en': 'read',
       'zh': '已读',
     },
+    'add_sharing_files': {
+      'en': 'Add Sharing Files',
+      'zh': '添加分享文件',
+    },
   };
 
   String getLanguageText(String textID) {

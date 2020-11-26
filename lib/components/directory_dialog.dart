@@ -7,6 +7,7 @@ import '../utils/iconfonts.dart';
 void createDirectory({@required BuildContext context, @required ValueChanged<String> callback, @required List<String> excludedNames}) {
   showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (BuildContext context) {
       return CreateDirectoryDialog(callback: callback, excludedNames: excludedNames);
     },

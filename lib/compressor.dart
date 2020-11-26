@@ -324,80 +324,76 @@ class _CompressorPageState extends State<CompressorPage> {
         child: Column(
           children: <Widget>[
             Container(
-              height: 46.0,
-              child: Column(
+              height: 45.0,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        child: Container(
-                          width: 45,
-                          height: 45,
-                          child: Icon(
-                            IconFonts.back,
-                            color: ColorUtils.themeColor,
-                            size: 20.0,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
+                  InkWell(
+                    child: Container(
+                      width: 45,
+                      height: 45,
+                      child: Icon(
+                        IconFonts.back,
+                        color: ColorUtils.themeColor,
+                        size: 20.0,
                       ),
-                      Container(
-                        width: 45,
-                        height: 45,
-                        alignment: Alignment.center,
-                        child: Icon(
-                          IconFonts.zip,
-                          color: ColorUtils.textColor,
-                          size: 25.0,
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            AppLocalizations.of(context)
-                                .getLanguageText('compress_title'),
-                            style: TextStyle(
-                              color: ColorUtils.textColor,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        child: Container(
-                          width: 45,
-                          height: 45,
-                          child: Icon(
-                            IconFonts.right,
-                            color: ColorUtils.themeColor,
-                            size: 20.0,
-                          ),
-                        ),
-                        onTap: () {
-                          compressFiles();
-                        },
-                      ),
-                    ],
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          height: 1,
-                          color: ColorUtils.divider,
+                  Container(
+                    width: 45,
+                    height: 45,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      IconFonts.zip,
+                      color: ColorUtils.textColor,
+                      size: 25.0,
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        AppLocalizations.of(context)
+                            .getLanguageText('compress_title'),
+                        style: TextStyle(
+                          color: ColorUtils.textColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
+                    ),
+                  ),
+                  InkWell(
+                    child: Container(
+                      width: 45,
+                      height: 45,
+                      child: Icon(
+                        IconFonts.right,
+                        color: ColorUtils.themeColor,
+                        size: 20.0,
+                      ),
+                    ),
+                    onTap: () {
+                      compressFiles();
+                    },
                   ),
                 ],
               ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    height: 1,
+                    color: ColorUtils.divider,
+                  ),
+                ),
+              ],
             ),
             Location(
               directories: getDirectories(),

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:compressor/utils/platform_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,7 +20,7 @@ import 'package:lpinyin/lpinyin.dart';
 import 'components/file_sort_dialog.dart';
 import 'utils/store.dart';
 import 'components/agreement_dialog.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'receive_file.dart';
 
 void main() {
   runApp(MyApp());
@@ -75,7 +73,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  StreamSubscription _intentDataStreamSubscription;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final actions = <Action>[
     Action(ActionType.directory, 'images/directory.png', 'create_directory'),
@@ -90,22 +87,8 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     initData().then((value) {
-      // For sharing images coming from outside the app while the app is in the memory
-      _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
-        if (value == null) return;
-        for (var item in value) {
-          print("===>>> memory ${item.path}");
-        }
-      }, onError: (err) {
-        print("getIntentDataStream error: $err");
-      });
-
-      // For sharing images coming from outside the app while the app is closed
-      ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
-        if (value == null) return;
-        for (var item in value) {
-          print("===>>> closed ${item.path}");
-        }
+      checkReceiveFiles(context: context, callback: () {
+        initData();
       });
     });
   }
@@ -398,11 +381,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  @override
-  void dispose() {
-    _intentDataStreamSubscription.cancel();
-    super.dispose();
-  }
+
 }
 
 enum ActionType { directory, archive }
