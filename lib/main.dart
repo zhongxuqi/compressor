@@ -1,3 +1,4 @@
+import 'package:compressor/components/action_bar.dart';
 import 'package:compressor/utils/platform_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -80,6 +81,7 @@ class _MainPageState extends State<MainPage> {
   ];
   final List<String> paths = [];
   final List<File> files = List<File>();
+  final Set<String> checkedFiles = Set<String>();
   var sortBy = SortBy.name;
   var sortType = SortType.asc;
 
@@ -274,6 +276,16 @@ class _MainPageState extends State<MainPage> {
                               })),
                             );
                           },
+                          checkStatus: checkedFiles.contains(e.uri)?CheckStatus.checked:CheckStatus.unchecked,
+                          onCheck: () {
+                            setState(() {
+                              if (checkedFiles.contains(e.uri)) {
+                                checkedFiles.remove(e.uri);
+                              } else {
+                                checkedFiles.add(e.uri);
+                              }
+                            });
+                          },
                         )).toList()
                       ),
                     ),
@@ -349,6 +361,20 @@ class _MainPageState extends State<MainPage> {
                           ],
                         ),
                       ),
+                      checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
+                        ActionItem(iconData: IconFonts.copy, textCode: 'copy', callback: () {
+
+                        }),
+                        ActionItem(iconData: IconFonts.move, textCode: 'move', callback: () {
+
+                        }),
+                        ActionItem(iconData: IconFonts.edit, textCode: 'rename', callback: () {
+
+                        }),
+                        ActionItem(iconData: IconFonts.delete, textCode: 'delete', callback: () {
+
+                        }),
+                      ]):Container(),
                     ],
                   ),
                 ),
@@ -380,8 +406,6 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
-
-
 }
 
 enum ActionType { directory, archive }

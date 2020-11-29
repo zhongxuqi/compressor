@@ -164,6 +164,22 @@ class AppLocalizations {
       'en': 'Add Sharing Files',
       'zh': '添加分享文件',
     },
+    'copy': {
+      'en': 'Copy',
+      'zh': '复制',
+    },
+    'move': {
+      'en': 'Move',
+      'zh': '移动',
+    },
+    'rename': {
+      'en': 'Rename',
+      'zh': '重命名',
+    },
+    'delete': {
+      'en': 'Delete',
+      'zh': '删除',
+    },
   };
 
   String getLanguageText(String textID) {

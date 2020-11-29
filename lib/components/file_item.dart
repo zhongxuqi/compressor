@@ -3,20 +3,19 @@ import '../common/data.dart' as data;
 import '../utils/colors.dart';
 import '../utils/common.dart';
 import '../utils/mime.dart';
+import '../utils/iconfonts.dart';
 
-class FileItem extends StatefulWidget {
-  final data.File fileData;
-  final VoidCallback onClick;
-
-  FileItem({Key key, @required this.fileData, @required this.onClick}):super(key: key);
-
-  @override
-  State<StatefulWidget> createState() {
-    return _FileItemState();
-  }
+enum CheckStatus {
+  none, unchecked, checked
 }
 
-class _FileItemState extends State<FileItem> {
+class FileItem extends StatelessWidget {
+  final data.File fileData;
+  final VoidCallback onClick;
+  final CheckStatus checkStatus;
+  final VoidCallback onCheck;
+
+  FileItem({Key key, @required this.fileData, @required this.onClick, this.checkStatus = CheckStatus.none, this.onCheck}):super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +27,7 @@ class _FileItemState extends State<FileItem> {
           children: [
             Container(
               margin: EdgeInsets.only(right: 8, top: 8, bottom: 8, left: 10),
-              child: Image.asset(MimeUtils.getIconByMime(widget.fileData.contentType), height: 40.0, width: 40.0,),
+              child: Image.asset(MimeUtils.getIconByMime(fileData.contentType), height: 40.0, width: 40.0,),
             ),
             Expanded(
               flex: 1,
@@ -41,8 +40,8 @@ class _FileItemState extends State<FileItem> {
                     child: Container(
                       alignment: Alignment.centerLeft,
                       padding: EdgeInsets.only(top: 8, bottom: 8),
-                      child: widget.fileData.contentType=='directory'?Text(
-                        widget.fileData.name,
+                      child: fileData.contentType=='directory'?Text(
+                        fileData.name,
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 16,
@@ -52,7 +51,7 @@ class _FileItemState extends State<FileItem> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.fileData.name,
+                            fileData.name,
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               fontSize: 16,
@@ -66,7 +65,7 @@ class _FileItemState extends State<FileItem> {
                           Row(
                             children: [
                               Text(
-                                CommonUtils.formatTimestamp(widget.fileData.extraObj.lastModified),
+                                CommonUtils.formatTimestamp(fileData.extraObj.lastModified),
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: ColorUtils.deepGrey,
@@ -74,7 +73,7 @@ class _FileItemState extends State<FileItem> {
                               ),
                               Container(width: 10,),
                               Text(
-                                CommonUtils.formatFileSize(widget.fileData.extraObj.fileSize),
+                                CommonUtils.formatFileSize(fileData.extraObj.fileSize),
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: ColorUtils.primaryColor,
@@ -100,11 +99,26 @@ class _FileItemState extends State<FileItem> {
                 ],
               ),
             ),
+            checkStatus!=CheckStatus.none?GestureDetector(
+              child: Container(
+                color: ColorUtils.white,
+                height: 60,
+                padding: EdgeInsets.all(10),
+                child: Icon(
+                  checkStatus==CheckStatus.checked?IconFonts.checked:IconFonts.unchecked,
+                  size: 18,
+                  color: checkStatus==CheckStatus.checked?ColorUtils.themeColor:ColorUtils.deepGrey,
+                ),
+              ),
+              onTap: () {
+                if (onCheck != null) onCheck();
+              },
+            ):Container(),
           ],
         ),
       ),
       onTap: () {
-        widget.onClick();
+        onClick();
       },
     );
   }
