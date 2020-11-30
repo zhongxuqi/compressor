@@ -60,7 +60,7 @@ class FormTextInputState extends State<FormTextInput> {
     return Container(
       child: Column(
         children: <Widget>[
-          Row(
+          widget.keyName.length>0?Row(
             children: <Widget>[
               Expanded(
                 flex: 1,
@@ -76,7 +76,7 @@ class FormTextInputState extends State<FormTextInput> {
                 ),
               ),
             ],
-          ),
+          ):Container(),
           Container(
             decoration: BoxDecoration(
               color: ColorUtils.formBackground,

@@ -37,6 +37,10 @@ class File {
       }),
     };
   }
+
+  File clone() {
+    return File(name, uri, contentType, extra, parent);
+  }
 }
 
 class FileExtra {

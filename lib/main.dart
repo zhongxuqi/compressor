@@ -22,6 +22,7 @@ import 'components/file_sort_dialog.dart';
 import 'utils/store.dart';
 import 'components/agreement_dialog.dart';
 import 'receive_file.dart';
+import 'components/copy_dialog.dart';
 
 void main() {
   runApp(MyApp());
@@ -363,7 +364,7 @@ class _MainPageState extends State<MainPage> {
                       ),
                       checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
                         ActionItem(iconData: IconFonts.copy, textCode: 'copy', callback: () {
-
+                          showCopyDialog(context: context, checkedFiles: files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList());
                         }),
                         ActionItem(iconData: IconFonts.move, textCode: 'move', callback: () {
 

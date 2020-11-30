@@ -180,6 +180,22 @@ class AppLocalizations {
       'en': 'Delete',
       'zh': '删除',
     },
+    'next_step': {
+      'en': 'Next Step',
+      'zh': '下一步',
+    },
+    'prev_step': {
+      'en': 'Prev Step',
+      'zh': '上一步',
+    },
+    'submit': {
+      'en': 'Submit',
+      'zh': '提交',
+    },
+    'confirm_file_name': {
+      'en': 'Confirm File Name',
+      'zh': '文件名确认',
+    },
   };
 
   String getLanguageText(String textID) {

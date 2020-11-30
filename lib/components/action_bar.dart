@@ -49,7 +49,7 @@ class ActionBar extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-
+                e.callback();
               },
             ),
           );
