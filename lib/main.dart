@@ -374,6 +374,7 @@ class _MainPageState extends State<MainPage> {
               var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
               showActionDialog(
                 context: context,
+                actionType: ActionDialogType.copy,
                 checkedFiles: validFiles,
                 relativePath: '',
                 callback: (String targetPath, Map<String, String> fileNameMap) {
@@ -392,10 +393,48 @@ class _MainPageState extends State<MainPage> {
               );
             }),
             ActionItem(iconData: IconFonts.move, textCode: 'move', callback: () {
-
+              var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+              showActionDialog(
+                context: context,
+                actionType: ActionDialogType.move,
+                checkedFiles: validFiles,
+                relativePath: '',
+                callback: (String targetPath, Map<String, String> fileNameMap) {
+                  validFiles.forEach((element) async {
+                    if (fileUtils.isDirectory(element.uri)) {
+                      io.Directory(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
+                    } else {
+                      io.File(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
+                    }
+                  });
+                  Navigator.of(context).pop();
+                  toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
+                  checkedFiles.clear();
+                  initData();
+                },
+              );
             }),
             ActionItem(iconData: IconFonts.edit, textCode: 'rename', callback: () {
-
+              var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+              showActionDialog(
+                context: context,
+                actionType: ActionDialogType.rename,
+                checkedFiles: validFiles,
+                relativePath: paths.join(''),
+                callback: (String targetPath, Map<String, String> fileNameMap) {
+                  validFiles.forEach((element) async {
+                    if (fileUtils.isDirectory(element.uri)) {
+                      io.Directory(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
+                    } else {
+                      io.File(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
+                    }
+                  });
+                  Navigator.of(context).pop();
+                  toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
+                  checkedFiles.clear();
+                  initData();
+                },
+              );
             }),
             ActionItem(iconData: IconFonts.delete, textCode: 'delete', callback: () {
               showDeleteAlertDialog(context, callback: () {

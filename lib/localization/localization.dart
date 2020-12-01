@@ -212,6 +212,14 @@ class AppLocalizations {
       'en': 'Delete Success',
       'zh': '删除成功',
     },
+    'move_success': {
+      'en': 'Move Success',
+      'zh': '移动成功',
+    },
+    'rename_success': {
+      'en': 'Rename Success',
+      'zh': '重命名成功',
+    },
   };
 
   String getLanguageText(String textID) {

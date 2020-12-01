@@ -11,28 +11,29 @@ import 'form_file_item.dart';
 import 'dart:io' as io;
 import 'package:path/path.dart' as path;
 
-enum ActionType {
+enum ActionDialogType {
   copy, move, rename
 }
 
 typedef ActionCallback = void Function(String targetPath, Map<String, String> fileNameMap);
 
-void showActionDialog({@required BuildContext context, @required List<File> checkedFiles, @required String relativePath, @required ActionCallback callback}) {
+void showActionDialog({@required BuildContext context, @required ActionDialogType actionType, @required List<File> checkedFiles, @required String relativePath, @required ActionCallback callback}) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      return ActionDialog(checkedFiles: checkedFiles, relativePath: relativePath, callback: callback);
+      return ActionDialog(actionType: actionType, checkedFiles: checkedFiles, relativePath: relativePath, callback: callback);
     },
   );
 }
 
 class ActionDialog extends StatefulWidget {
+  final ActionDialogType actionType;
   final List<File> checkedFiles;
   final String relativePath;
   final ActionCallback callback;
 
-  ActionDialog({Key key, @required this.checkedFiles, @required this.relativePath, @required this.callback}):super(key: key);
+  ActionDialog({Key key, @required this.actionType, @required this.checkedFiles, @required this.relativePath, @required this.callback}):super(key: key);
 
   @override
   State createState() {
@@ -117,261 +118,405 @@ class _ActionDialogState extends State<ActionDialog> {
   @override
   Widget build(BuildContext context) {
     var children = <Widget>[];
-    switch (step) {
-      case 0:
-        children.addAll(<Widget>[
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.only(left: 10),
-                    child: Text(
-                      AppLocalizations.of(context).getLanguageText('select_target_directory'),
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: ColorUtils.textColor,
-                      ),
+    if (widget.actionType == ActionDialogType.rename) {
+      children.addAll(<Widget>[
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(left: 10),
+                  child: Text(
+                    AppLocalizations.of(context).getLanguageText(
+                        'confirm_file_name'),
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: ColorUtils.textColor,
                     ),
                   ),
                 ),
-                InkWell(
+              ),
+              InkWell(
+                child: Container(
+                  height: 40,
+                  width: 50,
+                  child: Icon(
+                    IconFonts.close,
+                    color: ColorUtils.textColor,
+                    size: 22,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 1,
+                color: ColorUtils.divider,
+              ),
+            ),
+          ],
+        ),
+        Container(
+          height: MediaQuery
+              .of(context)
+              .size
+              .height / 2,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                    widget.checkedFiles.map((e) =>
+                        FormFileItem(
+                          key: formFileItemKeyMap[e.uri],
+                          fileData: e,
+                          fileNameListener: (fileName) {
+                            fileNameMap[e.uri] = fileName;
+                            formFileItemKeyMap[e.uri].currentState
+                                .fileNameInputKey.currentState.setTextError(
+                                '');
+                          },
+                        )).toList()
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: GestureDetector(
                   child: Container(
-                    height: 40,
-                    width: 50,
-                    child: Icon(
-                      IconFonts.close,
-                      color: ColorUtils.textColor,
-                      size: 22,
+                    margin: EdgeInsets.only(right: 10.0),
+                    padding: EdgeInsets.all(5.0),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius:
+                      BorderRadius.all(Radius.circular(5.0)),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context).getLanguageText('cancel'),
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   onTap: () {
                     Navigator.of(context).pop();
                   },
                 ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
+              ),
               Expanded(
-                child: Container(
-                  height: 1,
-                  color: ColorUtils.divider,
+                flex: 1,
+                child: GestureDetector(
+                  child: Container(
+                    padding: EdgeInsets.all(5.0),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: ColorUtils.themeColor,
+                      borderRadius:
+                      BorderRadius.all(Radius.circular(5.0)),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context).getLanguageText(
+                          'submit'),
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  onTap: submit,
                 ),
               ),
             ],
           ),
-          Location(
-            directories: pathFragments,
-            goBack: () {
-              if (pathFragments.length <= 0) return;
-              pathFragments.removeLast();
-              initData();
-            },
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height * 5 / 12,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    files.where((element) => element.contentType == 'directory' && !fileUris.contains(element.uri)).map((e) => FileItem(
-                      fileData: e,
-                      onClick: () {
-                        if (e.contentType == 'directory') {
-                          pathFragments.add(e.name);
-                          initData();
-                          return;
-                        }
-                      },
-                    )).toList()
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.only(top: 15, left: 10, right: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: GestureDetector(
+        ),
+      ]);
+    } else {
+      switch (step) {
+        case 0:
+          children.addAll(<Widget>[
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              child: Row(
+                children: [
+                  Expanded(
                     child: Container(
-                      margin: EdgeInsets.only(right: 10.0),
-                      padding: EdgeInsets.all(5.0),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(5.0)),
-                      ),
+                      margin: EdgeInsets.only(left: 10),
                       child: Text(
-                        AppLocalizations.of(context)
-                            .getLanguageText('cancel'),
+                        AppLocalizations.of(context).getLanguageText(
+                            'select_target_directory'),
                         style: TextStyle(
-                          color: Colors.black,
+                          fontSize: 18,
+                          color: ColorUtils.textColor,
                         ),
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    child: Container(
+                      height: 40,
+                      width: 50,
+                      child: Icon(
+                        IconFonts.close,
+                        color: ColorUtils.textColor,
+                        size: 22,
                       ),
                     ),
                     onTap: () {
                       Navigator.of(context).pop();
                     },
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: GestureDetector(
-                    child: Container(
-                      padding: EdgeInsets.all(5.0),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: ColorUtils.themeColor,
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context)
-                            .getLanguageText('next_step'),
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        step = 1;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ]);
-        break;
-      case 1:
-        children.addAll(<Widget>[
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.only(left: 10),
-                    child: Text(
-                      AppLocalizations.of(context).getLanguageText('confirm_file_name'),
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: ColorUtils.textColor,
-                      ),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  child: Container(
-                    height: 40,
-                    width: 50,
-                    child: Icon(
-                      IconFonts.close,
-                      color: ColorUtils.textColor,
-                      size: 22,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 1,
-                  color: ColorUtils.divider,
-                ),
+                ],
               ),
-            ],
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height / 2,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    widget.checkedFiles.map((e) => FormFileItem(
-                      key: formFileItemKeyMap[e.uri],
-                      fileData: e,
-                      fileNameListener: (fileName) {
-                        fileNameMap[e.uri] = fileName;
-                        formFileItemKeyMap[e.uri].currentState.fileNameInputKey.currentState.setTextError('');
-                      },
-                    )).toList()
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 1,
+                    color: ColorUtils.divider,
                   ),
                 ),
               ],
             ),
-          ),
-          Container(
-            padding: EdgeInsets.only(top: 15, left: 10, right: 10),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: GestureDetector(
-                    child: Container(
-                      margin: EdgeInsets.only(right: 10.0),
-                      padding: EdgeInsets.all(5.0),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context).getLanguageText('prev_step'),
-                        style: TextStyle(
-                          color: Colors.black,
+            Location(
+              directories: pathFragments,
+              goBack: () {
+                if (pathFragments.length <= 0) return;
+                pathFragments.removeLast();
+                initData();
+              },
+            ),
+            Container(
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height * 5 / 12,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                        files.where((element) =>
+                        element.contentType == 'directory' &&
+                            !fileUris.contains(element.uri))
+                            .map((e) =>
+                            FileItem(
+                              fileData: e,
+                              onClick: () {
+                                if (e.contentType == 'directory') {
+                                  pathFragments.add(e.name);
+                                  initData();
+                                  return;
+                                }
+                              },
+                            )).toList()
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10.0),
+                        padding: EdgeInsets.all(5.0),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(5.0)),
                         ),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .getLanguageText('cancel'),
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      child: Container(
+                        padding: EdgeInsets.all(5.0),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: ColorUtils.themeColor,
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .getLanguageText('next_step'),
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          step = 1;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ]);
+          break;
+        case 1:
+          children.addAll(<Widget>[
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(left: 10),
+                      child: Text(
+                        AppLocalizations.of(context).getLanguageText(
+                            'confirm_file_name'),
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: ColorUtils.textColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    child: Container(
+                      height: 40,
+                      width: 50,
+                      child: Icon(
+                        IconFonts.close,
+                        color: ColorUtils.textColor,
+                        size: 22,
                       ),
                     ),
                     onTap: () {
-                      setState(() {
-                        step = 0;
-                      });
+                      Navigator.of(context).pop();
                     },
                   ),
-                ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
                 Expanded(
-                  flex: 1,
-                  child: GestureDetector(
-                    child: Container(
-                      padding: EdgeInsets.all(5.0),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: ColorUtils.themeColor,
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context).getLanguageText('submit'),
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    onTap: submit,
+                  child: Container(
+                    height: 1,
+                    color: ColorUtils.divider,
                   ),
                 ),
               ],
             ),
-          ),
-        ]);
-        break;
+            Container(
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height / 2,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                        widget.checkedFiles.map((e) =>
+                            FormFileItem(
+                              key: formFileItemKeyMap[e.uri],
+                              fileData: e,
+                              fileNameListener: (fileName) {
+                                fileNameMap[e.uri] = fileName;
+                                formFileItemKeyMap[e.uri].currentState
+                                    .fileNameInputKey.currentState.setTextError(
+                                    '');
+                              },
+                            )).toList()
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      child: Container(
+                        margin: EdgeInsets.only(right: 10.0),
+                        padding: EdgeInsets.all(5.0),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context).getLanguageText(
+                              'prev_step'),
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          step = 0;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      child: Container(
+                        padding: EdgeInsets.all(5.0),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: ColorUtils.themeColor,
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context).getLanguageText(
+                              'submit'),
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      onTap: submit,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ]);
+          break;
+      }
     }
     return SimpleDialog(
       contentPadding: EdgeInsets.only(bottom: 10),
