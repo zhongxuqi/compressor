@@ -23,6 +23,7 @@ import 'utils/store.dart';
 import 'components/agreement_dialog.dart';
 import 'receive_file.dart';
 import 'components/copy_dialog.dart';
+import 'components/delete_alert_dialog.dart';
 
 void main() {
   runApp(MyApp());
@@ -262,7 +263,7 @@ class _MainPageState extends State<MainPage> {
                   slivers: <Widget>[
                     SliverList(
                       delegate: SliverChildListDelegate(
-                        files.map((e) => FileItem(
+                        files.map<Widget>((e) => FileItem(
                           fileData: e,
                           onClick: () {
                             if (e.contentType == 'directory') {
@@ -287,7 +288,7 @@ class _MainPageState extends State<MainPage> {
                               }
                             });
                           },
-                        )).toList()
+                        )).toList()..add(Container(height: 80, width: 1))
                       ),
                     ),
                   ],
@@ -362,26 +363,48 @@ class _MainPageState extends State<MainPage> {
                           ],
                         ),
                       ),
-                      checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
-                        ActionItem(iconData: IconFonts.copy, textCode: 'copy', callback: () {
-                          showCopyDialog(context: context, checkedFiles: files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList());
-                        }),
-                        ActionItem(iconData: IconFonts.move, textCode: 'move', callback: () {
-
-                        }),
-                        ActionItem(iconData: IconFonts.edit, textCode: 'rename', callback: () {
-
-                        }),
-                        ActionItem(iconData: IconFonts.delete, textCode: 'delete', callback: () {
-
-                        }),
-                      ]):Container(),
                     ],
                   ),
                 ),
               ],
             ),
           ),
+          checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
+            ActionItem(iconData: IconFonts.copy, textCode: 'copy', callback: () {
+              var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+              showCopyDialog(
+                context: context,
+                checkedFiles: validFiles,
+                callback: (String targetPath, Map<String, String> fileNameMap) {
+                  validFiles.forEach((element) async {
+                    await io.File(element.uri).copy(path.join(targetPath, fileNameMap[element.uri]));
+                  });
+                  Navigator.of(context).pop();
+                  toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
+                  checkedFiles.clear();
+                  initData();
+                },
+              );
+            }),
+            ActionItem(iconData: IconFonts.move, textCode: 'move', callback: () {
+
+            }),
+            ActionItem(iconData: IconFonts.edit, textCode: 'rename', callback: () {
+
+            }),
+            ActionItem(iconData: IconFonts.delete, textCode: 'delete', callback: () {
+              showDeleteAlertDialog(context, callback: () {
+                var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+                validFiles.forEach((element) async {
+                  await io.File(element.uri).delete(recursive: true);
+                });
+                Navigator.of(context).pop();
+                toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('delete_success'));
+                checkedFiles.clear();
+                initData();
+              });
+            }),
+          ]):Container(),
         ]),
       ),
       drawer: Container(

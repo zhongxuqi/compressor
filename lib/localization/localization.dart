@@ -196,6 +196,22 @@ class AppLocalizations {
       'en': 'Confirm File Name',
       'zh': '文件名确认',
     },
+    'unknown_error': {
+      'en': 'Unknown Error',
+      'zh': '未知错误',
+    },
+    'copy_success': {
+      'en': 'Copy Success',
+      'zh': '复制成功',
+    },
+    'delete_alert': {
+      'en': 'Deleted file can\'t be recovery, are you sure?',
+      'zh': '删除的文件无法恢复，您是否确定?',
+    },
+    'delete_success': {
+      'en': 'Delete Success',
+      'zh': '删除成功',
+    },
   };
 
   String getLanguageText(String textID) {

@@ -7,21 +7,26 @@ import '../utils/file.dart' as fileUtils;
 import '../utils/toast.dart' as toastUtils;
 import 'location.dart';
 import 'file_item.dart';
+import 'form_file_item.dart';
+import 'dart:io' as io;
 
-void showCopyDialog({@required BuildContext context, @required List<File> checkedFiles}) {
+typedef CopyCallback = void Function(String targetPath, Map<String, String> fileNameMap);
+
+void showCopyDialog({@required BuildContext context, @required List<File> checkedFiles, @required CopyCallback callback}) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      return CopyDialog(checkedFiles: checkedFiles);
+      return CopyDialog(checkedFiles: checkedFiles, callback: callback);
     },
   );
 }
 
 class CopyDialog extends StatefulWidget {
   final List<File> checkedFiles;
+  final CopyCallback callback;
 
-  CopyDialog({Key key, @required this.checkedFiles}):super(key: key);
+  CopyDialog({Key key, @required this.checkedFiles, @required this.callback}):super(key: key);
 
   @override
   State createState() {
@@ -34,6 +39,9 @@ class _CopyDialogState extends State<CopyDialog> {
   final List<String> paths = [];
   final List<File> files = List<File>();
 
+  final fileNameMap = Map<String, String>();
+  final formFileItemKeyMap = Map<String, GlobalKey<FormFileItemState>>();
+
   var step = 0;
 
   @override
@@ -41,6 +49,8 @@ class _CopyDialogState extends State<CopyDialog> {
     super.initState();
     widget.checkedFiles.forEach((element) {
       fileUris.add(element.uri);
+      formFileItemKeyMap[element.uri] = GlobalKey<FormFileItemState>();
+      fileNameMap[element.uri] = element.name;
     });
     initData();
   }
@@ -57,6 +67,47 @@ class _CopyDialogState extends State<CopyDialog> {
     });
   }
 
+  void submit() async {
+    final targetPath = await fileUtils.getTargetPath(paths.join("/"));
+    final targetFile = io.Directory(targetPath);
+    if (!targetFile.existsSync()) {
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('unknown_error'));
+      return;
+    }
+    try {
+      final currFiles = (await targetFile.list().toList()).map((value) {
+        return fileUtils.path2File(value.path);
+      }).toList();
+      final fileNameSet = Set<String>();
+      currFiles.forEach((element) {
+        fileNameSet.add(element.name);
+      });
+      var hasError = false;
+      final selfFileNameSet = Set<String>();
+      widget.checkedFiles.forEach((element) {
+        if (selfFileNameSet.contains(fileNameMap[element.uri])) {
+          formFileItemKeyMap[element.uri].currentState.fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
+          hasError = true;
+        } else {
+          selfFileNameSet.add(fileNameMap[element.uri]);
+        }
+      });
+      widget.checkedFiles.forEach((element) {
+        if (fileNameSet.contains(fileNameMap[element.uri])) {
+          formFileItemKeyMap[element.uri].currentState.fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
+          hasError = true;
+        }
+      });
+      if (hasError) {
+        return;
+      }
+      widget.callback(targetPath, fileNameMap);
+    } catch (e) {
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('unknown_error'));
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var children = <Widget>[];
@@ -71,8 +122,7 @@ class _CopyDialogState extends State<CopyDialog> {
                   child: Container(
                     margin: EdgeInsets.only(left: 10),
                     child: Text(
-                      AppLocalizations.of(context)
-                          .getLanguageText('select_target_directory'),
+                      AppLocalizations.of(context).getLanguageText('select_target_directory'),
                       style: TextStyle(
                         fontSize: 18,
                         color: ColorUtils.textColor,
@@ -206,8 +256,7 @@ class _CopyDialogState extends State<CopyDialog> {
                   child: Container(
                     margin: EdgeInsets.only(left: 10),
                     child: Text(
-                      AppLocalizations.of(context)
-                          .getLanguageText('confirm_file_name'),
+                      AppLocalizations.of(context).getLanguageText('confirm_file_name'),
                       style: TextStyle(
                         fontSize: 18,
                         color: ColorUtils.textColor,
@@ -248,11 +297,12 @@ class _CopyDialogState extends State<CopyDialog> {
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildListDelegate(
-                    widget.checkedFiles.map((e) => FileItem(
+                    widget.checkedFiles.map((e) => FormFileItem(
+                      key: formFileItemKeyMap[e.uri],
                       fileData: e,
-                      editFileName: true,
                       fileNameListener: (fileName) {
-
+                        fileNameMap[e.uri] = fileName;
+                        formFileItemKeyMap[e.uri].currentState.fileNameInputKey.currentState.setTextError('');
                       },
                     )).toList()
                   ),
@@ -302,16 +352,13 @@ class _CopyDialogState extends State<CopyDialog> {
                         BorderRadius.all(Radius.circular(5.0)),
                       ),
                       child: Text(
-                        AppLocalizations.of(context)
-                            .getLanguageText('submit'),
+                        AppLocalizations.of(context).getLanguageText('submit'),
                         style: TextStyle(
                           color: Colors.white,
                         ),
                       ),
                     ),
-                    onTap: () {
-
-                    },
+                    onTap: submit,
                   ),
                 ),
               ],

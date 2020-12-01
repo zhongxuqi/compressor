@@ -19,6 +19,7 @@ class ColorUtils {
   );
 
   static const Color white = Colors.white;
+  static const Color red = Colors.red;
   static const Color lightGrey = const Color(0xFFF9F9FB);
   static const Color deepGrey = const Color(0xFF7E7E80);
   static const Color textColor = const Color(0xFF4D5156);

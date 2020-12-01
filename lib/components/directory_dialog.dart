@@ -33,13 +33,11 @@ class _CreateDirectoryDialogState extends State<CreateDirectoryDialog> {
   void doCreateDirectory() async {
     var hasErr = false;
     if (directoryName == "") {
-      _directoryNameInputKey.currentState.setTextError(
-          AppLocalizations.of(context).getLanguageText('required'));
+      _directoryNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('required'));
       hasErr = true;
     }
     if (widget.excludedNames.contains(directoryName)) {
-      _directoryNameInputKey.currentState.setTextError(
-          AppLocalizations.of(context).getLanguageText('file_exists'));
+      _directoryNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
       hasErr = true;
     }
     if (hasErr) {

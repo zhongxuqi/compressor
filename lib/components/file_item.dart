@@ -1,11 +1,9 @@
-import 'package:compressor/localization/localization.dart';
 import 'package:flutter/material.dart';
 import '../common/data.dart' as data;
 import '../utils/colors.dart';
 import '../utils/common.dart';
 import '../utils/mime.dart';
 import '../utils/iconfonts.dart';
-import 'form_text_input.dart';
 
 enum CheckStatus {
   none, unchecked, checked
@@ -16,16 +14,12 @@ class FileItem extends StatefulWidget {
   final VoidCallback onClick;
   final CheckStatus checkStatus;
   final VoidCallback onCheck;
-  final bool editFileName;
-  final ValueChanged<String> fileNameListener;
 
   FileItem({Key key,
     @required this.fileData,
     this.onClick,
     this.checkStatus = CheckStatus.none,
     this.onCheck,
-    this.editFileName = false,
-    this.fileNameListener,
   }) :super(key: key);
 
   @override
@@ -36,7 +30,6 @@ class FileItem extends StatefulWidget {
 
 class _FileItemState extends State<FileItem> {
   final fileNameCtl = TextEditingController();
-
 
   @override
   void initState() {
@@ -67,31 +60,13 @@ class _FileItemState extends State<FileItem> {
                     child: Container(
                       alignment: Alignment.centerLeft,
                       padding: EdgeInsets.only(top: 8, bottom: 8, right: 8),
-                      child: widget.fileData.contentType=='directory'?(widget.editFileName?FormTextInput(
-                        keyName: '',
-                        value: widget.fileData.name,
-                        hintText: AppLocalizations.of(context)
-                            .getLanguageText('input_file_name_hint'),
-                        maxLines: 1,
-                        onChange: (value) {
-
-                        },
-                      ):Text(
+                      child: widget.fileData.contentType=='directory'?Text(
                         widget.fileData.name,
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 16,
                           color: ColorUtils.textColor,
                         ),
-                      )):(widget.editFileName?FormTextInput(
-                        keyName: '',
-                        value: widget.fileData.name,
-                        hintText: AppLocalizations.of(context)
-                            .getLanguageText('input_file_name_hint'),
-                        maxLines: 1,
-                        onChange: (value) {
-
-                        },
                       ):Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -127,7 +102,7 @@ class _FileItemState extends State<FileItem> {
                             ],
                           ),
                         ],
-                      )),
+                      ),
                     ),
                   ),
                   Row(
