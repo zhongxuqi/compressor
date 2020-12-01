@@ -90,3 +90,16 @@ File path2File(String path) {
     null,
   );
 }
+
+void copyDirectory(io.Directory source, io.Directory destination) {
+  destination.createSync();
+  source.listSync(recursive: false).forEach((entity) {
+    if (entity is io.Directory) {
+      var newDirectory = io.Directory(path.join(destination.absolute.path, path.basename(entity.path)));
+      newDirectory.createSync();
+      copyDirectory(entity.absolute, newDirectory);
+    } else if (entity is io.File) {
+      entity.copySync(path.join(destination.path, path.basename(entity.path)));
+    }
+  });
+}

@@ -9,34 +9,40 @@ import 'location.dart';
 import 'file_item.dart';
 import 'form_file_item.dart';
 import 'dart:io' as io;
+import 'package:path/path.dart' as path;
 
-typedef CopyCallback = void Function(String targetPath, Map<String, String> fileNameMap);
+enum ActionType {
+  copy, move, rename
+}
 
-void showCopyDialog({@required BuildContext context, @required List<File> checkedFiles, @required CopyCallback callback}) {
+typedef ActionCallback = void Function(String targetPath, Map<String, String> fileNameMap);
+
+void showActionDialog({@required BuildContext context, @required List<File> checkedFiles, @required String relativePath, @required ActionCallback callback}) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      return CopyDialog(checkedFiles: checkedFiles, callback: callback);
+      return ActionDialog(checkedFiles: checkedFiles, relativePath: relativePath, callback: callback);
     },
   );
 }
 
-class CopyDialog extends StatefulWidget {
+class ActionDialog extends StatefulWidget {
   final List<File> checkedFiles;
-  final CopyCallback callback;
+  final String relativePath;
+  final ActionCallback callback;
 
-  CopyDialog({Key key, @required this.checkedFiles, @required this.callback}):super(key: key);
+  ActionDialog({Key key, @required this.checkedFiles, @required this.relativePath, @required this.callback}):super(key: key);
 
   @override
   State createState() {
-    return _CopyDialogState();
+    return _ActionDialogState();
   }
 }
 
-class _CopyDialogState extends State<CopyDialog> {
+class _ActionDialogState extends State<ActionDialog> {
   final Set<String> fileUris = Set<String>();
-  final List<String> paths = [];
+  final List<String> pathFragments = [];
   final List<File> files = List<File>();
 
   final fileNameMap = Map<String, String>();
@@ -56,7 +62,7 @@ class _CopyDialogState extends State<CopyDialog> {
   }
 
   void initData() async {
-    final files = await fileUtils.listFile(paths.join("/"));
+    final files = await fileUtils.listFile(path.join(widget.relativePath, pathFragments.join("/")));
     if (files == null) {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
       return;
@@ -68,7 +74,7 @@ class _CopyDialogState extends State<CopyDialog> {
   }
 
   void submit() async {
-    final targetPath = await fileUtils.getTargetPath(paths.join("/"));
+    final targetPath = await fileUtils.getTargetPath(path.join(widget.relativePath, pathFragments.join("/")));
     final targetFile = io.Directory(targetPath);
     if (!targetFile.existsSync()) {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('unknown_error'));
@@ -158,10 +164,10 @@ class _CopyDialogState extends State<CopyDialog> {
             ],
           ),
           Location(
-            directories: paths,
+            directories: pathFragments,
             goBack: () {
-              if (paths.length <= 0) return;
-              paths.removeLast();
+              if (pathFragments.length <= 0) return;
+              pathFragments.removeLast();
               initData();
             },
           ),
@@ -175,7 +181,7 @@ class _CopyDialogState extends State<CopyDialog> {
                       fileData: e,
                       onClick: () {
                         if (e.contentType == 'directory') {
-                          paths.add(e.name);
+                          pathFragments.add(e.name);
                           initData();
                           return;
                         }

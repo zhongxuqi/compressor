@@ -22,7 +22,7 @@ import 'components/file_sort_dialog.dart';
 import 'utils/store.dart';
 import 'components/agreement_dialog.dart';
 import 'receive_file.dart';
-import 'components/copy_dialog.dart';
+import 'components/action_dialog.dart';
 import 'components/delete_alert_dialog.dart';
 
 void main() {
@@ -372,12 +372,17 @@ class _MainPageState extends State<MainPage> {
           checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
             ActionItem(iconData: IconFonts.copy, textCode: 'copy', callback: () {
               var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
-              showCopyDialog(
+              showActionDialog(
                 context: context,
                 checkedFiles: validFiles,
+                relativePath: '',
                 callback: (String targetPath, Map<String, String> fileNameMap) {
                   validFiles.forEach((element) async {
-                    await io.File(element.uri).copy(path.join(targetPath, fileNameMap[element.uri]));
+                    if (fileUtils.isDirectory(element.uri)) {
+                      fileUtils.copyDirectory(io.Directory(element.uri), io.Directory(path.join(targetPath, fileNameMap[element.uri])));
+                    } else {
+                      await io.File(element.uri).copy(path.join(targetPath, fileNameMap[element.uri]));
+                    }
                   });
                   Navigator.of(context).pop();
                   toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
