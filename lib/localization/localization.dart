@@ -236,6 +236,18 @@ class AppLocalizations {
       'en': 'Choose The Directory',
       'zh': '选择当前目录',
     },
+    'add': {
+      'en': 'Add',
+      'zh': '添加',
+    },
+    'add_success': {
+      'en': 'Add Success',
+      'zh': '添加成功',
+    },
+    'files_add': {
+      'en': 'Files Add',
+      'zh': '批量添加文件',
+    },
   };
 
   String getLanguageText(String textID) {

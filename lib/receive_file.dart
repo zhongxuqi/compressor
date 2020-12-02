@@ -8,6 +8,12 @@ import 'components/file_item.dart';
 import 'file_detail.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'dart:async';
+import 'components/action_bar.dart';
+import 'components/action_dialog.dart';
+import 'utils/file.dart' as fileUtils;
+import 'package:path/path.dart' as path;
+import 'dart:io' as io;
+import 'utils/toast.dart' as toastUtils;
 
 StreamSubscription _intentDataStreamSubscription;
 
@@ -49,6 +55,7 @@ class ReceiveFilePage extends StatefulWidget {
 
 class _ReceiveFilePageState extends State<ReceiveFilePage> {
   final List<File> files = List<File>();
+  final Set<String> checkedFiles = Set<String>();
 
   @override
   void initState() {
@@ -142,12 +149,51 @@ class _ReceiveFilePageState extends State<ReceiveFilePage> {
                             })),
                           );
                         },
+                        checkStatus: checkedFiles.contains(e.uri)?CheckStatus.checked:CheckStatus.unchecked,
+                        onCheck: () {
+                          setState(() {
+                            if (checkedFiles.contains(e.uri)) {
+                              checkedFiles.remove(e.uri);
+                            } else {
+                              checkedFiles.add(e.uri);
+                            }
+                          });
+                        },
                       )).toList()
                     ),
                   ),
                 ],
               ),
             ),
+            checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
+              ActionItem(iconData: IconFonts.add, textCode: 'add', callback: () {
+                var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+                showActionDialog(
+                  context: context,
+                  actionType: ActionDialogType.copy,
+                  checkedFiles: validFiles,
+                  relativePath: '',
+                  callback: (String targetPath, Map<String, String> fileNameMap) {
+                    validFiles.forEach((element) async {
+                      if (fileUtils.isDirectory(element.uri)) {
+                        fileUtils.copyDirectory(io.Directory(element.uri), io.Directory(path.join(targetPath, fileNameMap[element.uri])));
+                      } else {
+                        await io.File(element.uri).copy(path.join(targetPath, fileNameMap[element.uri]));
+                      }
+                    });
+                    Navigator.of(context).pop();
+                    toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('add_success'));
+                    widget.callback();
+                    setState(() {
+                      final addedUris = validFiles.map((e) => e.uri).toList();
+                      final remainFiles = this.files.where((element) => !addedUris.contains(element.uri)).toList();
+                      this.files.clear();
+                      this.files.addAll(remainFiles);
+                    });
+                  },
+                );
+              }),
+            ]):Container(),
           ],
         ),
       ),

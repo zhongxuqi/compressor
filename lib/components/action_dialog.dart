@@ -12,7 +12,7 @@ import 'dart:io' as io;
 import 'package:path/path.dart' as path;
 
 enum ActionDialogType {
-  copy, move, rename
+  copy, move, rename, add
 }
 
 typedef ActionCallback = void Function(String targetPath, Map<String, String> fileNameMap);
@@ -123,6 +123,8 @@ class _ActionDialogState extends State<ActionDialog> {
         return AppLocalizations.of(context).getLanguageText('files_move');
       case ActionDialogType.rename:
         return AppLocalizations.of(context).getLanguageText('files_rename');
+      case ActionDialogType.add:
+        return AppLocalizations.of(context).getLanguageText('files_add');
     }
   }
 
