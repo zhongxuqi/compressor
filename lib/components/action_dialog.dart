@@ -115,55 +115,66 @@ class _ActionDialogState extends State<ActionDialog> {
     }
   }
 
+  String getTitle() {
+    switch (widget.actionType) {
+      case ActionDialogType.copy:
+        return AppLocalizations.of(context).getLanguageText('files_copy');
+      case ActionDialogType.move:
+        return AppLocalizations.of(context).getLanguageText('files_move');
+      case ActionDialogType.rename:
+        return AppLocalizations.of(context).getLanguageText('files_rename');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    var children = <Widget>[];
-    if (widget.actionType == ActionDialogType.rename) {
-      children.addAll(<Widget>[
-        Container(
-          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(left: 10),
-                  child: Text(
-                    AppLocalizations.of(context).getLanguageText(
-                        'confirm_file_name'),
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: ColorUtils.textColor,
-                    ),
-                  ),
-                ),
-              ),
-              InkWell(
-                child: Container(
-                  height: 40,
-                  width: 50,
-                  child: Icon(
-                    IconFonts.close,
-                    color: ColorUtils.textColor,
-                    size: 22,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        ),
-        Row(
+    var children = <Widget>[
+      Container(
+        padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+        child: Row(
           children: [
             Expanded(
               child: Container(
-                height: 1,
-                color: ColorUtils.divider,
+                margin: EdgeInsets.only(left: 10),
+                child: Text(
+                  getTitle(),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: ColorUtils.textColor,
+                  ),
+                ),
               ),
+            ),
+            InkWell(
+              child: Container(
+                height: 40,
+                width: 50,
+                child: Icon(
+                  IconFonts.close,
+                  color: ColorUtils.textColor,
+                  size: 22,
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+              },
             ),
           ],
         ),
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 1,
+              color: ColorUtils.divider,
+            ),
+          ),
+        ],
+      ),
+    ];
+    if (widget.actionType == ActionDialogType.rename) {
+      children.addAll(<Widget>[
         Container(
           height: MediaQuery
               .of(context)
@@ -247,50 +258,6 @@ class _ActionDialogState extends State<ActionDialog> {
       switch (step) {
         case 0:
           children.addAll(<Widget>[
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 10),
-                      child: Text(
-                        AppLocalizations.of(context).getLanguageText(
-                            'select_target_directory'),
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: ColorUtils.textColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    child: Container(
-                      height: 40,
-                      width: 50,
-                      child: Icon(
-                        IconFonts.close,
-                        color: ColorUtils.textColor,
-                        size: 22,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 1,
-                    color: ColorUtils.divider,
-                  ),
-                ),
-              ],
-            ),
             Location(
               directories: pathFragments,
               goBack: () {
@@ -369,7 +336,7 @@ class _ActionDialogState extends State<ActionDialog> {
                         ),
                         child: Text(
                           AppLocalizations.of(context)
-                              .getLanguageText('next_step'),
+                              .getLanguageText('choose_the_directory'),
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -389,50 +356,6 @@ class _ActionDialogState extends State<ActionDialog> {
           break;
         case 1:
           children.addAll(<Widget>[
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 10),
-                      child: Text(
-                        AppLocalizations.of(context).getLanguageText(
-                            'confirm_file_name'),
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: ColorUtils.textColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    child: Container(
-                      height: 40,
-                      width: 50,
-                      child: Icon(
-                        IconFonts.close,
-                        color: ColorUtils.textColor,
-                        size: 22,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 1,
-                    color: ColorUtils.divider,
-                  ),
-                ),
-              ],
-            ),
             Container(
               height: MediaQuery
                   .of(context)

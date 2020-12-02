@@ -220,6 +220,22 @@ class AppLocalizations {
       'en': 'Rename Success',
       'zh': '重命名成功',
     },
+    'files_copy': {
+      'en': 'Files Copy',
+      'zh': '批量复制文件',
+    },
+    'files_move': {
+      'en': 'Files Move',
+      'zh': '批量移动文件',
+    },
+    'files_rename': {
+      'en': 'Files Rename',
+      'zh': '批量重命名文件',
+    },
+    'choose_the_directory': {
+      'en': 'Choose The Directory',
+      'zh': '选择当前目录',
+    },
   };
 
   String getLanguageText(String textID) {
