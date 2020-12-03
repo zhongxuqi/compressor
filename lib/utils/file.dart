@@ -38,6 +38,10 @@ int length(String path) {
 }
 
 Future<String> getTargetPath(String relativePath) async {
+  if (io.Platform.isIOS) {
+    final appDocDir = await getApplicationDocumentsDirectory();
+    return path.join(appDocDir.path, relativePath);
+  }
   final appDocDir = await getExternalStorageDirectory();
   return path.join(appDocDir.path, relativePath);
 }

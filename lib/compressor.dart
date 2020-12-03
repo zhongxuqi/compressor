@@ -421,7 +421,7 @@ class _CompressorPageState extends State<CompressorPage> {
                           }
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e)),
+                            MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {})),
                           );
                         },
                       )).toList(),
