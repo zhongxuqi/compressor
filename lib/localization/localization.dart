@@ -32,6 +32,10 @@ class AppLocalizations {
       "en": "Video",
       "zh": "视频",
     },
+    "local": {
+      "en": "Local File",
+      "zh": "内部文件",
+    },
     "unknown_file_type": {
       "en": "Unknown File Type",
       "zh": "未知文件类型",
@@ -247,6 +251,10 @@ class AppLocalizations {
     'files_add': {
       'en': 'Files Add',
       'zh': '批量添加文件',
+    },
+    'files_select': {
+      'en': 'Files Select',
+      'zh': '文件选择',
     },
   };
 

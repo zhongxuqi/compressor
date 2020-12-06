@@ -19,12 +19,14 @@ import 'utils/toast.dart' as toastUtils;
 import 'components/location.dart';
 import 'components/directory_dialog.dart' as directory_dialog;
 import 'package:path/path.dart' as path;
+import './file_select.dart';
 
 class CompressorPage extends StatefulWidget {
   final VoidCallback callback;
   final Directory dir;
 
-  CompressorPage({Key key, @required this.callback, @required this.dir}) : super(key: key);
+  CompressorPage({Key key, @required this.callback, @required this.dir})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -34,12 +36,14 @@ class CompressorPage extends StatefulWidget {
 
 class _CompressorPageState extends State<CompressorPage> {
   final fileTypes = <FilePicker>[
-    FilePicker(FileType.directory, 'images/directory.png', 'directory'),
-    FilePicker(FileType.file, 'images/file_txt.png', 'file'),
+    FilePicker(FileType.file, 'images/file_oa.png', 'file'),
     FilePicker(FileType.image, 'images/file_pic.png', 'image'),
     FilePicker(FileType.video, 'images/file_video.png', 'video'),
+    FilePicker(FileType.directory, 'images/directory.png', 'directory'),
+    FilePicker(FileType.local, 'images/file_Installation_pa.png', 'local'),
   ];
-  final GlobalKey<FormTextInputState> _fileNameInputKey = GlobalKey<FormTextInputState>();
+  final GlobalKey<FormTextInputState> _fileNameInputKey =
+      GlobalKey<FormTextInputState>();
 
   var files = Map<String, data.File>();
   var fileName = '';
@@ -79,6 +83,16 @@ class _CompressorPageState extends State<CompressorPage> {
       case FileType.video:
         _pickFileByMimeType(mimeType: 'video/*');
         break;
+      case FileType.local:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => FileSelectPage(
+            callback: (value) {
+
+            },
+          )),
+        );
+        break;
       default:
         break;
     }
@@ -109,15 +123,16 @@ class _CompressorPageState extends State<CompressorPage> {
       json.encode(data.FileExtra(0, 0).toMap()),
       currentFile,
     );
-    setState(() {
-
-    });
+    setState(() {});
     Navigator.of(context).pop();
   }
 
   void createDirectory() async {
     Navigator.of(context).pop();
-    directory_dialog.createDirectory(context: context, callback: doCreateDirectory, excludedNames: getFiles().entries.map((e) => e.value.name).toList());
+    directory_dialog.createDirectory(
+        context: context,
+        callback: doCreateDirectory,
+        excludedNames: getFiles().entries.map((e) => e.value.name).toList());
   }
 
   Future<bool> checkFileExists(String fileName) async {
@@ -152,12 +167,16 @@ class _CompressorPageState extends State<CompressorPage> {
       })),
     };
     Navigator.of(context).pop();
-    showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('compressing'), barrierDismissible: true);
+    showLoadingDialog(
+        context, AppLocalizations.of(context).getLanguageText('compressing'),
+        barrierDismissible: true);
     final fileResult = await createArchiveFile(params);
     if (fileResult.archiveType.isNotEmpty) {
-      final fileObj = await fileUtils.createFileByFileResult(widget.dir, fileResult);
+      final fileObj =
+          await fileUtils.createFileByFileResult(widget.dir, fileResult);
       if (fileObj == null) {
-        toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('save_failure'));
+        toastUtils.showErrorToast(
+            AppLocalizations.of(context).getLanguageText('save_failure'));
         return;
       }
       widget.callback();
@@ -266,8 +285,7 @@ class _CompressorPageState extends State<CompressorPage> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(5.0)),
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         child: Text(
                           AppLocalizations.of(context)
@@ -290,8 +308,7 @@ class _CompressorPageState extends State<CompressorPage> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: ColorUtils.themeColor,
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(5.0)),
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         child: Text(
                           AppLocalizations.of(context)
@@ -452,37 +469,73 @@ class _CompressorPageState extends State<CompressorPage> {
                   builder: (context) {
                     return Container(
                       color: Colors.white,
-                      height: 120,
+                      height: 180,
                       padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: fileTypes.map((e) => Expanded(
-                          flex: 1,
-                          child: InkWell(
-                            child: Column(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  e.icon,
-                                  height: 50.0,
-                                  width: 50.0,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: fileTypes.sublist(0, 3).map((e) => Expanded(
+                              flex: 1,
+                              child: InkWell(
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      e.icon,
+                                      height: 50.0,
+                                      width: 50.0,
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(top: 5),
+                                      child: Text(
+                                        AppLocalizations.of(context)
+                                            .getLanguageText(e.name),
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Container(
-                                  margin: EdgeInsets.only(top: 5),
-                                  child: Text(
-                                    AppLocalizations.of(context)
-                                        .getLanguageText(e.name),
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              pick(e.fileType);
-                            },
+                                onTap: () {
+                                  pick(e.fileType);
+                                },
+                              ),
+                            )).toList(),
                           ),
-                        )).toList(),
+                          Container(height: 10, width: 1),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: fileTypes.sublist(3).map((e) => Expanded(
+                              flex: 1,
+                              child: InkWell(
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      e.icon,
+                                      height: 50.0,
+                                      width: 50.0,
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(top: 5),
+                                      child: Text(
+                                        AppLocalizations.of(context)
+                                            .getLanguageText(e.name),
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                onTap: () {
+                                  pick(e.fileType);
+                                },
+                              ),
+                            )).toList(),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -496,7 +549,7 @@ class _CompressorPageState extends State<CompressorPage> {
   }
 }
 
-enum FileType { directory, file, image, video }
+enum FileType { file, image, video, directory, local }
 
 class FilePicker {
   final FileType fileType;
