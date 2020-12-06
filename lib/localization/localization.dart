@@ -256,6 +256,10 @@ class AppLocalizations {
       'en': 'Files Select',
       'zh': '文件选择',
     },
+    'directory_selected': {
+      'en': 'Directory has selected',
+      'zh': '目录已选择',
+    },
   };
 
   String getLanguageText(String textID) {

@@ -152,6 +152,7 @@ class _FileSelectPageState extends State<FileSelectPage> {
                         onClick: () {
                           if (e.contentType == 'directory') {
                             if (checkedFiles.contains(e.uri)) {
+                              toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('directory_selected'));
                               return;
                             }
 
