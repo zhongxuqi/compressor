@@ -20,6 +20,7 @@ import 'components/location.dart';
 import 'components/directory_dialog.dart' as directory_dialog;
 import 'package:path/path.dart' as path;
 import './file_select.dart';
+import 'components/action_dialog.dart';
 
 class CompressorPage extends StatefulWidget {
   final VoidCallback callback;
@@ -88,7 +89,18 @@ class _CompressorPageState extends State<CompressorPage> {
           context,
           MaterialPageRoute(builder: (context) => FileSelectPage(
             callback: (value) {
-
+              var validFiles = value.map((e) => fileUtils.path2File(e)).toList();
+              showActionDialog(
+                context: context,
+                actionType: ActionDialogType.rename,
+                checkedFiles: validFiles,
+                relativePath: null,
+                excludeFileNames: getFiles().keys,
+                callback: (String targetPath, Map<String, String> fileNameMap) {
+                  addFiles(validFiles);
+                  Navigator.of(context).pop();
+                },
+              );
             },
           )),
         );
@@ -101,17 +113,34 @@ class _CompressorPageState extends State<CompressorPage> {
   void _pickFileByMimeType({@required String mimeType}) async {
     Navigator.of(context).pop();
     final fileResultList = await pickFile(mimeType: mimeType);
-    for (var fileResult in fileResultList) {
-      final f = File.fromUri(Uri.parse(fileResult.uri));
-      final contentType = lookupMimeType(fileResult.uri);
-      getFiles()[fileResult.fileName] = data.File(
-        fileResult.fileName,
-        fileResult.uri,
+    var validFiles = fileResultList.map((e) => fileUtils.path2File(e.uri)).toList();
+    showActionDialog(
+      context: context,
+      actionType: ActionDialogType.rename,
+      checkedFiles: validFiles,
+      relativePath: null,
+      excludeFileNames: getFiles().keys,
+      callback: (String targetPath, Map<String, String> fileNameMap) {
+        addFiles(validFiles);
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  void addFiles(List<data.File> validFiles) {
+    validFiles.forEach((element) async {
+      final contentType = lookupMimeType(element.uri);
+
+      // todo 目录特殊逻辑
+
+      getFiles()[element.name] = data.File(
+        element.name,
+        element.uri,
         contentType,
-        json.encode(data.FileExtra(f.lastModifiedSync().millisecondsSinceEpoch, f.lengthSync()).toMap()),
+        element.extra,
         currentFile,
       );
-    }
+    });
     setState(() {});
   }
 

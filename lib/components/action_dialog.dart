@@ -17,12 +17,23 @@ enum ActionDialogType {
 
 typedef ActionCallback = void Function(String targetPath, Map<String, String> fileNameMap);
 
-void showActionDialog({@required BuildContext context, @required ActionDialogType actionType, @required List<File> checkedFiles, @required String relativePath, @required ActionCallback callback}) {
+void showActionDialog({
+  @required BuildContext context,
+  @required ActionDialogType actionType,
+  @required List<File> checkedFiles,
+  String relativePath,
+  List<String> excludeFileNames,
+  @required ActionCallback callback}) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      return ActionDialog(actionType: actionType, checkedFiles: checkedFiles, relativePath: relativePath, callback: callback);
+      return ActionDialog(
+          actionType: actionType,
+          checkedFiles: checkedFiles,
+          relativePath: relativePath,
+          excludeFileNames: excludeFileNames,
+          callback: callback);
     },
   );
 }
@@ -31,9 +42,16 @@ class ActionDialog extends StatefulWidget {
   final ActionDialogType actionType;
   final List<File> checkedFiles;
   final String relativePath;
+  final List<String> excludeFileNames;
   final ActionCallback callback;
 
-  ActionDialog({Key key, @required this.actionType, @required this.checkedFiles, @required this.relativePath, @required this.callback}):super(key: key);
+  ActionDialog({
+    Key key,
+    @required this.actionType,
+    @required this.checkedFiles,
+    this.relativePath,
+    this.excludeFileNames,
+    @required this.callback}):super(key: key);
 
   @override
   State createState() {
@@ -63,6 +81,7 @@ class _ActionDialogState extends State<ActionDialog> {
   }
 
   void initData() async {
+    if (widget.relativePath == null) return;
     final files = await fileUtils.listFile(path.join(widget.relativePath, pathFragments.join("/")));
     if (files == null) {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
@@ -75,20 +94,31 @@ class _ActionDialogState extends State<ActionDialog> {
   }
 
   void submit() async {
-    final targetPath = await fileUtils.getTargetPath(path.join(widget.relativePath, pathFragments.join("/")));
-    final targetFile = io.Directory(targetPath);
-    if (!targetFile.existsSync()) {
-      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('unknown_error'));
-      return;
-    }
     try {
-      final currFiles = (await targetFile.list().toList()).map((value) {
-        return fileUtils.path2File(value.path);
-      }).toList();
       final fileNameSet = Set<String>();
-      currFiles.forEach((element) {
-        fileNameSet.add(element.name);
-      });
+      String targetPath;
+
+      // 如果目录不为空，就获取目录下文件名
+      if (widget.relativePath != null) {
+        targetPath = await fileUtils.getTargetPath(path.join(widget.relativePath, pathFragments.join("/")));
+        final targetFile = io.Directory(targetPath);
+        if (!targetFile.existsSync()) {
+          toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('unknown_error'));
+          return;
+        }
+        final currFiles = (await targetFile.list().toList()).map((value) {
+          return fileUtils.path2File(value.path);
+        }).toList();
+        currFiles.forEach((element) {
+          fileNameSet.add(element.name);
+        });
+      }
+
+      // 添加被排除的文件名
+      if (widget.excludeFileNames != null) {
+        fileNameSet.addAll(widget.excludeFileNames);
+      }
+
       var hasError = false;
       final selfFileNameSet = Set<String>();
       widget.checkedFiles.forEach((element) {
@@ -126,6 +156,7 @@ class _ActionDialogState extends State<ActionDialog> {
       case ActionDialogType.add:
         return AppLocalizations.of(context).getLanguageText('files_add');
     }
+    return '';
   }
 
   @override
