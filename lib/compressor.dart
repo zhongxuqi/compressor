@@ -95,10 +95,12 @@ class _CompressorPageState extends State<CompressorPage> {
                 actionType: ActionDialogType.rename,
                 checkedFiles: validFiles,
                 relativePath: null,
-                excludeFileNames: getFiles().keys,
-                callback: (String targetPath, Map<String, String> fileNameMap) {
-                  addFiles(getFiles(), validFiles);
+                excludeFileNames: getFiles().keys.toList(),
+                callback: (String targetPath, Map<String, String> fileNameMap) async {
+                  await addFiles(getFiles(), validFiles, fileNameMap);
                   Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  setState(() {});
                 },
               );
             },
@@ -120,33 +122,33 @@ class _CompressorPageState extends State<CompressorPage> {
       checkedFiles: validFiles,
       relativePath: null,
       excludeFileNames: getFiles().keys,
-      callback: (String targetPath, Map<String, String> fileNameMap) {
-        addFiles(getFiles(), validFiles);
+      callback: (String targetPath, Map<String, String> fileNameMap) async {
+        await addFiles(getFiles(), validFiles, fileNameMap);
         Navigator.of(context).pop();
+        setState(() {});
       },
     );
   }
 
-  Future<void> addFiles(Map<String, data.File> rootNode, List<data.File> validFiles) async {
+  Future<void> addFiles(Map<String, data.File> rootNode, List<data.File> validFiles, Map<String, String> fileNameMap) async {
     validFiles.forEach((element) async {
-      final contentType = lookupMimeType(element.uri);
-
+      final contentType = fileUtils.lookupMimeType(element.uri);
+      final fileName = fileNameMap!=null&&fileNameMap.containsKey(element.uri)?fileNameMap[element.uri]:element.name;
       final fileData = data.File(
-        element.name,
+        fileName,
         element.uri,
         contentType,
         element.extra,
         currentFile,
       );
-      getFiles()[element.name] = fileData;
+      rootNode[fileName] = fileData;
 
       if (contentType == 'directory') {
         final filePaths = await fileUtils.listFileByAbsolute(element.uri);
         final subValidFiles = filePaths.map((e) => fileUtils.path2File(e.uri)).toList();
-        await addFiles(fileData.files, subValidFiles);
+        await addFiles(fileData.files, subValidFiles, null);
       }
     });
-    setState(() {});
   }
 
   void doCreateDirectory(String directoryName) async {

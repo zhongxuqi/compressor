@@ -140,6 +140,7 @@ class _ActionDialogState extends State<ActionDialog> {
       }
       widget.callback(targetPath, fileNameMap);
     } catch (e) {
+      print("error: ${e.message}.");
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('unknown_error'));
       return;
     }
