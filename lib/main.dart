@@ -104,7 +104,7 @@ class _MainPageState extends State<MainPage> {
   Future<void> initData() async {
     sortBy = await StoreUtils.getSortByKey();
     sortType = await StoreUtils.getSortTypeKey();
-    final files = await fileUtils.listFile(paths.join("/"));
+    final files = await fileUtils.listFileByRelative(paths.join("/"));
     if (files == null) {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
       return;

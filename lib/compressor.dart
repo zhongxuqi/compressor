@@ -97,7 +97,7 @@ class _CompressorPageState extends State<CompressorPage> {
                 relativePath: null,
                 excludeFileNames: getFiles().keys,
                 callback: (String targetPath, Map<String, String> fileNameMap) {
-                  addFiles(validFiles);
+                  addFiles(getFiles(), validFiles);
                   Navigator.of(context).pop();
                 },
               );
@@ -121,25 +121,30 @@ class _CompressorPageState extends State<CompressorPage> {
       relativePath: null,
       excludeFileNames: getFiles().keys,
       callback: (String targetPath, Map<String, String> fileNameMap) {
-        addFiles(validFiles);
+        addFiles(getFiles(), validFiles);
         Navigator.of(context).pop();
       },
     );
   }
 
-  void addFiles(List<data.File> validFiles) {
+  Future<void> addFiles(Map<String, data.File> rootNode, List<data.File> validFiles) async {
     validFiles.forEach((element) async {
       final contentType = lookupMimeType(element.uri);
 
-      // todo 目录特殊逻辑
-
-      getFiles()[element.name] = data.File(
+      final fileData = data.File(
         element.name,
         element.uri,
         contentType,
         element.extra,
         currentFile,
       );
+      getFiles()[element.name] = fileData;
+
+      if (contentType == 'directory') {
+        final filePaths = await fileUtils.listFileByAbsolute(element.uri);
+        final subValidFiles = filePaths.map((e) => fileUtils.path2File(e.uri)).toList();
+        await addFiles(fileData.files, subValidFiles);
+      }
     });
     setState(() {});
   }

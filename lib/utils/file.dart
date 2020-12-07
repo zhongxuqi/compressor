@@ -65,9 +65,12 @@ Future<File> createFileByFileResult(io.Directory dir, FileResult fileResult) asy
   );
 }
 
-Future<List<File>> listFile(String relativePath) async {
-  final targetPath = await getTargetPath(relativePath);
-  final targetFile = io.Directory(targetPath);
+Future<List<File>> listFileByRelative(String relativePath) async {
+  return await listFileByAbsolute(await getTargetPath(relativePath));
+}
+
+Future<List<File>> listFileByAbsolute(String absolutePath) async {
+  final targetFile = io.Directory(absolutePath);
   if (!targetFile.existsSync()) {
     return List<File>();
   }

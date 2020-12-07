@@ -82,7 +82,7 @@ class _ActionDialogState extends State<ActionDialog> {
 
   void initData() async {
     if (widget.relativePath == null) return;
-    final files = await fileUtils.listFile(path.join(widget.relativePath, pathFragments.join("/")));
+    final files = await fileUtils.listFileByRelative(path.join(widget.relativePath, pathFragments.join("/")));
     if (files == null) {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
       return;

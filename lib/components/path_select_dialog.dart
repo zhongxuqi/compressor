@@ -45,7 +45,7 @@ class _PathSelectDialogState extends State<PathSelectDialog> {
   }
 
   void initData() async {
-    final files = await fileUtils.listFile(paths.join("/"));
+    final files = await fileUtils.listFileByRelative(paths.join("/"));
     if (files == null) {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('list_file_failure'));
       return;
