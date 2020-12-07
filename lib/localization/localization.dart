@@ -66,7 +66,7 @@ class AppLocalizations {
     },
     'confirm': {
       'en': 'Confirm',
-      'zh': '确认',
+      'zh': '确定',
     },
     'required': {
       'en': 'Required',
@@ -259,6 +259,14 @@ class AppLocalizations {
     'directory_selected': {
       'en': 'Directory has selected',
       'zh': '目录已选择',
+    },
+    'exit_app_alert': {
+      'en': 'Exit app, are you sure?',
+      'zh': '是否确认退出APP',
+    },
+    'exit_edit_alert': {
+      'en': 'Exit edit, are you sure?',
+      'zh': '是否确认编辑',
     },
   };
 

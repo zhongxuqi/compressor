@@ -21,7 +21,7 @@ import 'package:path/path.dart' as path;
 import './file_select.dart';
 import 'components/action_dialog.dart';
 import 'components/action_bar.dart';
-import 'components/delete_alert_dialog.dart';
+import 'components/alert_dialog.dart';
 
 class CompressorPage extends StatefulWidget {
   final VoidCallback callback;
@@ -394,7 +394,7 @@ class _CompressorPageState extends State<CompressorPage> {
           );
         }),
         ActionItem(iconData: IconFonts.delete, textCode: 'delete', callback: () {
-          showDeleteAlertDialog(context, callback: () {
+          showAlertDialog(context, text: AppLocalizations.of(context).getLanguageText('delete_alert'), callback: () {
             checkedFiles.forEach((e) {
               files.remove(e.name);
             });
@@ -483,131 +483,146 @@ class _CompressorPageState extends State<CompressorPage> {
         },
       );
     }));
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 45.0,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InkWell(
-                    child: Container(
+    return WillPopScope(
+      onWillPop: () async {
+        if (currentFile != null) {
+          setState(() {
+            currentFile = currentFile.parent;
+          });
+        } else {
+          showAlertDialog(context, text: AppLocalizations.of(context).getLanguageText('exit_edit_alert'), callback: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          });
+        }
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Padding(
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: 45.0,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        child: Icon(
+                          IconFonts.back,
+                          color: ColorUtils.themeColor,
+                          size: 20.0,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    Container(
                       width: 45,
                       height: 45,
+                      alignment: Alignment.center,
                       child: Icon(
-                        IconFonts.back,
-                        color: ColorUtils.themeColor,
-                        size: 20.0,
+                        IconFonts.zip,
+                        color: ColorUtils.textColor,
+                        size: 25.0,
                       ),
                     ),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  Container(
-                    width: 45,
-                    height: 45,
-                    alignment: Alignment.center,
-                    child: Icon(
-                      IconFonts.zip,
-                      color: ColorUtils.textColor,
-                      size: 25.0,
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        AppLocalizations.of(context)
-                            .getLanguageText('compress_title'),
-                        style: TextStyle(
-                          color: ColorUtils.textColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .getLanguageText('compress_title'),
+                          style: TextStyle(
+                            color: ColorUtils.textColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  InkWell(
+                    InkWell(
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        child: Icon(
+                          IconFonts.right,
+                          color: ColorUtils.themeColor,
+                          size: 20.0,
+                        ),
+                      ),
+                      onTap: () {
+                        compressFiles();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
                     child: Container(
-                      width: 45,
-                      height: 45,
-                      child: Icon(
-                        IconFonts.right,
-                        color: ColorUtils.themeColor,
-                        size: 20.0,
+                      height: 1,
+                      color: ColorUtils.divider,
+                    ),
+                  ),
+                ],
+              ),
+              Location(
+                directories: getDirectories(),
+                goBack: () {
+                  if (currentFile == null) return;
+                  setState(() {
+                    currentFile = currentFile.parent;
+                  });
+                },
+              ),
+              Expanded(
+                flex: 1,
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildListDelegate(
+                        getFiles().values.map((e) => FileItem(
+                          fileData: e,
+                          onClick: () {
+                            if (e.contentType == 'directory') {
+                              setState(() {
+                                currentFile = e;
+                              });
+                              return;
+                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {})),
+                            );
+                          },
+                          checkStatus: checkedFiles.contains(e)?CheckStatus.checked:CheckStatus.unchecked,
+                          onCheck: () {
+                            setState(() {
+                              if (checkedFiles.contains(e)) {
+                                checkedFiles.remove(e);
+                              } else {
+                                checkedFiles.add(e);
+                              }
+                            });
+                          },
+                        )).toList(),
                       ),
                     ),
-                    onTap: () {
-                      compressFiles();
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    height: 1,
-                    color: ColorUtils.divider,
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            Location(
-              directories: getDirectories(),
-              goBack: () {
-                if (currentFile == null) return;
-                setState(() {
-                  currentFile = currentFile.parent;
-                });
-              },
-            ),
-            Expanded(
-              flex: 1,
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildListDelegate(
-                      getFiles().values.map((e) => FileItem(
-                        fileData: e,
-                        onClick: () {
-                          if (e.contentType == 'directory') {
-                            setState(() {
-                              currentFile = e;
-                            });
-                            return;
-                          }
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {})),
-                          );
-                        },
-                        checkStatus: checkedFiles.contains(e)?CheckStatus.checked:CheckStatus.unchecked,
-                        onCheck: () {
-                          setState(() {
-                            if (checkedFiles.contains(e)) {
-                              checkedFiles.remove(e);
-                            } else {
-                              checkedFiles.add(e);
-                            }
-                          });
-                        },
-                      )).toList(),
-                    ),
-                  ),
-                ],
               ),
-            ),
-            ActionBar(actionItems: actionItems),
-          ],
+              ActionBar(actionItems: actionItems),
+            ],
+          ),
         ),
       ),
     );

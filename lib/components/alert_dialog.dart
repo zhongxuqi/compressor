@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../localization/localization.dart';
 
-void showDeleteAlertDialog(BuildContext context, {@required VoidCallback callback}) {
+void showAlertDialog(BuildContext context, {@required String text, @required VoidCallback callback}) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -13,7 +13,7 @@ void showDeleteAlertDialog(BuildContext context, {@required VoidCallback callbac
           Container(
             padding: EdgeInsets.only(top: 5, left: 10, right: 10),
             child: Text(
-              AppLocalizations.of(context).getLanguageText('delete_alert'),
+              text,
               style: TextStyle(
                 fontSize: 18,
                 color: ColorUtils.red,
@@ -60,7 +60,7 @@ void showDeleteAlertDialog(BuildContext context, {@required VoidCallback callbac
                         BorderRadius.all(Radius.circular(5.0)),
                       ),
                       child: Text(
-                        AppLocalizations.of(context).getLanguageText('delete'),
+                        AppLocalizations.of(context).getLanguageText('confirm'),
                         style: TextStyle(
                           color: Colors.white,
                         ),

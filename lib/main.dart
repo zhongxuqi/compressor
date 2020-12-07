@@ -23,7 +23,7 @@ import 'utils/store.dart';
 import 'components/agreement_dialog.dart';
 import 'receive_file.dart';
 import 'components/action_dialog.dart';
-import 'components/delete_alert_dialog.dart';
+import 'components/alert_dialog.dart';
 
 void main() {
   runApp(MyApp());
@@ -171,305 +171,318 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-        child: Column(children: <Widget>[
-          Container(
-            height: 46.0,
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    InkWell(
-                      child: Container(
-                        width: 45,
-                        height: 45,
-                        child: Icon(
-                          IconFonts.menu,
-                          color: ColorUtils.themeColor,
-                          size: 20.0,
+    return WillPopScope(
+      onWillPop: () async {
+        if (paths.length > 0) {
+          paths.remove(paths.last);
+          initData();
+        } else {
+          showAlertDialog(context, text: AppLocalizations.of(context).getLanguageText('exit_app_alert'), callback: () {
+            SystemNavigator.pop();
+          });
+        }
+        return false;
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: Colors.white,
+        body: Padding(
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          child: Column(children: <Widget>[
+            Container(
+              height: 46.0,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      InkWell(
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          child: Icon(
+                            IconFonts.menu,
+                            color: ColorUtils.themeColor,
+                            size: 20.0,
+                          ),
                         ),
+                        onTap: () {
+                          _scaffoldKey.currentState.openDrawer();
+                        },
                       ),
-                      onTap: () {
-                        _scaffoldKey.currentState.openDrawer();
-                      },
-                    ),
-                    Expanded(
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: Text(
-                          AppLocalizations.of(context).getLanguageText('main_title'),
-                          style: TextStyle(
-                            color: ColorUtils.textColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: Text(
+                            AppLocalizations.of(context).getLanguageText('main_title'),
+                            style: TextStyle(
+                              color: ColorUtils.textColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    InkWell(
-                      child: Container(
-                        width: 45,
-                        height: 45,
-                        child: Icon(
-                          IconFonts.sort,
-                          color: ColorUtils.themeColor,
-                          size: 20.0,
+                      InkWell(
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          child: Icon(
+                            IconFonts.sort,
+                            color: ColorUtils.themeColor,
+                            size: 20.0,
+                          ),
                         ),
+                        onTap: () {
+                          showFileSortDialog(context: context, sortBy: this.sortBy, sortType: this.sortType, callback: (sortBy, sortType) {
+                            this.sortBy = sortBy;
+                            this.sortType = sortType;
+                            StoreUtils.setSortByKey(sortBy);
+                            StoreUtils.setSortTypeKey(sortType);
+                            initData();
+                            Navigator.of(context).pop();
+                          });
+                        },
                       ),
-                      onTap: () {
-                        showFileSortDialog(context: context, sortBy: this.sortBy, sortType: this.sortType, callback: (sortBy, sortType) {
-                          this.sortBy = sortBy;
-                          this.sortType = sortType;
-                          StoreUtils.setSortByKey(sortBy);
-                          StoreUtils.setSortTypeKey(sortType);
-                          initData();
-                          Navigator.of(context).pop();
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Container(
-                        height: 1,
-                        color: ColorUtils.divider,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Location(
-            directories: paths,
-            goBack: () {
-              if (paths.length <= 0) return;
-              paths.removeLast();
-              initData();
-            },
-          ),
-          Expanded(
-            flex: 1,
-            child: Stack(
-              children: [
-                CustomScrollView(
-                  slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildListDelegate(
-                        files.map<Widget>((e) => FileItem(
-                          fileData: e,
-                          onClick: () {
-                            if (e.contentType == 'directory') {
-                              paths.add(e.name);
-                              initData();
-                              return;
-                            }
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {
-                                initData();
-                              })),
-                            );
-                          },
-                          checkStatus: checkedFiles.contains(e.uri)?CheckStatus.checked:CheckStatus.unchecked,
-                          onCheck: () {
-                            setState(() {
-                              if (checkedFiles.contains(e.uri)) {
-                                checkedFiles.remove(e.uri);
-                              } else {
-                                checkedFiles.add(e.uri);
-                              }
-                            });
-                          },
-                        )).toList()..add(Container(height: 80, width: 1))
-                      ),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Column(
+                    ],
+                  ),
+                  Row(
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            GestureDetector(
-                              child: Container(
-                                padding: EdgeInsets.all(15.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: ColorUtils.lightGrey,
-                                ),
-                                child: Icon(
-                                  IconFonts.add,
-                                  color: ColorUtils.themeColor,
-                                  size: 20.0,
-                                ),
-                              ),
-                              onTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  builder: (context) {
-                                    return Container(
-                                      color: Colors.white,
-                                      height: 120,
-                                      padding: EdgeInsets.symmetric(horizontal: 20),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: actions.map((e) => Expanded(
-                                          flex: 1,
-                                          child: InkWell(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                              children: [
-                                                Image.asset(
-                                                  e.icon,
-                                                  height: 50.0,
-                                                  width: 50.0,
-                                                ),
-                                                Container(
-                                                  margin: EdgeInsets.only(top: 5),
-                                                  child: Text(
-                                                    AppLocalizations.of(context).getLanguageText(e.name),
-                                                    style: TextStyle(fontSize: 15),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            onTap: () {
-                                              doAction(e.actionType);
-                                            },
-                                          ),
-                                        )).toList(),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ],
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          height: 1,
+                          color: ColorUtils.divider,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
-            ActionItem(iconData: IconFonts.copy, textCode: 'copy', callback: () {
-              var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
-              showActionDialog(
-                context: context,
-                actionType: ActionDialogType.copy,
-                checkedFiles: validFiles,
-                relativePath: '',
-                callback: (String targetPath, Map<String, String> fileNameMap) {
-                  validFiles.forEach((element) async {
-                    if (fileUtils.isDirectory(element.uri)) {
-                      fileUtils.copyDirectory(io.Directory(element.uri), io.Directory(path.join(targetPath, fileNameMap[element.uri])));
-                    } else {
-                      await io.File(element.uri).copy(path.join(targetPath, fileNameMap[element.uri]));
-                    }
-                  });
-                  Navigator.of(context).pop();
-                  toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
-                  checkedFiles.clear();
-                  initData();
-                },
-              );
-            }),
-            ActionItem(iconData: IconFonts.move, textCode: 'move', callback: () {
-              var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
-              showActionDialog(
-                context: context,
-                actionType: ActionDialogType.move,
-                checkedFiles: validFiles,
-                relativePath: '',
-                callback: (String targetPath, Map<String, String> fileNameMap) {
-                  validFiles.forEach((element) async {
-                    if (fileUtils.isDirectory(element.uri)) {
-                      io.Directory(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
-                    } else {
-                      io.File(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
-                    }
-                  });
-                  Navigator.of(context).pop();
-                  toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
-                  checkedFiles.clear();
-                  initData();
-                },
-              );
-            }),
-            ActionItem(iconData: IconFonts.edit, textCode: 'rename', callback: () {
-              var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
-              showActionDialog(
-                context: context,
-                actionType: ActionDialogType.rename,
-                checkedFiles: validFiles,
-                relativePath: paths.join(''),
-                callback: (String targetPath, Map<String, String> fileNameMap) {
-                  validFiles.forEach((element) async {
-                    if (fileUtils.isDirectory(element.uri)) {
-                      io.Directory(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
-                    } else {
-                      io.File(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
-                    }
-                  });
-                  Navigator.of(context).pop();
-                  toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
-                  checkedFiles.clear();
-                  initData();
-                },
-              );
-            }),
-            ActionItem(iconData: IconFonts.delete, textCode: 'delete', callback: () {
-              showDeleteAlertDialog(context, callback: () {
-                var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
-                validFiles.forEach((element) async {
-                  await io.File(element.uri).delete(recursive: true);
-                });
-                Navigator.of(context).pop();
-                toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('delete_success'));
-                checkedFiles.clear();
+            Location(
+              directories: paths,
+              goBack: () {
+                if (paths.length <= 0) return;
+                paths.removeLast();
                 initData();
-              });
-            }),
-          ]):Container(),
-        ]),
-      ),
-      drawer: Container(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-        color: ColorUtils.white,
-        width: 200,
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-              child: SideMenuBtn(iconData: IconFonts.feedback,text: AppLocalizations.of(context).getLanguageText('feedback'), callback: () {
-                feedback();
-              }),
+              },
             ),
-            AppLocalizations.of(context).getLanguage()=='zh'?Container(
-              padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-              child: SideMenuBtn(iconData: IconFonts.agreement,text: AppLocalizations.of(context).getLanguageText('agreement'), callback: () {
-                showAgreementDialog(context);
+            Expanded(
+              flex: 1,
+              child: Stack(
+                children: [
+                  CustomScrollView(
+                    slivers: <Widget>[
+                      SliverList(
+                        delegate: SliverChildListDelegate(
+                            files.map<Widget>((e) => FileItem(
+                              fileData: e,
+                              onClick: () {
+                                if (e.contentType == 'directory') {
+                                  paths.add(e.name);
+                                  initData();
+                                  return;
+                                }
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {
+                                    initData();
+                                  })),
+                                );
+                              },
+                              checkStatus: checkedFiles.contains(e.uri)?CheckStatus.checked:CheckStatus.unchecked,
+                              onCheck: () {
+                                setState(() {
+                                  if (checkedFiles.contains(e.uri)) {
+                                    checkedFiles.remove(e.uri);
+                                  } else {
+                                    checkedFiles.add(e.uri);
+                                  }
+                                });
+                              },
+                            )).toList()..add(Container(height: 80, width: 1))
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              GestureDetector(
+                                child: Container(
+                                  padding: EdgeInsets.all(15.0),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: ColorUtils.lightGrey,
+                                  ),
+                                  child: Icon(
+                                    IconFonts.add,
+                                    color: ColorUtils.themeColor,
+                                    size: 20.0,
+                                  ),
+                                ),
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) {
+                                      return Container(
+                                        color: Colors.white,
+                                        height: 120,
+                                        padding: EdgeInsets.symmetric(horizontal: 20),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: actions.map((e) => Expanded(
+                                            flex: 1,
+                                            child: InkWell(
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                                children: [
+                                                  Image.asset(
+                                                    e.icon,
+                                                    height: 50.0,
+                                                    width: 50.0,
+                                                  ),
+                                                  Container(
+                                                    margin: EdgeInsets.only(top: 5),
+                                                    child: Text(
+                                                      AppLocalizations.of(context).getLanguageText(e.name),
+                                                      style: TextStyle(fontSize: 15),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              onTap: () {
+                                                doAction(e.actionType);
+                                              },
+                                            ),
+                                          )).toList(),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
+              ActionItem(iconData: IconFonts.copy, textCode: 'copy', callback: () {
+                var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+                showActionDialog(
+                  context: context,
+                  actionType: ActionDialogType.copy,
+                  checkedFiles: validFiles,
+                  relativePath: '',
+                  callback: (String targetPath, Map<String, String> fileNameMap) {
+                    validFiles.forEach((element) async {
+                      if (fileUtils.isDirectory(element.uri)) {
+                        fileUtils.copyDirectory(io.Directory(element.uri), io.Directory(path.join(targetPath, fileNameMap[element.uri])));
+                      } else {
+                        await io.File(element.uri).copy(path.join(targetPath, fileNameMap[element.uri]));
+                      }
+                    });
+                    Navigator.of(context).pop();
+                    toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
+                    checkedFiles.clear();
+                    initData();
+                  },
+                );
               }),
-            ):Container(),
-          ],
+              ActionItem(iconData: IconFonts.move, textCode: 'move', callback: () {
+                var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+                showActionDialog(
+                  context: context,
+                  actionType: ActionDialogType.move,
+                  checkedFiles: validFiles,
+                  relativePath: '',
+                  callback: (String targetPath, Map<String, String> fileNameMap) {
+                    validFiles.forEach((element) async {
+                      if (fileUtils.isDirectory(element.uri)) {
+                        io.Directory(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
+                      } else {
+                        io.File(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
+                      }
+                    });
+                    Navigator.of(context).pop();
+                    toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
+                    checkedFiles.clear();
+                    initData();
+                  },
+                );
+              }),
+              ActionItem(iconData: IconFonts.edit, textCode: 'rename', callback: () {
+                var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+                showActionDialog(
+                  context: context,
+                  actionType: ActionDialogType.rename,
+                  checkedFiles: validFiles,
+                  relativePath: paths.join(''),
+                  callback: (String targetPath, Map<String, String> fileNameMap) {
+                    validFiles.forEach((element) async {
+                      if (fileUtils.isDirectory(element.uri)) {
+                        io.Directory(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
+                      } else {
+                        io.File(element.uri).rename(path.join(targetPath, fileNameMap[element.uri]));
+                      }
+                    });
+                    Navigator.of(context).pop();
+                    toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('copy_success'));
+                    checkedFiles.clear();
+                    initData();
+                  },
+                );
+              }),
+              ActionItem(iconData: IconFonts.delete, textCode: 'delete', callback: () {
+                showAlertDialog(context, text: AppLocalizations.of(context).getLanguageText('delete_alert'), callback: () {
+                  var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
+                  validFiles.forEach((element) async {
+                    await io.File(element.uri).delete(recursive: true);
+                  });
+                  Navigator.of(context).pop();
+                  toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('delete_success'));
+                  checkedFiles.clear();
+                  initData();
+                });
+              }),
+            ]):Container(),
+          ]),
+        ),
+        drawer: Container(
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          color: ColorUtils.white,
+          width: 200,
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+                child: SideMenuBtn(iconData: IconFonts.feedback,text: AppLocalizations.of(context).getLanguageText('feedback'), callback: () {
+                  feedback();
+                }),
+              ),
+              AppLocalizations.of(context).getLanguage()=='zh'?Container(
+                padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+                child: SideMenuBtn(iconData: IconFonts.agreement,text: AppLocalizations.of(context).getLanguageText('agreement'), callback: () {
+                  showAgreementDialog(context);
+                }),
+              ):Container(),
+            ],
+          ),
         ),
       ),
     );
