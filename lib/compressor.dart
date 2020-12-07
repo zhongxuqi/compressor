@@ -6,7 +6,6 @@ import './utils/platform_custom.dart';
 import './utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
-import 'package:mime/mime.dart';
 import 'common/data.dart' as data;
 import 'dart:convert';
 import 'components/file_item.dart';
@@ -21,6 +20,8 @@ import 'components/directory_dialog.dart' as directory_dialog;
 import 'package:path/path.dart' as path;
 import './file_select.dart';
 import 'components/action_dialog.dart';
+import 'components/action_bar.dart';
+import 'components/delete_alert_dialog.dart';
 
 class CompressorPage extends StatefulWidget {
   final VoidCallback callback;
@@ -37,7 +38,7 @@ class CompressorPage extends StatefulWidget {
 
 class _CompressorPageState extends State<CompressorPage> {
   final fileTypes = <FilePicker>[
-    FilePicker(FileType.file, 'images/file_oa.png', 'file'),
+    FilePicker(FileType.file, 'images/file_open.png', 'file'),
     FilePicker(FileType.image, 'images/file_pic.png', 'image'),
     FilePicker(FileType.video, 'images/file_video.png', 'video'),
     FilePicker(FileType.directory, 'images/directory.png', 'directory'),
@@ -52,6 +53,7 @@ class _CompressorPageState extends State<CompressorPage> {
   var password = '';
   var inSubmit = false;
   data.File currentFile;
+  final Set<data.File> checkedFiles = Set<data.File>();
 
   Map<String, data.File> getFiles() {
     return currentFile != null ? currentFile.files : files;
@@ -100,6 +102,7 @@ class _CompressorPageState extends State<CompressorPage> {
                   await addFiles(getFiles(), validFiles, fileNameMap);
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                   setState(() {});
                 },
               );
@@ -121,7 +124,7 @@ class _CompressorPageState extends State<CompressorPage> {
       actionType: ActionDialogType.rename,
       checkedFiles: validFiles,
       relativePath: null,
-      excludeFileNames: getFiles().keys,
+      excludeFileNames: getFiles().keys.toList(),
       callback: (String targetPath, Map<String, String> fileNameMap) async {
         await addFiles(getFiles(), validFiles, fileNameMap);
         Navigator.of(context).pop();
@@ -370,6 +373,116 @@ class _CompressorPageState extends State<CompressorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final actionItems = <ActionItem>[];
+    if (checkedFiles.length > 0) {
+      actionItems.addAll(<ActionItem>[
+        ActionItem(iconData: IconFonts.edit, textCode: 'rename', callback: () {
+          showActionDialog(
+            context: context,
+            actionType: ActionDialogType.rename,
+            checkedFiles: checkedFiles.toList(),
+            relativePath: null,
+            excludeFileNames: getFiles().keys.toList(),
+            callback: (String targetPath, Map<String, String> fileNameMap) {
+              checkedFiles.forEach((e) {
+                e.name = fileNameMap[e.uri];
+              });
+              Navigator.of(context).pop();
+              checkedFiles.clear();
+              setState(() {});
+            },
+          );
+        }),
+        ActionItem(iconData: IconFonts.delete, textCode: 'delete', callback: () {
+          showDeleteAlertDialog(context, callback: () {
+            checkedFiles.forEach((e) {
+              files.remove(e.name);
+            });
+            Navigator.of(context).pop();
+            checkedFiles.clear();
+            setState(() {});
+          });
+        }),
+      ]);
+    }
+    actionItems.add(ActionItem(iconData: IconFonts.add, textCode: 'add', callback: () {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            color: Colors.white,
+            height: 180,
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: fileTypes.sublist(0, 3).map((e) => Expanded(
+                    flex: 1,
+                    child: InkWell(
+                      child: Column(
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            e.icon,
+                            height: 50.0,
+                            width: 50.0,
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 5),
+                            child: Text(
+                              AppLocalizations.of(context)
+                                  .getLanguageText(e.name),
+                              style: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        pick(e.fileType);
+                      },
+                    ),
+                  )).toList(),
+                ),
+                Container(height: 10, width: 1),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: fileTypes.sublist(3).map((e) => Expanded(
+                    flex: 1,
+                    child: InkWell(
+                      child: Column(
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            e.icon,
+                            height: 50.0,
+                            width: 50.0,
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 5),
+                            child: Text(
+                              AppLocalizations.of(context)
+                                  .getLanguageText(e.name),
+                              style: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        pick(e.fileType);
+                      },
+                    ),
+                  )).toList(),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }));
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -477,107 +590,23 @@ class _CompressorPageState extends State<CompressorPage> {
                             MaterialPageRoute(builder: (context) => FileDetailPage(fileData: e, callback: () {})),
                           );
                         },
+                        checkStatus: checkedFiles.contains(e)?CheckStatus.checked:CheckStatus.unchecked,
+                        onCheck: () {
+                          setState(() {
+                            if (checkedFiles.contains(e)) {
+                              checkedFiles.remove(e);
+                            } else {
+                              checkedFiles.add(e);
+                            }
+                          });
+                        },
                       )).toList(),
                     ),
                   ),
                 ],
               ),
             ),
-            InkWell(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 45,
-                      color: ColorUtils.themeColor,
-                      child: Icon(
-                        IconFonts.add,
-                        color: Colors.white,
-                        size: 20.0,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              onTap: () async {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return Container(
-                      color: Colors.white,
-                      height: 180,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: fileTypes.sublist(0, 3).map((e) => Expanded(
-                              flex: 1,
-                              child: InkWell(
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.center,
-                                  children: [
-                                    Image.asset(
-                                      e.icon,
-                                      height: 50.0,
-                                      width: 50.0,
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(top: 5),
-                                      child: Text(
-                                        AppLocalizations.of(context)
-                                            .getLanguageText(e.name),
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                onTap: () {
-                                  pick(e.fileType);
-                                },
-                              ),
-                            )).toList(),
-                          ),
-                          Container(height: 10, width: 1),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: fileTypes.sublist(3).map((e) => Expanded(
-                              flex: 1,
-                              child: InkWell(
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.center,
-                                  children: [
-                                    Image.asset(
-                                      e.icon,
-                                      height: 50.0,
-                                      width: 50.0,
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(top: 5),
-                                      child: Text(
-                                        AppLocalizations.of(context)
-                                            .getLanguageText(e.name),
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                onTap: () {
-                                  pick(e.fileType);
-                                },
-                              ),
-                            )).toList(),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+            ActionBar(actionItems: actionItems),
           ],
         ),
       ),

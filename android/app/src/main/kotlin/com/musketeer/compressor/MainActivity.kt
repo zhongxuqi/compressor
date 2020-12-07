@@ -278,7 +278,6 @@ class MainActivity: FlutterActivity() {
         val res = ExtractRes()
         try {
             val zipFile = File(uri)
-            Log.d(TAG, "===>>> $password")
             val zipFileObj = if (password.isNotEmpty()) {
                 ZipFile(zipFile, password.toCharArray())
             } else {

@@ -63,6 +63,7 @@ class _FileItemState extends State<FileItem> {
                       child: widget.fileData.contentType=='directory'?Text(
                         widget.fileData.name,
                         textAlign: TextAlign.left,
+                        maxLines: 1,
                         style: TextStyle(
                           fontSize: 16,
                           color: ColorUtils.textColor,
@@ -73,6 +74,7 @@ class _FileItemState extends State<FileItem> {
                           Text(
                             widget.fileData.name,
                             textAlign: TextAlign.left,
+                            maxLines: 1,
                             style: TextStyle(
                               fontSize: 16,
                               color: ColorUtils.textColor,
