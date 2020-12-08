@@ -268,6 +268,10 @@ class AppLocalizations {
       'en': 'Exit edit, are you sure?',
       'zh': '是否确认编辑',
     },
+    'file_name_conflict': {
+      'en': 'File Name Conflict',
+      'zh': '文件名冲突',
+    },
   };
 
   String getLanguageText(String textID) {

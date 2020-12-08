@@ -16,7 +16,8 @@ object FileUtils {
         try {
             val extension = getImageExtension(uri)
             inputStream = context.contentResolver.openInputStream(uri)
-            file = File.createTempFile("file_picker", extension, context.cacheDir)
+            file = File(context.cacheDir, "${System.nanoTime()}$extension")
+            file.createNewFile()
             file.deleteOnExit()
             outputStream = FileOutputStream(file!!)
             if (inputStream != null) {

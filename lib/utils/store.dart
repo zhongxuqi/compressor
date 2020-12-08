@@ -2,6 +2,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../common/data.dart';
 
 class StoreUtils {
+  static final hasOpenedKey = 'has-opened';
+  static void setHasOpened(bool hasOpened) async {
+    var sharedPreference = await SharedPreferences.getInstance();
+    await sharedPreference.setBool(hasOpenedKey, hasOpened);
+  }
+  static Future<bool> hasOpened() async {
+    var sharedPreference = await SharedPreferences.getInstance();
+    return sharedPreference.getBool(hasOpenedKey) == true;
+  }
+
   static final SortByKey = 'sort-by';
   static void setSortByKey(SortBy sortBy) async {
     var sharedPreference = await SharedPreferences.getInstance();

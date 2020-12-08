@@ -75,6 +75,7 @@ class _FileItemState extends State<FileItem> {
                             widget.fileData.name,
                             textAlign: TextAlign.left,
                             maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 16,
                               color: ColorUtils.textColor,

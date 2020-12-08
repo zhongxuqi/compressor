@@ -82,6 +82,8 @@ class _FileDetailPageState extends State<FileDetailPage> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             widget.fileData.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: ColorUtils.textColor,
                               fontSize: 16,

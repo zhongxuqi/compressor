@@ -90,9 +90,16 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    initData().then((value) {
+    initData().then((value) async {
       checkReceiveFiles(context: context, callback: () {
         initData();
+      });
+
+      Future.delayed(Duration(milliseconds: 500), () async {
+        if (!await StoreUtils.hasOpened()) {
+          showAgreementDialog(context);
+          StoreUtils.setHasOpened(true);
+        }
       });
     });
   }
