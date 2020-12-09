@@ -9,6 +9,8 @@ import android.util.Log
 import androidx.annotation.NonNull
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.annotation.JSONField
+import com.github.junrar.Archive
+import com.github.junrar.Junrar
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -108,14 +110,14 @@ class MainActivity: FlutterActivity() {
                     }
                     "get_file_headers" -> {
                         val req = call.arguments as HashMap<String, String>
-                        val fileHeaders = getFileHeaders(req["uri"]!!, req["password"]!!)
+                        val fileHeaders = getFileHeaders(req["archive_type"]!!, req["uri"]!!, req["password"]!!)
                         result.success(JSON.toJSONString(fileHeaders))
                     }
                     "extract_file" -> {
                         val req = call.arguments as HashMap<String, String>
                         executor.submit(object: Runnable{
                             override fun run() {
-                                val res = extractFile(req["uri"]!!, req["password"]!!, req["file_name"]!!)
+                                val res = extractFile(req["archive_type"]!!, req["uri"]!!, req["password"]!!, req["file_name"]!!)
                                 mainExecutor.post(object: Runnable{
                                     override fun run() {
                                         result.success(JSON.toJSONString(res))
@@ -128,7 +130,7 @@ class MainActivity: FlutterActivity() {
                         val req = call.arguments as HashMap<String, String>
                         executor.submit(object: Runnable{
                             override fun run() {
-                                val res = extractAll(req["uri"]!!, req["password"]!!, req["target_dir"]!!)
+                                val res = extractAll(req["archive_type"]!!, req["uri"]!!, req["password"]!!, req["target_dir"]!!)
                                 mainExecutor.post(object: Runnable{
                                     override fun run() {
                                         result.success(JSON.toJSONString(res))
@@ -252,78 +254,172 @@ class MainActivity: FlutterActivity() {
         targetFile.deleteOnExit()
     }
 
-    fun getFileHeaders(uri: String, password: String): List<FileHeader> {
-        val zipFile = File(uri)
-        val zipFileObj = if (!password.isEmpty()) {
-            ZipFile(zipFile, password.toCharArray())
-        } else {
-            ZipFile(zipFile)
-        }
-        return zipFileObj.fileHeaders.map { zipFileHeader ->
-            val fileHeader = FileHeader()
-            fileHeader.FileName = zipFileHeader.fileName
-            fileHeader.IsDirectory = zipFileHeader.isDirectory
-            if (fileHeader.IsDirectory) {
-                fileHeader.ContentType = "directory"
-            } else {
-                fileHeader.ContentType = URLConnection.getFileNameMap().getContentTypeFor(fileHeader.FileName)
+    fun getFileHeaders(archiveType: String, uri: String, password: String): List<FileHeader> {
+        when (archiveType) {
+            "rar" -> {
+                val rarFile = File(uri)
+                val rarFileObj = Archive(rarFile)
+                if (password.isNotEmpty()) {
+                    rarFileObj.password = password
+                }
+                return rarFileObj.fileHeaders.map {
+                    val fileHeader = FileHeader()
+                    fileHeader.FileName = it.fileName
+                    fileHeader.IsDirectory = it.isDirectory
+                    if (fileHeader.IsDirectory) {
+                        fileHeader.ContentType = "directory"
+                    } else {
+                        fileHeader.ContentType = URLConnection.getFileNameMap().getContentTypeFor(fileHeader.FileName)
+                    }
+                    fileHeader.LastModified = it.mTime.time / 1000
+                    fileHeader.FileSize = it.dataSize
+                    fileHeader
+                }
             }
-            fileHeader.LastModified = zipFileHeader.lastModifiedTimeEpoch / 1000
-            fileHeader.FileSize = zipFileHeader.uncompressedSize
-            fileHeader
+            else -> {
+                val zipFile = File(uri)
+                val zipFileObj = if (password.isNotEmpty()) {
+                    ZipFile(zipFile, password.toCharArray())
+                } else {
+                    ZipFile(zipFile)
+                }
+                return zipFileObj.fileHeaders.map { zipFileHeader ->
+                    val fileHeader = FileHeader()
+                    fileHeader.FileName = zipFileHeader.fileName
+                    fileHeader.IsDirectory = zipFileHeader.isDirectory
+                    if (fileHeader.IsDirectory) {
+                        fileHeader.ContentType = "directory"
+                    } else {
+                        fileHeader.ContentType = URLConnection.getFileNameMap().getContentTypeFor(fileHeader.FileName)
+                    }
+                    fileHeader.LastModified = zipFileHeader.lastModifiedTimeEpoch / 1000
+                    fileHeader.FileSize = zipFileHeader.uncompressedSize
+                    fileHeader
+                }
+            }
         }
     }
 
-    fun extractFile(uri: String, password: String, fileName: String): ExtractRes {
+    fun extractFile(archiveType: String, uri: String, password: String, fileName: String): ExtractRes {
         val res = ExtractRes()
-        try {
-            val zipFile = File(uri)
-            val zipFileObj = if (password.isNotEmpty()) {
-                ZipFile(zipFile, password.toCharArray())
-            } else {
-                ZipFile(zipFile)
+        when (archiveType) {
+            "rar" -> {
+                try {
+                    val rarFile = File(uri)
+                    val rarFileObj = Archive(rarFile)
+                    if (password.isNotEmpty()) {
+                        rarFileObj.password = password
+                    }
+                    val destPath = File(externalCacheDir!!.absolutePath, fileName)
+                    if (destPath.exists()) {
+                        destPath.deleteRecursively()
+                    }
+                    val matchedFileHeaders = rarFileObj.fileHeaders.filter {
+                        it.fileName == fileName
+                    }
+                    if (matchedFileHeaders.isEmpty()) {
+                        res.errCode = "uncompress_error"
+                    } else {
+                        destPath.createNewFile()
+                        rarFileObj.extractFile(matchedFileHeaders[0], destPath.outputStream())
+                        destPath.deleteOnExit()
+                        res.targetUri = destPath.path
+                        return res
+                    }
+                } catch (e: ZipException) {
+                    e.printStackTrace()
+                    res.errCode = "uncompress_error"
+                    if (e.type == ZipException.Type.WRONG_PASSWORD) {
+                        res.errCode = "wrong_password"
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    res.errCode = "uncompress_error"
+                }
             }
-            val destPath = File(externalCacheDir!!.absolutePath, fileName)
-            if (destPath.exists()) {
-                destPath.deleteRecursively()
+            else -> {
+                try {
+                    val zipFile = File(uri)
+                    val zipFileObj = if (password.isNotEmpty()) {
+                        ZipFile(zipFile, password.toCharArray())
+                    } else {
+                        ZipFile(zipFile)
+                    }
+                    val destPath = File(externalCacheDir!!.absolutePath, fileName)
+                    if (destPath.exists()) {
+                        destPath.deleteRecursively()
+                    }
+                    zipFileObj.extractFile(fileName, externalCacheDir!!.absolutePath)
+                    destPath.deleteOnExit()
+                    res.targetUri = destPath.path
+                    return res
+                } catch (e: ZipException) {
+                    e.printStackTrace()
+                    res.errCode = "uncompress_error"
+                    if (e.type == ZipException.Type.WRONG_PASSWORD) {
+                        res.errCode = "wrong_password"
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    res.errCode = "uncompress_error"
+                }
             }
-            zipFileObj.extractFile(fileName, externalCacheDir!!.absolutePath)
-            destPath.deleteOnExit()
-            res.targetUri = destPath.path
-            return res
-        } catch (e: ZipException) {
-            e.printStackTrace()
-            res.errCode = "unzip_error"
-            if (e.type == ZipException.Type.WRONG_PASSWORD) {
-                res.errCode = "wrong_password"
-            }
-        } catch (e: Exception) {
-            res.errCode = "unzip_error"
         }
         return res
     }
 
-    fun extractAll(uri: String, password: String, targetDir: String): ExtractRes {
+    fun extractAll(archiveType: String, uri: String, password: String, targetDir: String): ExtractRes {
         val res = ExtractRes()
-        try {
-            val zipFile = File(uri)
-            val zipFileObj = if (password.isNotEmpty()) {
-                ZipFile(zipFile, password.toCharArray())
-            } else {
-                ZipFile(zipFile)
+        when (archiveType) {
+            "rar" -> {
+                try {
+                    val rarFile = File(uri)
+                    val rarFileObj = Archive(rarFile)
+                    if (password.isNotEmpty()) {
+                        rarFileObj.password = password
+                    }
+                    val targetDirObj = File(targetDir)
+                    if (!targetDirObj.exists()) {
+                        targetDirObj.mkdir()
+                    }
+                    Junrar.extract(uri, targetDir)
+                } catch (e: ZipException) {
+                    e.printStackTrace()
+                    res.errCode = "uncompress_error"
+                    if (e.type == ZipException.Type.WRONG_PASSWORD) {
+                        res.errCode = "wrong_password"
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    res.errCode = "uncompress_error"
+                }
+                if (res.errCode.isNotEmpty()) {
+                    File(targetDir).deleteRecursively()
+                }
             }
-            zipFileObj.extractAll(targetDir)
-        } catch (e: ZipException) {
-            e.printStackTrace()
-            res.errCode = "unzip_error"
-            if (e.type == ZipException.Type.WRONG_PASSWORD) {
-                res.errCode = "wrong_password"
+            else -> {
+                try {
+                    val zipFile = File(uri)
+                    val zipFileObj = if (password.isNotEmpty()) {
+                        ZipFile(zipFile, password.toCharArray())
+                    } else {
+                        ZipFile(zipFile)
+                    }
+                    zipFileObj.extractAll(targetDir)
+                } catch (e: ZipException) {
+                    e.printStackTrace()
+                    res.errCode = "uncompress_error"
+                    if (e.type == ZipException.Type.WRONG_PASSWORD) {
+                        res.errCode = "wrong_password"
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    res.errCode = "uncompress_error"
+                }
+                if (res.errCode.isNotEmpty()) {
+                    File(targetDir).deleteRecursively()
+                }
             }
-        } catch (e: Exception) {
-            res.errCode = "unzip_error"
-        }
-        if (res.errCode.isNotEmpty()) {
-            File(targetDir).deleteRecursively()
         }
         return res
     }

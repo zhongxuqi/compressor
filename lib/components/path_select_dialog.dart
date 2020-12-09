@@ -109,10 +109,9 @@ class _PathSelectDialogState extends State<PathSelectDialog> {
           padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
           child: FormTextInput(
             key: _directoryNameInputKey,
-            keyName: AppLocalizations.of(context).getLanguageText('unzip_dir_name'),
+            keyName: AppLocalizations.of(context).getLanguageText('uncompress_dir_name'),
             value: directoryName,
-            hintText: AppLocalizations.of(context)
-                .getLanguageText('input_file_name_hint'),
+            hintText: AppLocalizations.of(context).getLanguageText('input_file_name_hint'),
             maxLines: 1,
             onChange: (value) {
               directoryName = value;

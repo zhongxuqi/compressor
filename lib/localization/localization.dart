@@ -104,23 +104,23 @@ class AppLocalizations {
       'en': 'Extracting',
       'zh': '提取中',
     },
-    'unzip': {
-      'en': 'Unzip',
+    'uncompress': {
+      'en': 'Uncompress',
       'zh': '解压',
     },
     'select_target_directory': {
       'en': 'Select Target Directory',
       'zh': '请选择目标目录',
     },
-    'unzip_dir_name': {
-      'en': 'Unzip Directory Name',
+    'uncompress_dir_name': {
+      'en': 'Uncompress Directory Name',
       'zh': '解压目录名',
     },
-    'unzip_success': {
-      'en': 'Unzip Success',
+    'uncompress_success': {
+      'en': 'Uncompress Success',
       'zh': '解压成功',
     },
-    'unzip_failure': {
+    'uncompress_failure': {
       'en': 'Unzip Failure',
       'zh': '解压失败',
     },

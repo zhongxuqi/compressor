@@ -62,9 +62,10 @@ class FileHeader {
   FileHeader({@required this.fileName, @required this.isDirectory, @required this.contentType, @required this.lastModified, @required this.fileSize});
 }
 
-Future<List<FileHeader>> getFileHeaders(String uri, String password) async {
+Future<List<FileHeader>> getFileHeaders(String archiveType, String uri, String password) async {
   try {
     var result = await platform.invokeMethod('get_file_headers', {
+      'archive_type': archiveType,
       'uri': uri,
       'password': password,
     });
@@ -91,9 +92,10 @@ class ExtractRes {
   ExtractRes({@required this.errCode, @required this. targetUri});
 }
 
-Future<ExtractRes> extractFile(String uri, String password, String fileName) async {
+Future<ExtractRes> extractFile(String archiveType, String uri, String password, String fileName) async {
   try {
     var result = await platform.invokeMethod('extract_file', {
+      'archive_type': archiveType,
       'uri': uri,
       'password': password,
       'file_name': fileName,
@@ -106,9 +108,10 @@ Future<ExtractRes> extractFile(String uri, String password, String fileName) asy
   return ExtractRes(errCode: 'unzip_error', targetUri: '');
 }
 
-Future<ExtractRes> extractAll(String uri, String password, String targetDir) async {
+Future<ExtractRes> extractAll(String archiveType, String uri, String password, String targetDir) async {
   try {
     var result = await platform.invokeMethod('extract_all', {
+      'archive_type': archiveType,
       'uri': uri,
       'password': password,
       'target_dir': targetDir,

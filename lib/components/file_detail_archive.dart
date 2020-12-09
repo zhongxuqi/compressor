@@ -1,7 +1,6 @@
 import 'package:compressor/utils/platform_custom.dart';
 import 'package:compressor/utils/toast.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../common/data.dart' as data;
 import 'file_item.dart';
 import '../file_detail.dart';
@@ -15,19 +14,20 @@ import '../utils/colors.dart';
 import 'path_select_dialog.dart';
 import 'form_text_input.dart';
 
-class FileDetailZip extends StatefulWidget {
+class FileDetailArchive extends StatefulWidget {
+  final String archiveType;
   final data.File fileData;
   final VoidCallback callback;
 
-  FileDetailZip({Key key, @required this.fileData, @required this.callback}):super(key: key);
+  FileDetailArchive({Key key, @required this.archiveType, @required this.fileData, @required this.callback}):super(key: key);
 
   @override
   State createState() {
-    return _FileDetailZipState();
+    return _FileDetailArchiveState();
   }
 }
 
-class _FileDetailZipState extends State<FileDetailZip> {
+class _FileDetailArchiveState extends State<FileDetailArchive> {
   var files = Map<String, data.File>();
   data.File currentFile;
   var showPasswordInput = false;
@@ -45,7 +45,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
   }
 
   void initFiles() async {
-    final fileHeaders = await getFileHeaders(widget.fileData.uri, '');
+    final fileHeaders = await getFileHeaders(widget.archiveType, widget.fileData.uri, '');
     fileHeaders.forEach((e) {
       if (e.isDirectory) return;
       final paths = e.fileName.split("/");
@@ -143,7 +143,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
                               return;
                             }
                             showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('extracting'), barrierDismissible: true);
-                            final extractRes = await extractFile(widget.fileData.uri, password, e.uri);
+                            final extractRes = await extractFile(widget.archiveType, widget.fileData.uri, password, e.uri);
                             Navigator.of(context).pop();
                             if (extractRes.errCode.isNotEmpty) {
                               if (extractRes.errCode == 'wrong_password') {
@@ -153,7 +153,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
                                 });
                                 return;
                               }
-                              showErrorToast(AppLocalizations.of(context).getLanguageText('unzip_failure'));
+                              showErrorToast(AppLocalizations.of(context).getLanguageText('uncompress_failure'));
                               return;
                             }
                             if (extractRes.targetUri.isNotEmpty) {
@@ -178,7 +178,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
                         color: ColorUtils.themeColor,
                         alignment: Alignment.center,
                         child: Text(
-                          AppLocalizations.of(context).getLanguageText('unzip'),
+                          AppLocalizations.of(context).getLanguageText('uncompress'),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -189,7 +189,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
                   ],
                 ),
                 onTap: () async {
-                  final endIndex = widget.fileData.name.indexOf('.zip');
+                  final endIndex = widget.fileData.name.lastIndexOf('.');
                   String defaultDirName = '';
                   if (endIndex >= 0) {
                     defaultDirName = widget.fileData.name.substring(0, endIndex);
@@ -197,7 +197,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
                     defaultDirName = widget.fileData.name;
                   }
                   selectPath(context: context, callback: (p) async {
-                    final extractRes = await extractAll(widget.fileData.uri, password, await fileUtils.getTargetPath(p));
+                    final extractRes = await extractAll(widget.archiveType, widget.fileData.uri, password, await fileUtils.getTargetPath(p));
                     if (extractRes.errCode.isNotEmpty) {
                       if (extractRes.errCode == 'wrong_password') {
                         Navigator.of(context).pop();
@@ -207,12 +207,12 @@ class _FileDetailZipState extends State<FileDetailZip> {
                         });
                         return;
                       }
-                      showErrorToast(AppLocalizations.of(context).getLanguageText('unzip_failure'));
+                      showErrorToast(AppLocalizations.of(context).getLanguageText('uncompress_failure'));
                       return;
                     }
                     widget.callback();
                     Navigator.of(context).pop();
-                    showSuccessToast(AppLocalizations.of(context).getLanguageText('unzip_success'));
+                    showSuccessToast(AppLocalizations.of(context).getLanguageText('uncompress_success'));
                   }, defaultDirName: defaultDirName);
                 },
               ),

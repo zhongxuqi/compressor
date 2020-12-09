@@ -12,7 +12,7 @@ import 'components/file_detail_image.dart';
 import 'components/file_detail_video.dart';
 import 'components/file_detail_text.dart';
 import 'components/file_detail_pdf.dart';
-import 'components/file_detail_zip.dart';
+import 'components/file_detail_archive.dart';
 import 'package:share/share.dart';
 import 'components/action_dialog.dart';
 import 'localization/localization.dart';
@@ -55,7 +55,9 @@ class _FileDetailPageState extends State<FileDetailPage> {
     } else if (fileData.contentType.startsWith("application/pdf")) {
       return FileDetailPDF(fileData: fileData);
     } else if (fileData.contentType.startsWith("application/zip")) {
-      return FileDetailZip(fileData: fileData, callback: widget.callback);
+      return FileDetailArchive(archiveType: 'zip', fileData: fileData, callback: widget.callback);
+    } else if (fileData.contentType.startsWith("application/x-rar-compressed")) {
+      return FileDetailArchive(archiveType: 'rar', fileData: fileData, callback: widget.callback);
     }
     return FileDetailUnknown();
   }
