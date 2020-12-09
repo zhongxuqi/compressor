@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'common/data.dart' as data;
+import 'dart:io' as io;
+import 'package:path/path.dart' as path;
+import 'utils/toast.dart' as toastUtils;
 import 'utils/colors.dart';
 import 'utils/iconfonts.dart';
 import 'utils/mime.dart';
+import 'utils/file.dart' as fileUtils;
 import 'components/file_detail_unknown.dart';
 import 'components/file_detail_image.dart';
 import 'components/file_detail_video.dart';
@@ -10,6 +14,8 @@ import 'components/file_detail_text.dart';
 import 'components/file_detail_pdf.dart';
 import 'components/file_detail_zip.dart';
 import 'package:share/share.dart';
+import 'components/action_dialog.dart';
+import 'localization/localization.dart';
 
 class FileDetailPage extends StatefulWidget {
   final VoidCallback callback;
@@ -24,17 +30,32 @@ class FileDetailPage extends StatefulWidget {
 }
 
 class _FileDetailPageState extends State<FileDetailPage> {
+  data.File fileData;
+  String documentPath = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fileData = widget.fileData;
+    initData();
+  }
+
+  void initData() async {
+    documentPath = await fileUtils.getTargetPath('');
+    setState(() {});
+  }
+
   Widget getWidgetByFile() {
-    if (widget.fileData.contentType.startsWith("image")) {
-      return FileDetailImage(fileData: widget.fileData);
-    } else if (widget.fileData.contentType.startsWith("video")) {
-      return FileDetailVideo(fileData: widget.fileData);
-    } else if (widget.fileData.contentType.startsWith("text")) {
-      return FileDetailText(fileData: widget.fileData);
-    } else if (widget.fileData.contentType.startsWith("application/pdf")) {
-      return FileDetailPDF(fileData: widget.fileData);
-    } else if (widget.fileData.contentType.startsWith("application/zip")) {
-      return FileDetailZip(fileData: widget.fileData, callback: widget.callback);
+    if (fileData.contentType.startsWith("image")) {
+      return FileDetailImage(fileData: fileData);
+    } else if (fileData.contentType.startsWith("video")) {
+      return FileDetailVideo(fileData: fileData);
+    } else if (fileData.contentType.startsWith("text")) {
+      return FileDetailText(fileData: fileData);
+    } else if (fileData.contentType.startsWith("application/pdf")) {
+      return FileDetailPDF(fileData: fileData);
+    } else if (fileData.contentType.startsWith("application/zip")) {
+      return FileDetailZip(fileData: fileData, callback: widget.callback);
     }
     return FileDetailUnknown();
   }
@@ -72,7 +93,7 @@ class _FileDetailPageState extends State<FileDetailPage> {
                       Container(
                         margin: EdgeInsets.only(right: 5),
                         child: Image.asset(
-                          MimeUtils.getIconByMime(widget.fileData.contentType),
+                          MimeUtils.getIconByMime(fileData.contentType),
                           height: 30.0,
                           width: 30.0,
                         ),
@@ -81,7 +102,7 @@ class _FileDetailPageState extends State<FileDetailPage> {
                         child: Container(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            widget.fileData.name,
+                            fileData.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -91,6 +112,39 @@ class _FileDetailPageState extends State<FileDetailPage> {
                             ),
                           ),
                         ),
+                      ),
+                      documentPath.isEmpty||fileData.uri.startsWith(documentPath)?Container():InkWell(
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          child: Icon(
+                            IconFonts.add,
+                            color: ColorUtils.themeColor,
+                            size: 20.0,
+                          ),
+                        ),
+                        onTap: () {
+                          showActionDialog(
+                            context: context,
+                            actionType: ActionDialogType.copy,
+                            checkedFiles: <data.File>[fileData],
+                            relativePath: '',
+                            callback: (String targetPath, Map<String, String> fileNameMap) async {
+                              final toPath = path.join(targetPath, fileNameMap[fileData.uri]);
+                              if (fileUtils.isDirectory(fileData.uri)) {
+                                fileUtils.copyDirectory(io.Directory(fileData.uri), io.Directory(toPath));
+                              } else {
+                                await io.File(fileData.uri).copy(toPath);
+                              }
+                              Navigator.of(context).pop();
+                              toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('add_success'));
+                              widget.callback();
+                              setState(() {
+                                fileData = fileUtils.path2File(toPath);
+                              });
+                            },
+                          );
+                        },
                       ),
                       InkWell(
                         child: Container(
@@ -103,7 +157,7 @@ class _FileDetailPageState extends State<FileDetailPage> {
                           ),
                         ),
                         onTap: () {
-                          Share.shareFiles([widget.fileData.uri]);
+                          Share.shareFiles([fileData.uri]);
                         },
                       ),
                     ],

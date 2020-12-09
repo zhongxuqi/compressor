@@ -145,7 +145,6 @@ class _CompressorPageState extends State<CompressorPage> {
         currentFile,
       );
       rootNode[fileName] = fileData;
-
       if (contentType == 'directory') {
         final filePaths = await fileUtils.listFileByAbsolute(element.uri);
         final subValidFiles = filePaths.map((e) => fileUtils.path2File(e.uri)).toList();
@@ -168,10 +167,7 @@ class _CompressorPageState extends State<CompressorPage> {
 
   void createDirectory() async {
     Navigator.of(context).pop();
-    directory_dialog.createDirectory(
-        context: context,
-        callback: doCreateDirectory,
-        excludedNames: getFiles().entries.map((e) => e.value.name).toList());
+    directory_dialog.createDirectory(context: context, callback: doCreateDirectory, excludedNames: getFiles().entries.map((e) => e.value.name).toList());
   }
 
   Future<bool> checkFileExists(String fileName) async {
@@ -281,11 +277,9 @@ class _CompressorPageState extends State<CompressorPage> {
               padding: EdgeInsets.only(top: 0, left: 15, right: 15),
               child: FormTextInput(
                 key: _fileNameInputKey,
-                keyName:
-                    AppLocalizations.of(context).getLanguageText('file_name'),
+                keyName: AppLocalizations.of(context).getLanguageText('file_name'),
                 value: fileName,
-                hintText: AppLocalizations.of(context)
-                    .getLanguageText('input_file_name_hint'),
+                hintText: AppLocalizations.of(context).getLanguageText('input_file_name_hint'),
                 maxLines: 1,
                 onChange: (value) {
                   fileName = value;
@@ -433,8 +427,7 @@ class _CompressorPageState extends State<CompressorPage> {
                           Container(
                             margin: EdgeInsets.only(top: 5),
                             child: Text(
-                              AppLocalizations.of(context)
-                                  .getLanguageText(e.name),
+                              AppLocalizations.of(context).getLanguageText(e.name),
                               style: TextStyle(fontSize: 15),
                             ),
                           ),
@@ -464,8 +457,7 @@ class _CompressorPageState extends State<CompressorPage> {
                           Container(
                             margin: EdgeInsets.only(top: 5),
                             child: Text(
-                              AppLocalizations.of(context)
-                                  .getLanguageText(e.name),
+                              AppLocalizations.of(context).getLanguageText(e.name),
                               style: TextStyle(fontSize: 15),
                             ),
                           ),

@@ -159,7 +159,7 @@ class _FileDetailZipState extends State<FileDetailZip> {
                             if (extractRes.targetUri.isNotEmpty) {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => FileDetailPage(fileData: fileUtils.path2File(extractRes.targetUri), callback: () {})),
+                                MaterialPageRoute(builder: (context) => FileDetailPage(fileData: fileUtils.path2File(extractRes.targetUri), callback: widget.callback)),
                               );
                             }
                           },
