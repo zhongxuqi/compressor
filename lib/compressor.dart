@@ -183,13 +183,13 @@ class _CompressorPageState extends State<CompressorPage> {
     inSubmit = true;
     var hasErr = false;
     if (fileName == "") {
-      _fileNameInputKey.currentState.setTextError(
-          AppLocalizations.of(context).getLanguageText('required'));
+      _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('required'));
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_empty'));
       hasErr = true;
     }
     if (await checkFileExists("$fileName.zip")) {
-      _fileNameInputKey.currentState.setTextError(
-          AppLocalizations.of(context).getLanguageText('file_exists'));
+      _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
       hasErr = true;
     }
     if (hasErr) {

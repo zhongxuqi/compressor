@@ -122,8 +122,16 @@ class _ActionDialogState extends State<ActionDialog> {
       var hasError = false;
       final selfFileNameSet = Set<String>();
       widget.checkedFiles.forEach((element) {
+        if (fileNameMap[element.uri].isEmpty) {
+          formFileItemKeyMap[element.uri].currentState.fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('required'));
+          toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_empty'));
+          hasError = true;
+        }
+      });
+      widget.checkedFiles.forEach((element) {
         if (selfFileNameSet.contains(fileNameMap[element.uri])) {
           formFileItemKeyMap[element.uri].currentState.fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
+          toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
           hasError = true;
         } else {
           selfFileNameSet.add(fileNameMap[element.uri]);
@@ -132,6 +140,7 @@ class _ActionDialogState extends State<ActionDialog> {
       widget.checkedFiles.forEach((element) {
         if (fileNameSet.contains(fileNameMap[element.uri])) {
           formFileItemKeyMap[element.uri].currentState.fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
+          toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
           hasError = true;
         }
       });
@@ -224,9 +233,7 @@ class _ActionDialogState extends State<ActionDialog> {
                           fileData: e,
                           fileNameListener: (fileName) {
                             fileNameMap[e.uri] = fileName;
-                            formFileItemKeyMap[e.uri].currentState
-                                .fileNameInputKey.currentState.setTextError(
-                                '');
+                            formFileItemKeyMap[e.uri].currentState.fileNameInputKey.currentState.setTextError('');
                           },
                         )).toList()
                 ),

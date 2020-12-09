@@ -272,6 +272,10 @@ class AppLocalizations {
       'en': 'File Name Conflict',
       'zh': '文件名冲突',
     },
+    'file_name_empty': {
+      'en': 'File Name Empty',
+      'zh': '文件名为空',
+    },
   };
 
   String getLanguageText(String textID) {
