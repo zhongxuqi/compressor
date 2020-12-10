@@ -15,6 +15,7 @@ class MimeUtils {
     _MimeItem(mimeType: 'application/pdf', mimeIcon: 'images/file_pdf.png'),
     _MimeItem(mimeType: 'application/zip', mimeIcon: 'images/file_zip.png'),
     _MimeItem(mimeType: 'application/x-rar-compressed', mimeIcon: 'images/file_zip.png'),
+    _MimeItem(mimeType: 'application/x-7z-compressed', mimeIcon: 'images/file_zip.png'),
     _MimeItem(mimeType: 'directory', mimeIcon: 'images/directory.png'),
   ];
 

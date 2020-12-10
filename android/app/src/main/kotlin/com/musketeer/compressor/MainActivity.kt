@@ -20,11 +20,18 @@ import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.ZipParameters
 import net.lingala.zip4j.model.enums.EncryptionMethod
+import net.sf.sevenzipjbinding.*
+import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream
+import net.sf.sevenzipjbinding.impl.RandomAccessFileOutStream
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.RandomAccessFile
 import java.net.URLConnection
+import java.util.*
 import java.util.concurrent.Executors
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class FileInfo {
@@ -109,9 +116,13 @@ class MainActivity: FlutterActivity() {
                         })
                     }
                     "get_file_headers" -> {
-                        val req = call.arguments as HashMap<String, String>
-                        val fileHeaders = getFileHeaders(req["archive_type"]!!, req["uri"]!!, req["password"]!!)
-                        result.success(JSON.toJSONString(fileHeaders))
+                        try {
+                            val req = call.arguments as HashMap<String, String>
+                            val fileHeaders = getFileHeaders(req["archive_type"]!!, req["uri"]!!, req["password"]!!)
+                            result.success(JSON.toJSONString(fileHeaders))
+                        } catch(e: java.lang.Exception) {
+                            e.printStackTrace()
+                        }
                     }
                     "extract_file" -> {
                         val req = call.arguments as HashMap<String, String>
@@ -276,6 +287,33 @@ class MainActivity: FlutterActivity() {
                     fileHeader
                 }
             }
+            "7z" -> {
+                val sevenZipFile = File(uri)
+                val randomAccessFile = RandomAccessFile(sevenZipFile, "r")
+                val inStream = RandomAccessFileInStream(randomAccessFile)
+                val inArchive = if (password.isNotEmpty()) {
+                    SevenZip.openInArchive(ArchiveFormat.SEVEN_ZIP, inStream, password)
+                } else {
+                    SevenZip.openInArchive(ArchiveFormat.SEVEN_ZIP, inStream)
+                }
+                val fileHeaders = ArrayList<FileHeader>()
+                for (i in 0 until inArchive.numberOfItems) {
+                    val fileHeader = FileHeader()
+                    fileHeader.FileName = inArchive.getStringProperty(i, PropID.PATH)
+                    fileHeader.IsDirectory = inArchive.getProperty(i, PropID.IS_FOLDER) as Boolean
+                    if (fileHeader.IsDirectory) {
+                        fileHeader.ContentType = "directory"
+                    } else {
+                        fileHeader.ContentType = URLConnection.getFileNameMap().getContentTypeFor(fileHeader.FileName)
+                    }
+                    fileHeader.LastModified = (inArchive.getProperty(i, PropID.LAST_MODIFICATION_TIME) as Date).time
+                    fileHeader.FileSize = inArchive.getProperty(i, PropID.SIZE) as Long
+                    fileHeaders.add(fileHeader)
+                }
+                inArchive.close()
+                inStream.close()
+                return fileHeaders
+            }
             else -> {
                 val zipFile = File(uri)
                 val zipFileObj = if (password.isNotEmpty()) {
@@ -337,6 +375,43 @@ class MainActivity: FlutterActivity() {
                     res.errCode = "uncompress_error"
                 }
             }
+            "7z" -> {
+                try {
+                    val sevenZipFile = File(uri)
+                    val randomAccessFile = RandomAccessFile(sevenZipFile, "r")
+                    val inStream = RandomAccessFileInStream(randomAccessFile)
+                    val inArchive = if (password.isNotEmpty()) {
+                        SevenZip.openInArchive(ArchiveFormat.SEVEN_ZIP, inStream, password)
+                    } else {
+                        SevenZip.openInArchive(ArchiveFormat.SEVEN_ZIP, inStream)
+                    }
+                    var fileIndex = -1
+                    for (i in 0 until inArchive.numberOfItems) {
+                        if (inArchive.getStringProperty(i, PropID.PATH) == fileName) {
+                            fileIndex = i
+                            break
+                        }
+                    }
+                    val destPath = File(externalCacheDir!!.absolutePath, fileName)
+                    if (destPath.exists()) {
+                        destPath.deleteRecursively()
+                    }
+                    if (fileIndex < 0) {
+                        res.errCode = "uncompress_error"
+                    } else {
+                        destPath.createNewFile()
+                        val outStream = RandomAccessFileOutStream(RandomAccessFile(destPath, "rw"))
+                        inArchive.extractSlow(fileIndex, outStream)
+                        destPath.deleteOnExit()
+                        res.targetUri = destPath.path
+                        return res
+                    }
+                    inArchive.close()
+                    inStream.close()
+                } catch(e: Exception) {
+                    e.printStackTrace()
+                }
+            }
             else -> {
                 try {
                     val zipFile = File(uri)
@@ -392,6 +467,52 @@ class MainActivity: FlutterActivity() {
                 } catch (e: Exception) {
                     e.printStackTrace()
                     res.errCode = "uncompress_error"
+                }
+                if (res.errCode.isNotEmpty()) {
+                    File(targetDir).deleteRecursively()
+                }
+            }
+            "7z" -> {
+                try {
+                    val sevenZipFile = File(uri)
+                    val randomAccessFile = RandomAccessFile(sevenZipFile, "r")
+                    val inStream = RandomAccessFileInStream(randomAccessFile)
+                    val inArchive = if (password.isNotEmpty()) {
+                        SevenZip.openInArchive(ArchiveFormat.SEVEN_ZIP, inStream, password)
+                    } else {
+                        SevenZip.openInArchive(ArchiveFormat.SEVEN_ZIP, inStream)
+                    }
+                    val targetDirObj = File(targetDir)
+                    if (!targetDirObj.exists()) {
+                        targetDirObj.mkdir()
+                    }
+                    inArchive.extract(null, false, object: IArchiveExtractCallback{
+                        override fun setOperationResult(p0: ExtractOperationResult?) {
+                            Log.d(TAG, "setOperationResult ${p0.toString()}")
+                        }
+
+                        override fun setCompleted(p0: Long) {
+                            Log.d(TAG, "setCompleted ${p0.toString()}")
+                        }
+
+                        override fun getStream(p0: Int, p1: ExtractAskMode?): ISequentialOutStream {
+                            Log.d(TAG, "getStream ${p0.toString()} ${p1.toString()}")
+                            val outFile = File(targetDir, inArchive.getStringProperty(p0, PropID.PATH))
+                            return RandomAccessFileOutStream(RandomAccessFile(outFile, "rw"))
+                        }
+
+                        override fun prepareOperation(p0: ExtractAskMode?) {
+                            Log.d(TAG, "prepareOperation ${p0.toString()}")
+                        }
+
+                        override fun setTotal(p0: Long) {
+                            Log.d(TAG, "setTotal ${p0.toString()}")
+                        }
+                    })
+                    inArchive.close()
+                    inStream.close()
+                } catch(e: Exception) {
+                    e.printStackTrace()
                 }
                 if (res.errCode.isNotEmpty()) {
                     File(targetDir).deleteRecursively()
