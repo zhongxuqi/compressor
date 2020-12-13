@@ -47,6 +47,7 @@ class _CompressorPageState extends State<CompressorPage> {
   final GlobalKey<FormTextInputState> _fileNameInputKey =
       GlobalKey<FormTextInputState>();
 
+  String archiveType = 'zip';
   var files = Map<String, data.File>();
   var fileName = '';
   var fileNameError = '';
@@ -183,7 +184,7 @@ class _CompressorPageState extends State<CompressorPage> {
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_empty'));
       hasErr = true;
     }
-    if (await checkFileExists("$fileName.zip")) {
+    if (await checkFileExists("$fileName.$archiveType")) {
       _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
       toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
       hasErr = true;
@@ -194,8 +195,8 @@ class _CompressorPageState extends State<CompressorPage> {
       return;
     }
     final Map<String, String> params = {
-      'archive_type': 'zip',
-      'file_name': "$fileName.zip",
+      'archive_type': archiveType,
+      'file_name': "$fileName.$archiveType",
       'password': password,
       'files': json.encode(files.map((key, value) {
         return MapEntry(key, value.toMap());
@@ -272,6 +273,15 @@ class _CompressorPageState extends State<CompressorPage> {
                   ),
                 ),
               ],
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 0, left: 15, right: 15),
+              child: DropDownMenu(
+                initArchiveType: archiveType,
+                callback: (value) {
+                  archiveType = value;
+                },
+              ),
             ),
             Container(
               padding: EdgeInsets.only(top: 0, left: 15, right: 15),
@@ -629,4 +639,100 @@ class FilePicker {
   final String name;
 
   FilePicker(this.fileType, this.icon, this.name);
+}
+
+class DropDownMenu extends StatefulWidget {
+  final String initArchiveType;
+  final ValueChanged<String> callback;
+
+  DropDownMenu({Key key, @required this.initArchiveType, @required this.callback}):super(key: key);
+
+  @override
+  State createState() {
+    return _DropDownMenuState();
+  }
+}
+
+class _DropDownMenuState extends State<DropDownMenu> {
+  final archiveTypes = <String>['zip', '7z'];
+  String archiveType = 'zip';
+
+  @override
+  void initState() {
+    super.initState();
+    archiveType = widget.initArchiveType;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: EdgeInsets.only(top: 8.0, bottom: 8.0),
+            child: Text(
+              AppLocalizations.of(context).getLanguageText('archive_type'),
+              style: TextStyle(
+                color: ColorUtils.textColor,
+                fontSize: 15.0,
+              ),
+            ),
+          ),
+          PopupMenuButton<String>(
+            initialValue: archiveType,
+            child: Container(
+              height: 33.0,
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
+              padding: EdgeInsets.symmetric(vertical: 0.0,horizontal: 10.0),
+              decoration: BoxDecoration(
+                color: ColorUtils.themeColor,
+                borderRadius: BorderRadius.all(Radius.circular(3.0)),
+              ),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      child:Text(
+                        archiveType,
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    IconFonts.arrowDown,
+                    color: Colors.white,
+                  )
+                ],
+              ),
+            ),
+            onSelected: (String value) {
+              widget.callback(value);
+              setState(() {
+                this.archiveType = value;
+              });
+            },
+            itemBuilder: (BuildContext context) => archiveTypes.map((item) {
+              return PopupMenuItem<String>(
+                value: item,
+                child: Container(
+                  child: Text(
+                    item,
+                    style: TextStyle(
+                      color: ColorUtils.textColor,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -21,11 +21,13 @@ import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.model.ZipParameters
 import net.lingala.zip4j.model.enums.EncryptionMethod
 import net.sf.sevenzipjbinding.*
+import net.sf.sevenzipjbinding.impl.OutItemFactory
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream
 import net.sf.sevenzipjbinding.impl.RandomAccessFileOutStream
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileInputStream
 import java.io.RandomAccessFile
 import java.net.URLConnection
 import java.util.*
@@ -204,11 +206,29 @@ class MainActivity: FlutterActivity() {
                 "zip" -> {
                     return createZipFile(fileName, password, fileInfos)
                 }
+                "7z" -> {
+                    return create7zFile(fileName, password, fileInfos)
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
         return JSONObject()
+    }
+
+    fun cloneFile(fileDir: File, fileInfo: FileInfo) {
+        val targetFile = File(fileDir.path, fileInfo.Name)
+        if (fileInfo.ContentType == "directory") {
+            if (targetFile.mkdir()) {
+                for (entry in fileInfo.files.entries) {
+                    cloneFile(targetFile, entry.value)
+                }
+            }
+            return
+        }
+        val fileItem = File(fileInfo.Uri)
+        fileItem.copyRecursively(targetFile)
+        targetFile.deleteOnExit()
     }
 
     fun createZipFile(fileName: String, password: String, fileInfos: JSONObject): JSONObject {
@@ -250,19 +270,81 @@ class MainActivity: FlutterActivity() {
         return fileJsonObj
     }
 
-    fun cloneFile(fileDir: File, fileInfo: FileInfo) {
-        val targetFile = File(fileDir.path, fileInfo.Name)
+    fun extractFile(fileMap: HashMap<String, File>, parentPath: String, fileInfo: FileInfo) {
+        val pathPrefix = if (parentPath.isNotEmpty()) {
+            "$parentPath/"
+        } else {
+            ""
+        }
         if (fileInfo.ContentType == "directory") {
-            if (targetFile.mkdir()) {
-                for (entry in fileInfo.files.entries) {
-                    cloneFile(targetFile, entry.value)
-                }
+            for (entry in fileInfo.files.entries) {
+                extractFile(fileMap, "$pathPrefix${fileInfo.Name}", entry.value)
             }
             return
         }
-        val fileItem = File(fileInfo.Uri)
-        fileItem.copyRecursively(targetFile)
-        targetFile.deleteOnExit()
+        fileMap["$pathPrefix${fileInfo.Name}"] = File(fileInfo.Uri)
+    }
+
+    fun create7zFile(fileName: String, password: String, fileInfos: JSONObject): JSONObject {
+        val fileMap = HashMap<String, File>()
+        for (key in fileInfos.keys()) {
+            extractFile(fileMap, "", JSON.parseObject(fileInfos.get(key).toString(), FileInfo::class.java))
+        }
+        val fileEntries = fileMap.entries.toList()
+        val sevenZFile = File(context.cacheDir.path, fileName)
+        if (sevenZFile.exists()) {
+            sevenZFile.deleteRecursively()
+        }
+        sevenZFile.createNewFile()
+        sevenZFile.deleteOnExit()
+        var raf: RandomAccessFile? = null
+        var outArchive: IOutCreateArchive7z? = null
+        try {
+            raf = RandomAccessFile(sevenZFile.path, "rw")
+            outArchive = SevenZip.openOutArchive7z()
+            outArchive?.setLevel(5)
+            outArchive?.setSolid(true)
+            outArchive?.setSolidFiles(fileEntries.size)
+            outArchive?.setThreadCount(1)
+            Log.d(TAG, "begin createArchive")
+            outArchive?.createArchive(RandomAccessFileOutStream(raf), fileEntries.size, object: IOutCreateCallback<IOutItem7z>{
+                override fun setOperationResult(p0: Boolean) {
+                    Log.d(TAG, "setOperationResult $p0")
+                }
+
+                override fun setCompleted(p0: Long) {
+                    Log.d(TAG, "setCompleted $p0")
+                }
+
+                override fun getItemInformation(index: Int, outItemFactory: OutItemFactory<IOutItem7z>?): IOutItem7z {
+                    val item = outItemFactory!!.createOutItem()
+                    item.dataSize = fileEntries[index].value.length()
+                    item.propertyPath = fileEntries[index].key
+                    return item
+                }
+
+                override fun getStream(index: Int): ISequentialInStream {
+                    return MyFileOutStream(fileEntries[index].value.inputStream())
+                }
+
+                override fun setTotal(p0: Long) {
+                    Log.d(TAG, "setTotal $p0")
+                }
+            })
+            Log.d(TAG, "end createArchive")
+        } catch (e: SevenZipException) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+//            outArchive?.close()
+//            raf?.close()
+        }
+        val fileJsonObj = JSONObject()
+        fileJsonObj.put("archive_type", "7z")
+        fileJsonObj.put("file_name", fileName)
+        fileJsonObj.put("uri", sevenZFile.path)
+        return fileJsonObj
     }
 
     fun getFileHeaders(archiveType: String, uri: String, password: String): List<FileHeader> {
@@ -306,7 +388,7 @@ class MainActivity: FlutterActivity() {
                     } else {
                         fileHeader.ContentType = URLConnection.getFileNameMap().getContentTypeFor(fileHeader.FileName)
                     }
-                    fileHeader.LastModified = (inArchive.getProperty(i, PropID.LAST_MODIFICATION_TIME) as Date).time
+                    fileHeader.LastModified = (inArchive.getProperty(i, PropID.LAST_MODIFICATION_TIME) as Date).time / 1000
                     fileHeader.FileSize = inArchive.getProperty(i, PropID.SIZE) as Long
                     fileHeaders.add(fileHeader)
                 }
@@ -543,5 +625,15 @@ class MainActivity: FlutterActivity() {
             }
         }
         return res
+    }
+}
+
+class MyFileOutStream(val inputStream: FileInputStream): ISequentialInStream {
+    override fun close() {
+        inputStream.close()
+    }
+
+    override fun read(p0: ByteArray?): Int {
+        return inputStream.read(p0)
     }
 }

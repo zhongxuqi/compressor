@@ -44,6 +44,10 @@ class AppLocalizations {
       'en': 'Archive File Info',
       'zh': '压缩文件信息',
     },
+    'archive_type': {
+      'en': 'Archive Type',
+      'zh': '压缩类型',
+    },
     'file_name': {
       'en': 'File Name',
       'zh': '文件名',
