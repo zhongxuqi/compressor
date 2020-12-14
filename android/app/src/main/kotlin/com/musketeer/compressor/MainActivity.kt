@@ -324,7 +324,7 @@ class MainActivity: FlutterActivity() {
                 }
 
                 override fun getStream(index: Int): ISequentialInStream {
-                    return MyFileOutStream(ByteArrayStream(fileEntries[0].value.inputStream().readBytes(), true))
+                    return ByteArrayStream(fileEntries[0].value.inputStream().readBytes(), true)
                 }
 
                 override fun setTotal(p0: Long) {
@@ -624,15 +624,5 @@ class MainActivity: FlutterActivity() {
             }
         }
         return res
-    }
-}
-
-class MyFileOutStream(val inputStream: ByteArrayStream): ISequentialInStream {
-    override fun close() {
-        inputStream.close()
-    }
-
-    override fun read(p0: ByteArray?): Int {
-        return inputStream.read(p0)
     }
 }
