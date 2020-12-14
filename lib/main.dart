@@ -328,6 +328,9 @@ class _MainPageState extends State<MainPage> {
                                 child: Container(
                                   padding: EdgeInsets.all(15.0),
                                   decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(blurRadius: 5.0, spreadRadius: 1.0, color: Colors.grey.shade400)
+                                    ],
                                     shape: BoxShape.circle,
                                     color: ColorUtils.lightGrey,
                                   ),
