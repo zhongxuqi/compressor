@@ -336,8 +336,8 @@ class MainActivity: FlutterActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
-//            outArchive?.close()
-//            raf?.close()
+            outArchive?.close()
+            raf?.close()
         }
         val fileJsonObj = JSONObject()
         fileJsonObj.put("archive_type", "7z")
@@ -433,6 +433,9 @@ class MainActivity: FlutterActivity() {
                     if (destPath.exists()) {
                         destPath.deleteRecursively()
                     }
+                    if (destPath.parentFile?.exists() != true) {
+                        destPath.parentFile?.mkdirs()
+                    }
                     val matchedFileHeaders = rarFileObj.fileHeaders.filter {
                         it.fileName == fileName
                     }
@@ -476,6 +479,9 @@ class MainActivity: FlutterActivity() {
                     val destPath = File(externalCacheDir!!.absolutePath, fileName)
                     if (destPath.exists()) {
                         destPath.deleteRecursively()
+                    }
+                    if (destPath.parentFile?.exists() != true) {
+                        destPath.parentFile?.mkdirs()
                     }
                     if (fileIndex < 0) {
                         res.errCode = "uncompress_error"
@@ -579,6 +585,9 @@ class MainActivity: FlutterActivity() {
                         override fun getStream(p0: Int, p1: ExtractAskMode?): ISequentialOutStream {
                             Log.d(TAG, "getStream ${p0.toString()} ${p1.toString()}")
                             val outFile = File(targetDir, inArchive.getStringProperty(p0, PropID.PATH))
+                            if (outFile.parentFile?.exists() != true) {
+                                outFile.parentFile?.mkdirs()
+                            }
                             return RandomAccessFileOutStream(RandomAccessFile(outFile, "rw"))
                         }
 
