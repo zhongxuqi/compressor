@@ -24,6 +24,7 @@ import net.sf.sevenzipjbinding.*
 import net.sf.sevenzipjbinding.impl.OutItemFactory
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream
 import net.sf.sevenzipjbinding.impl.RandomAccessFileOutStream
+import net.sf.sevenzipjbinding.util.ByteArrayStream
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -306,7 +307,6 @@ class MainActivity: FlutterActivity() {
             outArchive?.setSolid(true)
             outArchive?.setSolidFiles(fileEntries.size)
             outArchive?.setThreadCount(1)
-            Log.d(TAG, "begin createArchive")
             outArchive?.createArchive(RandomAccessFileOutStream(raf), fileEntries.size, object: IOutCreateCallback<IOutItem7z>{
                 override fun setOperationResult(p0: Boolean) {
                     Log.d(TAG, "setOperationResult $p0")
@@ -324,14 +324,13 @@ class MainActivity: FlutterActivity() {
                 }
 
                 override fun getStream(index: Int): ISequentialInStream {
-                    return MyFileOutStream(fileEntries[index].value.inputStream())
+                    return MyFileOutStream(ByteArrayStream(fileEntries[0].value.inputStream().readBytes(), true))
                 }
 
                 override fun setTotal(p0: Long) {
                     Log.d(TAG, "setTotal $p0")
                 }
             })
-            Log.d(TAG, "end createArchive")
         } catch (e: SevenZipException) {
             e.printStackTrace()
         } catch (e: Exception) {
@@ -628,7 +627,7 @@ class MainActivity: FlutterActivity() {
     }
 }
 
-class MyFileOutStream(val inputStream: FileInputStream): ISequentialInStream {
+class MyFileOutStream(val inputStream: ByteArrayStream): ISequentialInStream {
     override fun close() {
         inputStream.close()
     }
