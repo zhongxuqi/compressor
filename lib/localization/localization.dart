@@ -280,6 +280,10 @@ class AppLocalizations {
       'en': 'File Name Empty',
       'zh': '文件名为空',
     },
+    'file_empty': {
+      'en': 'File Empty',
+      'zh': '文件为空',
+    },
   };
 
   String getLanguageText(String textID) {

@@ -181,17 +181,22 @@ class _CompressorPageState extends State<CompressorPage> {
     var hasErr = false;
     if (fileName == "") {
       _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('required'));
-      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_empty'));
-      hasErr = true;
-    }
-    if (await checkFileExists("$fileName.$archiveType")) {
-      _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
-      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
       hasErr = true;
     }
     if (hasErr) {
       setState(() {});
       inSubmit = false;
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_empty'));
+      return;
+    }
+    if (await checkFileExists("$fileName.$archiveType")) {
+      _fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
+      hasErr = true;
+    }
+    if (hasErr) {
+      setState(() {});
+      inSubmit = false;
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
       return;
     }
     final Map<String, String> params = {
@@ -223,6 +228,10 @@ class _CompressorPageState extends State<CompressorPage> {
   }
 
   void compressFiles() async {
+    if (files.isEmpty) {
+      toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_empty'));
+      return;
+    }
     fileName = '';
     showDialog(
       context: context,

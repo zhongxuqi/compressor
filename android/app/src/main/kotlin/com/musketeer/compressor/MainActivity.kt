@@ -307,28 +307,62 @@ class MainActivity: FlutterActivity() {
             outArchive?.setSolid(true)
             outArchive?.setSolidFiles(fileEntries.size)
             outArchive?.setThreadCount(1)
-            outArchive?.createArchive(RandomAccessFileOutStream(raf), fileEntries.size, object: IOutCreateCallback<IOutItem7z>{
-                override fun setOperationResult(p0: Boolean) {
-                    Log.d(TAG, "setOperationResult $p0")
-                }
+            if (password.isNotEmpty()) {
+                outArchive?.setHeaderEncryption(true)
+            }
+            outArchive?.createArchive(RandomAccessFileOutStream(raf), fileEntries.size, if (password.isNotEmpty()) {
+                object: IOutCreateCallback<IOutItem7z>, ICryptoGetTextPassword{
+                    override fun setOperationResult(p0: Boolean) {
+                        Log.d(TAG, "setOperationResult $p0")
+                    }
 
-                override fun setCompleted(p0: Long) {
-                    Log.d(TAG, "setCompleted $p0")
-                }
+                    override fun setCompleted(p0: Long) {
+                        Log.d(TAG, "setCompleted $p0")
+                    }
 
-                override fun getItemInformation(index: Int, outItemFactory: OutItemFactory<IOutItem7z>?): IOutItem7z {
-                    val item = outItemFactory!!.createOutItem()
-                    item.dataSize = fileEntries[index].value.length()
-                    item.propertyPath = fileEntries[index].key
-                    return item
-                }
+                    override fun getItemInformation(index: Int, outItemFactory: OutItemFactory<IOutItem7z>?): IOutItem7z {
+                        val item = outItemFactory!!.createOutItem()
+                        item.dataSize = fileEntries[index].value.length()
+                        item.propertyPath = fileEntries[index].key
+                        return item
+                    }
 
-                override fun getStream(index: Int): ISequentialInStream {
-                    return ByteArrayStream(fileEntries[0].value.inputStream().readBytes(), true)
-                }
+                    override fun getStream(index: Int): ISequentialInStream {
+                        return ByteArrayStream(fileEntries[index].value.inputStream().readBytes(), true)
+                    }
 
-                override fun setTotal(p0: Long) {
-                    Log.d(TAG, "setTotal $p0")
+                    override fun setTotal(p0: Long) {
+                        Log.d(TAG, "setTotal $p0")
+                    }
+
+                    override fun cryptoGetTextPassword(): String {
+                        return password
+                    }
+                }
+            } else {
+                object: IOutCreateCallback<IOutItem7z>{
+                    override fun setOperationResult(p0: Boolean) {
+                        Log.d(TAG, "setOperationResult $p0")
+                    }
+
+                    override fun setCompleted(p0: Long) {
+                        Log.d(TAG, "setCompleted $p0")
+                    }
+
+                    override fun getItemInformation(index: Int, outItemFactory: OutItemFactory<IOutItem7z>?): IOutItem7z {
+                        val item = outItemFactory!!.createOutItem()
+                        item.dataSize = fileEntries[index].value.length()
+                        item.propertyPath = fileEntries[index].key
+                        return item
+                    }
+
+                    override fun getStream(index: Int): ISequentialInStream {
+                        return ByteArrayStream(fileEntries[index].value.inputStream().readBytes(), true)
+                    }
+
+                    override fun setTotal(p0: Long) {
+                        Log.d(TAG, "setTotal $p0")
+                    }
                 }
             })
         } catch (e: SevenZipException) {
@@ -487,8 +521,67 @@ class MainActivity: FlutterActivity() {
                         res.errCode = "uncompress_error"
                     } else {
                         destPath.createNewFile()
-                        val outStream = RandomAccessFileOutStream(RandomAccessFile(destPath, "rw"))
-                        inArchive.extractSlow(fileIndex, outStream)
+                        var result: ExtractOperationResult? = null
+                        inArchive.extract(intArrayOf(fileIndex), false, if (password.isNotEmpty()) {
+                            object: IArchiveExtractCallback, ICryptoGetTextPassword{
+                                override fun setOperationResult(p0: ExtractOperationResult?) {
+                                    Log.d(TAG, "setOperationResult ${p0.toString()}")
+                                    result = p0
+                                }
+
+                                override fun setCompleted(p0: Long) {
+                                    Log.d(TAG, "setCompleted ${p0.toString()}")
+                                }
+
+                                override fun getStream(p0: Int, p1: ExtractAskMode?): ISequentialOutStream {
+                                    Log.d(TAG, "getStream ${p0.toString()} ${p1.toString()}")
+                                    return RandomAccessFileOutStream(RandomAccessFile(destPath, "rw"))
+                                }
+
+                                override fun prepareOperation(p0: ExtractAskMode?) {
+                                    Log.d(TAG, "prepareOperation ${p0.toString()}")
+                                }
+
+                                override fun setTotal(p0: Long) {
+                                    Log.d(TAG, "setTotal ${p0.toString()}")
+                                }
+
+                                override fun cryptoGetTextPassword(): String {
+                                    return password
+                                }
+                            }
+                        } else {
+                            object: IArchiveExtractCallback{
+                                override fun setOperationResult(p0: ExtractOperationResult?) {
+                                    Log.d(TAG, "setOperationResult ${p0.toString()}")
+                                    result = p0
+                                }
+
+                                override fun setCompleted(p0: Long) {
+                                    Log.d(TAG, "setCompleted ${p0.toString()}")
+                                }
+
+                                override fun getStream(p0: Int, p1: ExtractAskMode?): ISequentialOutStream {
+                                    Log.d(TAG, "getStream ${p0.toString()} ${p1.toString()}")
+                                    return RandomAccessFileOutStream(RandomAccessFile(destPath, "rw"))
+                                }
+
+                                override fun prepareOperation(p0: ExtractAskMode?) {
+                                    Log.d(TAG, "prepareOperation ${p0.toString()}")
+                                }
+
+                                override fun setTotal(p0: Long) {
+                                    Log.d(TAG, "setTotal ${p0.toString()}")
+                                }
+                            }
+                        })
+                        if (result == ExtractOperationResult.WRONG_PASSWORD || result == ExtractOperationResult.UNSUPPORTEDMETHOD || result == ExtractOperationResult.DATAERROR) {
+                            res.errCode = "wrong_password"
+                            return res
+                        } else if (result != ExtractOperationResult.OK) {
+                            res.errCode = "uncompress_error"
+                            return res
+                        }
                         destPath.deleteOnExit()
                         res.targetUri = destPath.path
                         return res
@@ -573,35 +666,84 @@ class MainActivity: FlutterActivity() {
                     if (!targetDirObj.exists()) {
                         targetDirObj.mkdir()
                     }
-                    inArchive.extract(null, false, object: IArchiveExtractCallback{
-                        override fun setOperationResult(p0: ExtractOperationResult?) {
-                            Log.d(TAG, "setOperationResult ${p0.toString()}")
-                        }
-
-                        override fun setCompleted(p0: Long) {
-                            Log.d(TAG, "setCompleted ${p0.toString()}")
-                        }
-
-                        override fun getStream(p0: Int, p1: ExtractAskMode?): ISequentialOutStream {
-                            Log.d(TAG, "getStream ${p0.toString()} ${p1.toString()}")
-                            val outFile = File(targetDir, inArchive.getStringProperty(p0, PropID.PATH))
-                            if (outFile.parentFile?.exists() != true) {
-                                outFile.parentFile?.mkdirs()
+                    var result: ExtractOperationResult? = null
+                    inArchive.extract(null, false, if (password.isNotEmpty()) {
+                        object: IArchiveExtractCallback, ICryptoGetTextPassword{
+                            override fun setOperationResult(p0: ExtractOperationResult?) {
+                                Log.d(TAG, "setOperationResult ${p0.toString()}")
+                                result = p0
                             }
-                            return RandomAccessFileOutStream(RandomAccessFile(outFile, "rw"))
-                        }
 
-                        override fun prepareOperation(p0: ExtractAskMode?) {
-                            Log.d(TAG, "prepareOperation ${p0.toString()}")
-                        }
+                            override fun setCompleted(p0: Long) {
+                                Log.d(TAG, "setCompleted ${p0.toString()}")
+                            }
 
-                        override fun setTotal(p0: Long) {
-                            Log.d(TAG, "setTotal ${p0.toString()}")
+                            override fun getStream(p0: Int, p1: ExtractAskMode?): ISequentialOutStream {
+                                Log.d(TAG, "getStream ${p0.toString()} ${p1.toString()}")
+                                val outFile = File(targetDir, inArchive.getStringProperty(p0, PropID.PATH))
+                                if (outFile.parentFile?.exists() != true) {
+                                    outFile.parentFile?.mkdirs()
+                                }
+                                return RandomAccessFileOutStream(RandomAccessFile(outFile, "rw"))
+                            }
+
+                            override fun prepareOperation(p0: ExtractAskMode?) {
+                                Log.d(TAG, "prepareOperation ${p0.toString()}")
+                            }
+
+                            override fun setTotal(p0: Long) {
+                                Log.d(TAG, "setTotal ${p0.toString()}")
+                            }
+
+                            override fun cryptoGetTextPassword(): String {
+                                return password
+                            }
+                        }
+                    } else {
+                        object: IArchiveExtractCallback{
+                            override fun setOperationResult(p0: ExtractOperationResult?) {
+                                Log.d(TAG, "setOperationResult ${p0.toString()}")
+                                result = p0
+                            }
+
+                            override fun setCompleted(p0: Long) {
+                                Log.d(TAG, "setCompleted ${p0.toString()}")
+                            }
+
+                            override fun getStream(p0: Int, p1: ExtractAskMode?): ISequentialOutStream {
+                                Log.d(TAG, "getStream ${p0.toString()} ${p1.toString()}")
+                                val outFile = File(targetDir, inArchive.getStringProperty(p0, PropID.PATH))
+                                if (outFile.parentFile?.exists() != true) {
+                                    outFile.parentFile?.mkdirs()
+                                }
+                                return RandomAccessFileOutStream(RandomAccessFile(outFile, "rw"))
+                            }
+
+                            override fun prepareOperation(p0: ExtractAskMode?) {
+                                Log.d(TAG, "prepareOperation ${p0.toString()}")
+                            }
+
+                            override fun setTotal(p0: Long) {
+                                Log.d(TAG, "setTotal ${p0.toString()}")
+                            }
                         }
                     })
+                    if (result == ExtractOperationResult.WRONG_PASSWORD || result == ExtractOperationResult.UNSUPPORTEDMETHOD || result == ExtractOperationResult.DATAERROR) {
+                        targetDirObj.deleteRecursively()
+                        res.errCode = "wrong_password"
+                        return res
+                    } else if (result != ExtractOperationResult.OK) {
+                        targetDirObj.deleteRecursively()
+                        res.errCode = "uncompress_error"
+                        return res
+                    }
                     inArchive.close()
                     inStream.close()
+                } catch(e: SevenZipException) {
+                    res.errCode = "uncompress_error"
+                    e.printStackTrace()
                 } catch(e: Exception) {
+                    res.errCode = "uncompress_error"
                     e.printStackTrace()
                 }
                 if (res.errCode.isNotEmpty()) {
