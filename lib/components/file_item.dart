@@ -29,14 +29,6 @@ class FileItem extends StatefulWidget {
 }
 
 class _FileItemState extends State<FileItem> {
-  final fileNameCtl = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    fileNameCtl.text = widget.fileData.name;
-  }
-
   @override
   Widget build(BuildContext context) {
     return InkWell(

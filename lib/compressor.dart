@@ -416,6 +416,10 @@ class _CompressorPageState extends State<CompressorPage> {
             setState(() {});
           });
         }),
+        ActionItem(iconData: IconFonts.close, textCode: 'unselect', callback: () {
+          checkedFiles.clear();
+          setState(() {});
+        }),
       ]);
     }
     actionItems.add(ActionItem(iconData: IconFonts.add, textCode: 'add', callback: () {

@@ -284,6 +284,14 @@ class AppLocalizations {
       'en': 'File Empty',
       'zh': '文件为空',
     },
+    'unselect': {
+      'en': 'Unselect',
+      'zh': '取消选择',
+    },
+    'save': {
+      'en': 'Save',
+      'zh': '保存',
+    },
   };
 
   String getLanguageText(String textID) {

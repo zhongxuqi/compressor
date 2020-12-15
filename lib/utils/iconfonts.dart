@@ -25,4 +25,5 @@ class IconFonts {
   static const IconData copy = IconData(0xe6e5, fontFamily: 'iconfont');
   static const IconData delete = IconData(0xe660, fontFamily: 'iconfont');
   static const IconData arrowDown = IconData(0xe644, fontFamily: 'iconfont');
+  static const IconData save = IconData(0xe603, fontFamily: 'iconfont');
 }

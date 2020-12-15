@@ -470,6 +470,10 @@ class _MainPageState extends State<MainPage> {
                   initData();
                 });
               }),
+              ActionItem(iconData: IconFonts.close, textCode: 'unselect', callback: () {
+                checkedFiles.clear();
+                initData();
+              }),
             ]):Container(),
           ]),
         ),

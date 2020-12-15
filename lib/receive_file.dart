@@ -166,7 +166,7 @@ class _ReceiveFilePageState extends State<ReceiveFilePage> {
               ),
             ),
             checkedFiles.length>0?ActionBar(actionItems: <ActionItem>[
-              ActionItem(iconData: IconFonts.add, textCode: 'add', callback: () {
+              ActionItem(iconData: IconFonts.save, textCode: 'save', callback: () {
                 var validFiles = files.where((e) => checkedFiles.contains(e.uri)).map((e) => e.clone()).toList();
                 showActionDialog(
                   context: context,
@@ -192,6 +192,10 @@ class _ReceiveFilePageState extends State<ReceiveFilePage> {
                     });
                   },
                 );
+              }),
+              ActionItem(iconData: IconFonts.close, textCode: 'unselect', callback: () {
+                checkedFiles.clear();
+                setState(() {});
               }),
             ]):Container(),
           ],
