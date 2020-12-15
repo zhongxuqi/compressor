@@ -124,27 +124,33 @@ class _ActionDialogState extends State<ActionDialog> {
       widget.checkedFiles.forEach((element) {
         if (fileNameMap[element.uri].isEmpty) {
           formFileItemKeyMap[element.uri].currentState.fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('required'));
-          toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_empty'));
           hasError = true;
         }
       });
+      if (hasError) {
+        toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_empty'));
+        return;
+      }
       widget.checkedFiles.forEach((element) {
         if (selfFileNameSet.contains(fileNameMap[element.uri])) {
           formFileItemKeyMap[element.uri].currentState.fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
-          toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
           hasError = true;
         } else {
           selfFileNameSet.add(fileNameMap[element.uri]);
         }
       });
+      if (hasError) {
+        toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
+        return;
+      }
       widget.checkedFiles.forEach((element) {
         if (fileNameSet.contains(fileNameMap[element.uri])) {
           formFileItemKeyMap[element.uri].currentState.fileNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
-          toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
           hasError = true;
         }
       });
       if (hasError) {
+        toastUtils.showErrorToast(AppLocalizations.of(context).getLanguageText('file_name_conflict'));
         return;
       }
       widget.callback(targetPath, fileNameMap);
