@@ -9,7 +9,7 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
-#umeng
+#Umeng
 -keep class com.umeng.** {*;}
 -keep class com.uc.** {*;}
 -keepclassmembers class * {
