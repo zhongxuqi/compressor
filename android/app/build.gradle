@@ -38,6 +38,7 @@ android {
 
     lintOptions {
         disable 'InvalidPackage'
+        checkReleaseBuilds false
     }
 
     defaultConfig {
@@ -76,6 +77,7 @@ flutter {
 }
 
 dependencies {
+    implementation(name:'sevenzipjbinding-release', ext:'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "net.lingala.zip4j:zip4j:2.6.4"
     implementation 'com.alibaba:fastjson:1.1.72.android'
@@ -83,5 +85,4 @@ dependencies {
     implementation "com.umeng.umsdk:asms:1.1.3" // asms包依赖(必选)
     implementation "com.umeng.umsdk:crash:0.0.4" // native crash包依赖(必选)
     implementation "com.github.junrar:junrar:7.4.0"
-    compile(name:'sevenzipjbinding-release', ext:'aar')
 }
