@@ -488,9 +488,22 @@ class _ActionDialogState extends State<ActionDialog> {
           break;
       }
     }
-    return SimpleDialog(
-      contentPadding: EdgeInsets.only(bottom: 10),
-      children: children,
+    return Dialog(
+      backgroundColor: ColorUtils.transparent,
+      elevation: 0,
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: ColorUtils.white,
+            borderRadius: BorderRadius.all(Radius.circular(10.0))
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
+        ),
+      ),
     );
   }
 }

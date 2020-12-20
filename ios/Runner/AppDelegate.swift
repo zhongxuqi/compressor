@@ -1,13 +1,58 @@
 import UIKit
 import Flutter
+import HandyJSON
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
-  override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
+    private var imagePicker = UIImagePickerController()
+    private var result: FlutterResult?
+    
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        imagePicker.delegate = self
+        let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+        let compressorChannel = FlutterMethodChannel(name: "com.musketeer.compressor", binaryMessenger: controller.binaryMessenger)
+        compressorChannel.setMethodCallHandler({(call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+            switch call.method {
+            case "pick_file":
+                let req = call.arguments as! [String: String]
+                self.pickFile(mimeType: req["mime_type"]!, result: result)
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        })
+        GeneratedPluginRegistrant.register(with: self)
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+    
+    func pickFile(mimeType: String, result: @escaping FlutterResult) {
+        let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+        if mimeType.starts(with: "image") {
+            self.result = result
+            imagePicker.sourceType = .photoLibrary
+            controller.present(imagePicker, animated: true)
+        }
+    }
+}
+
+extension AppDelegate: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+    ) {
+        let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+        if let pickedImage = info[.originalImage] as? UIImage {
+            pickedImage.jpegData(compressionQuality: 1.0)
+            let fileName = "\(TimeUtils.getMillisecondsSince1970()).jpg"
+            let fileURL = NSTemporaryDirectory().appending(fileName)
+            FileManager.default.createFile(atPath: fileURL, contents: pickedImage.jpegData(compressionQuality: 1.0), attributes: nil)
+            let fileInfo = FileInfo()
+            fileInfo.fileName = fileName
+            fileInfo.uri = fileURL
+            result?([fileInfo].toJSONString())
+            controller.dismiss(animated: true)
+        }
+    }
 }

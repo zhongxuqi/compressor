@@ -31,6 +31,9 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
+  # Pods for StyleTransfer
+  pod 'HandyJSON', '~> 5.0.2'
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 

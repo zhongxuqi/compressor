@@ -3,6 +3,7 @@ PODS:
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
+  - HandyJSON (5.0.2)
   - native_pdf_renderer (1.0.0):
     - Flutter
   - path_provider (0.0.1):
@@ -22,6 +23,7 @@ PODS:
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - HandyJSON (~> 5.0.1)
   - native_pdf_renderer (from `.symlinks/plugins/native_pdf_renderer/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
@@ -32,6 +34,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - HandyJSON
     - Toast
 
 EXTERNAL SOURCES:
@@ -57,6 +60,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
+  HandyJSON: 9e4e236f5d2dbefad5155a77417bbea438201c03
   native_pdf_renderer: fa374da660730abe059e7a178e79895dd202f007
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission_handler: eac8e15b4a1a3fba55b761d19f3f4e6b005d15b6
@@ -66,6 +70,6 @@ SPEC CHECKSUMS:
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
 
-PODFILE CHECKSUM: 07921952dd20d67443288c1d0c581642eed8392f
+PODFILE CHECKSUM: f7a732077e96360c5af1cfc3e06038a4162a9a53
 
 COCOAPODS: 1.10.0
