@@ -3,6 +3,7 @@ import Flutter
 import HandyJSON
 import StoreKit
 import MobileCoreServices
+import SSZipArchive
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -24,6 +25,9 @@ import MobileCoreServices
             case "pick_file":
                 let req = call.arguments as! [String: String]
                 self.pickFile(mimeType: req["mime_type"]!, result: result)
+            case "create_archive":
+                let req = call.arguments as! [String: String]
+                FileManager.default
             default:
                 result(FlutterMethodNotImplemented)
             }
