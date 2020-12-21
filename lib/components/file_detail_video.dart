@@ -34,6 +34,13 @@ class _FileDetailVideoState extends State<FileDetailVideo> {
     });
   }
 
+  void play() {
+    if (_controller.value.position.inSeconds <= 0 || _controller.value.position.inSeconds >= _controller.value.duration.inSeconds) {
+      return;
+    }
+    _controller.play();
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -68,9 +75,7 @@ class _FileDetailVideoState extends State<FileDetailVideo> {
                   ),
                   onTap: () {
                     setState(() {
-                      _controller.value.isPlaying
-                          ? _controller.pause()
-                          : _controller.play();
+                      _controller.value.isPlaying ? _controller.pause() : play();
                     });
                   },
                 ),
@@ -87,7 +92,7 @@ class _FileDetailVideoState extends State<FileDetailVideo> {
                         if (!_controller.value.initialized) return;
                         progress = val;
                         _controller.seekTo(Duration(seconds: progress * _controller.value.duration.inSeconds ~/ 100));
-                        _controller.play();
+                        play();
                       });
                     },
                   ),
