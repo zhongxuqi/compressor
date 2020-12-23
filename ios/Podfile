@@ -33,7 +33,7 @@ target 'Runner' do
 
   # Pods for StyleTransfer
   pod 'HandyJSON', '~> 5.0.2'
-  pod 'SSZipArchive'
+  pod 'ZIPFoundation', '~> 0.9'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
