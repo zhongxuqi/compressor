@@ -34,6 +34,10 @@ import ZIPFoundation
                         result(res.rawString())
                     }
                 }
+            case "get_file_headers":
+                let req = call.arguments as! [String: String]
+                let res = self.getFileHeaders(archiveType: req["archive_type"]!, uri: req["uri"]!, password: req["password"]!)
+                result(res.rawString())
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -98,12 +102,33 @@ import ZIPFoundation
                 print("copy file \(fileEntry.key)")
                 try copyFileInfo(path: zipPath, fileInfo: fileEntry.value)
             }
-            try FileManager.default.zipItem(at: URL.init(fileURLWithPath: zipPath), to: URL.init(fileURLWithPath: targetPath))
+            
+            try FileManager.default.zipItem(at: URL.init(fileURLWithPath: zipPath), to: URL.init(fileURLWithPath: targetPath), shouldKeepParent: false)
             try FileManager.default.removeItem(atPath: zipPath)
         } catch {
             print("createZipArchive error \(error.localizedDescription)")
         }
         return JSON(["archive_type": "zip", "file_name": fileName, "uri": targetPath])
+    }
+    
+    func getFileHeaders(archiveType: String, uri: String, password: String) -> JSON {
+        var res = [Any]()
+        switch archiveType {
+        default:
+            guard let archive = Archive(url: URL.init(fileURLWithPath: uri), accessMode: .read, preferredEncoding: nil) else  {
+                return JSON(res)
+            }
+            for entry in archive {
+                res.append([
+                    "fileName": URL.init(fileURLWithPath: entry.path).lastPathComponent,
+                    "isDirectory": false,
+                    "contentType": "",
+                    "lastModified": (entry.fileAttributes[.modificationDate] as! Date).timeIntervalSince1970,
+                    "fileSize": entry.uncompressedSize,
+                ])
+            }
+        }
+        return JSON(res)
     }
 }
 

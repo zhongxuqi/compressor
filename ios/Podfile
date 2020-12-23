@@ -34,6 +34,7 @@ target 'Runner' do
   # Pods for StyleTransfer
   pod 'SwiftyJSON', '~> 4.0'
   pod 'ZIPFoundation', '~> 0.9'
+  pod 'Zip', '~> 2.1'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end

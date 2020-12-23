@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'package:mime/mime.dart' as mime;
 
 const platform = const MethodChannel('com.musketeer.compressor');
 
@@ -74,7 +75,7 @@ Future<List<FileHeader>> getFileHeaders(String archiveType, String uri, String p
       return FileHeader(
         fileName: e['fileName'],
         isDirectory: e['isDirectory'],
-        contentType: e['contentType'],
+        contentType: mime.lookupMimeType(e['fileName']),
         lastModified: e['lastModified'],
         fileSize: e['fileSize'],
       );

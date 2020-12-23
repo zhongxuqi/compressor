@@ -19,6 +19,7 @@ PODS:
   - Toast (4.0.0)
   - video_player (0.0.1):
     - Flutter
+  - Zip (2.1.1)
   - ZIPFoundation (0.9.11)
 
 DEPENDENCIES:
@@ -32,12 +33,14 @@ DEPENDENCIES:
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - SwiftyJSON (~> 4.0)
   - video_player (from `.symlinks/plugins/video_player/ios`)
+  - Zip (~> 2.1)
   - ZIPFoundation (~> 0.9)
 
 SPEC REPOS:
   trunk:
     - SwiftyJSON
     - Toast
+    - Zip
     - ZIPFoundation
 
 EXTERNAL SOURCES:
@@ -72,8 +75,9 @@ SPEC CHECKSUMS:
   SwiftyJSON: 6faa0040f8b59dead0ee07436cbf76b73c08fd08
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
+  Zip: 414f59909701fda9a84ab774ebe0f5449b1082cc
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
-PODFILE CHECKSUM: f26819b187676b4b34d6a78eb16b2e8055b25534
+PODFILE CHECKSUM: 32645123e76beacac5bc525152edbe6140a809ca
 
 COCOAPODS: 1.10.0
