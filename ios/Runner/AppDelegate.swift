@@ -7,6 +7,7 @@ import ZIPFoundation
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
+    private let compressorQueue: DispatchQueue = DispatchQueue(label: "com.musketeer.compressor")
     private var imagePicker = UIImagePickerController()
     private var result: FlutterResult?
     
@@ -27,9 +28,12 @@ import ZIPFoundation
                 self.pickFile(mimeType: req["mime_type"]!, result: result)
             case "create_archive":
                 let req = call.arguments as! [String: String]
-//                var files: [String: FileItem] = [String: FileItem]()
-//                [String: Any].deserialize(from: req["files"]!)
-//                FileManager.default
+                self.compressorQueue.async {
+                    let res = self.createArchive(archiveType: req["archive_type"]!, fileName: req["file_name"]!, password: req["password"]!, fileInfos: JSON(parseJSON: req["files"]!))
+                    DispatchQueue.main.async {
+                        result(res.rawString())
+                    }
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -59,8 +63,47 @@ import ZIPFoundation
         }
     }
     
-    func createArchive(archiveType: String, fileName: String, password: String) {
-        
+    func createArchive(archiveType: String, fileName: String, password: String, fileInfos: JSON) -> JSON {
+        switch archiveType {
+        default:
+            return createZipArchive(fileName: fileName, password: password, fileInfos: fileInfos)
+        }
+    }
+    
+    func copyFileInfo(path: String, fileInfo: JSON) throws {
+        let filePath = "\(path)/\(fileInfo["name"].string!)"
+        if fileInfo["content_type"].string == "directory" {
+            try FileManager.default.createDirectory(atPath: filePath, withIntermediateDirectories: false, attributes: nil)
+            for entry in fileInfo["files"].array! {
+                try copyFileInfo(path: filePath, fileInfo: entry)
+            }
+            return
+        }
+        try FileManager.default.copyItem(atPath: fileInfo["uri"].string!, toPath: filePath)
+    }
+    
+    func createZipArchive(fileName: String, password: String, fileInfos: JSON) -> JSON {
+        let targetPath = NSTemporaryDirectory().appending(fileName)
+        let zipPath = NSTemporaryDirectory().appending("file_dir")
+        do {
+            if FileManager.default.fileExists(atPath: targetPath) {
+                try FileManager.default.removeItem(atPath: targetPath)
+            }
+            if FileManager.default.fileExists(atPath: zipPath) {
+                try FileManager.default.removeItem(atPath: zipPath)
+            }
+            try FileManager.default.createDirectory(atPath: zipPath, withIntermediateDirectories: false, attributes: nil)
+            print("fileInfos \(fileInfos.rawString()!)")
+            for fileEntry in fileInfos.dictionaryValue {
+                print("copy file \(fileEntry.key)")
+                try copyFileInfo(path: zipPath, fileInfo: fileEntry.value)
+            }
+            try FileManager.default.zipItem(at: URL.init(fileURLWithPath: zipPath), to: URL.init(fileURLWithPath: targetPath))
+            try FileManager.default.removeItem(atPath: zipPath)
+        } catch {
+            print("createZipArchive error \(error.localizedDescription)")
+        }
+        return JSON(["archive_type": "zip", "file_name": fileName, "uri": targetPath])
     }
 }
 
