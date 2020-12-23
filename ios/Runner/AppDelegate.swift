@@ -1,9 +1,9 @@
 import UIKit
 import Flutter
-import HandyJSON
+import SwiftyJSON
 import StoreKit
 import MobileCoreServices
-import SSZipArchive
+import ZIPFoundation
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -27,7 +27,9 @@ import SSZipArchive
                 self.pickFile(mimeType: req["mime_type"]!, result: result)
             case "create_archive":
                 let req = call.arguments as! [String: String]
-                FileManager.default
+//                var files: [String: FileItem] = [String: FileItem]()
+//                [String: Any].deserialize(from: req["files"]!)
+//                FileManager.default
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -56,6 +58,10 @@ import SSZipArchive
             controller.present(documentPicker, animated: true)
         }
     }
+    
+    func createArchive(archiveType: String, fileName: String, password: String) {
+        
+    }
 }
 
 extension AppDelegate: UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate {
@@ -72,26 +78,20 @@ extension AppDelegate: UIImagePickerControllerDelegate, UINavigationControllerDe
             } catch let error {
                 print("Failed to copyItem with error: \(error.localizedDescription)")
             }
-            let fileInfo = FileInfo()
-            fileInfo.fileName = fileName
-            fileInfo.uri = fileURL
-            result?([fileInfo].toJSONString())
+            result?(JSON([["file_name": fileName, "uri": fileURL]]).rawString())
             controller.dismiss(animated: true)
         } else if let pickedImage = info[.originalImage] as? UIImage {
             let fileName = "\(TimeUtils.getMillisecondsSince1970()).jpg"
             let fileURL = NSTemporaryDirectory().appending(fileName)
             FileManager.default.createFile(atPath: fileURL, contents: pickedImage.jpegData(compressionQuality: 1.0), attributes: nil)
-            let fileInfo = FileInfo()
-            fileInfo.fileName = fileName
-            fileInfo.uri = fileURL
-            result?([fileInfo].toJSONString())
+            result?(JSON([["file_name": fileName, "uri": fileURL]]).rawString())
             controller.dismiss(animated: true)
         }
     }
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         print(urls)
-        var fileInfos = [FileInfo]()
+        var fileInfos = JSON([JSON]())
         for urlItem in urls {
             let fileName = "\(TimeUtils.getMillisecondsSince1970())\((urlItem.pathExtension != "") ? ".\(urlItem.pathExtension)" : "")"
             let fileURL = NSTemporaryDirectory().appending(fileName)
@@ -100,13 +100,10 @@ extension AppDelegate: UIImagePickerControllerDelegate, UINavigationControllerDe
             } catch let error {
                 print("Failed to copyItem with error: \(error.localizedDescription)")
             }
-            let fileInfo = FileInfo()
-            fileInfo.fileName = fileName
-            fileInfo.uri = fileURL
-            fileInfos.append(fileInfo)
+            fileInfos.arrayObject?.append(JSON(["file_name": fileName, "uri": fileURL]))
             usleep(1000)
         }
-        result?(fileInfos.toJSONString())
+        result?(fileInfos.rawString())
         controller.dismiss(animated: true)
     }
 }

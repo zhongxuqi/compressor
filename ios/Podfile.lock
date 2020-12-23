@@ -3,7 +3,6 @@ PODS:
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
-  - HandyJSON (5.0.2)
   - native_pdf_renderer (1.0.0):
     - Flutter
   - path_provider (0.0.1):
@@ -16,6 +15,7 @@ PODS:
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
+  - SwiftyJSON (4.3.0)
   - Toast (4.0.0)
   - video_player (0.0.1):
     - Flutter
@@ -24,19 +24,19 @@ PODS:
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
-  - HandyJSON (~> 5.0.2)
   - native_pdf_renderer (from `.symlinks/plugins/native_pdf_renderer/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
   - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - SwiftyJSON (~> 4.0)
   - video_player (from `.symlinks/plugins/video_player/ios`)
   - ZIPFoundation (~> 0.9)
 
 SPEC REPOS:
   trunk:
-    - HandyJSON
+    - SwiftyJSON
     - Toast
     - ZIPFoundation
 
@@ -63,17 +63,17 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
-  HandyJSON: 9e4e236f5d2dbefad5155a77417bbea438201c03
   native_pdf_renderer: fa374da660730abe059e7a178e79895dd202f007
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission_handler: eac8e15b4a1a3fba55b761d19f3f4e6b005d15b6
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  SwiftyJSON: 6faa0040f8b59dead0ee07436cbf76b73c08fd08
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
-PODFILE CHECKSUM: 9d0bafa80ce105bc647000e79db9c640e080d608
+PODFILE CHECKSUM: f26819b187676b4b34d6a78eb16b2e8055b25534
 
 COCOAPODS: 1.10.0
