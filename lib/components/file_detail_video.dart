@@ -35,7 +35,7 @@ class _FileDetailVideoState extends State<FileDetailVideo> {
   }
 
   void play() {
-    if (_controller.value.position.inSeconds <= 0 || _controller.value.position.inSeconds >= _controller.value.duration.inSeconds) {
+    if (_controller.value.position.inSeconds >= _controller.value.duration.inSeconds) {
       return;
     }
     _controller.play();
