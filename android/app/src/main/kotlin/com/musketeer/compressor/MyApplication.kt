@@ -14,7 +14,7 @@ class MyApplication : FlutterApplication() {
     override fun onCreate() {
         super.onCreate()
         SevenZip.initSevenZipFromPlatformJAR()
-        UMConfigure.init(this, "5fce4e9dbed37e4506c546b0", "main", UMConfigure.DEVICE_TYPE_PHONE, "")
+        UMConfigure.init(this, "5fce4e9dbed37e4506c546b0", "google", UMConfigure.DEVICE_TYPE_PHONE, "")
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.AUTO)
     }
 }
