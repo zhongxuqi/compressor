@@ -78,6 +78,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final actions = <Action>[
+    Action(ActionType.file, 'images/file_open.png', 'add_file'),
+    Action(ActionType.image, 'images/file_pic.png', 'add_image'),
+    Action(ActionType.video, 'images/file_video.png', 'add_video'),
     Action(ActionType.directory, 'images/directory.png', 'create_directory'),
     Action(ActionType.archive, 'images/file_zip.png', 'create_archive'),
   ];
@@ -144,6 +147,15 @@ class _MainPageState extends State<MainPage> {
 
   void doAction(ActionType t) async {
     switch (t) {
+      case ActionType.file:
+        _pickFileByMimeType(mimeType: '*/*');
+        break;
+      case ActionType.image:
+        _pickFileByMimeType(mimeType: 'image/*');
+        break;
+      case ActionType.video:
+        _pickFileByMimeType(mimeType: 'video/*');
+        break;
       case ActionType.directory:
         createDirectory();
         break;
@@ -160,6 +172,31 @@ class _MainPageState extends State<MainPage> {
         );
         break;
     }
+  }
+
+  void _pickFileByMimeType({@required String mimeType}) async {
+    Navigator.of(context).pop();
+    final fileResultList = await pickFile(mimeType: mimeType);
+    var validFiles = fileResultList.map((e) => fileUtils.path2File(e.uri)).toList();
+    showActionDialog(
+      context: context,
+      actionType: ActionDialogType.add,
+      checkedFiles: validFiles,
+      relativePath: '',
+      callback: (String targetPath, Map<String, String> fileNameMap) async {
+        validFiles.forEach((element) async {
+          if (fileUtils.isDirectory(element.uri)) {
+            fileUtils.copyDirectory(io.Directory(element.uri), io.Directory(path.join(targetPath, fileNameMap[element.uri])));
+          } else {
+            await io.File(element.uri).copy(path.join(targetPath, fileNameMap[element.uri]));
+          }
+        });
+        Navigator.of(context).pop();
+        toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('add_success'));
+        checkedFiles.clear();
+        initData();
+      },
+    );
   }
 
   void doCreateDirectory(String directoryName) async {
@@ -346,36 +383,71 @@ class _MainPageState extends State<MainPage> {
                                     builder: (context) {
                                       return Container(
                                         color: Colors.white,
-                                        height: 120,
+                                        height: 180,
                                         padding: EdgeInsets.symmetric(horizontal: 20),
-                                        child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: actions.map((e) => Expanded(
-                                            flex: 1,
-                                            child: InkWell(
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: [
-                                                  Image.asset(
-                                                    e.icon,
-                                                    height: 50.0,
-                                                    width: 50.0,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: actions.sublist(0, 3).map((e) => Expanded(
+                                                flex: 1,
+                                                child: InkWell(
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                    children: [
+                                                      Image.asset(
+                                                        e.icon,
+                                                        height: 50.0,
+                                                        width: 50.0,
+                                                      ),
+                                                      Container(
+                                                        margin: EdgeInsets.only(top: 5),
+                                                        child: Text(
+                                                          AppLocalizations.of(context).getLanguageText(e.name),
+                                                          style: TextStyle(fontSize: 15),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                  Container(
-                                                    margin: EdgeInsets.only(top: 5),
-                                                    child: Text(
-                                                      AppLocalizations.of(context).getLanguageText(e.name),
-                                                      style: TextStyle(fontSize: 15),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              onTap: () {
-                                                doAction(e.actionType);
-                                              },
+                                                  onTap: () {
+                                                    doAction(e.actionType);
+                                                  },
+                                                ),
+                                              )).toList(),
                                             ),
-                                          )).toList(),
+                                            Container(height: 10, width: 1),
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: actions.sublist(3).map((e) => Expanded(
+                                                flex: 1,
+                                                child: InkWell(
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                    children: [
+                                                      Image.asset(
+                                                        e.icon,
+                                                        height: 50.0,
+                                                        width: 50.0,
+                                                      ),
+                                                      Container(
+                                                        margin: EdgeInsets.only(top: 5),
+                                                        child: Text(
+                                                          AppLocalizations.of(context).getLanguageText(e.name),
+                                                          style: TextStyle(fontSize: 15),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  onTap: () {
+                                                    doAction(e.actionType);
+                                                  },
+                                                ),
+                                              )).toList(),
+                                            ),
+                                          ],
                                         ),
                                       );
                                     },
@@ -503,7 +575,7 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-enum ActionType { directory, archive }
+enum ActionType { file, image, video, directory, archive }
 
 class Action {
   final ActionType actionType;

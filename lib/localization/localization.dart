@@ -102,7 +102,7 @@ class AppLocalizations {
     },
     'create_archive': {
       'en': 'Create Archive',
-      'zh': '压缩文件',
+      'zh': '创建压缩文件',
     },
     'extracting': {
       'en': 'Extracting',
@@ -249,7 +249,7 @@ class AppLocalizations {
       'zh': '添加',
     },
     'add_success': {
-      'en': 'Add Success',
+      'en': 'Added successfully',
       'zh': '添加成功',
     },
     'files_add': {
@@ -295,6 +295,22 @@ class AppLocalizations {
     'uncompressing': {
       'en': 'Uncompressing',
       'zh': '解压中',
+    },
+    'add_file': {
+      'en': 'Add Files',
+      'zh': '添加文件',
+    },
+    'add_image': {
+      'en': 'Add Images',
+      'zh': '添加图片',
+    },
+    'add_video': {
+      'en': 'Add Videos',
+      'zh': '添加视频',
+    },
+    'add_local': {
+      'en': 'Add Local Files',
+      'zh': '添加内部文件',
     },
   };
 

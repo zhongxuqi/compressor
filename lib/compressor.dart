@@ -38,11 +38,11 @@ class CompressorPage extends StatefulWidget {
 
 class _CompressorPageState extends State<CompressorPage> {
   final fileTypes = <FilePicker>[
-    FilePicker(FileType.file, 'images/file_open.png', 'file'),
-    FilePicker(FileType.image, 'images/file_pic.png', 'image'),
-    FilePicker(FileType.video, 'images/file_video.png', 'video'),
-    FilePicker(FileType.directory, 'images/directory.png', 'directory'),
-    FilePicker(FileType.local, 'images/file_Installation_pa.png', 'local'),
+    FilePicker(FileType.file, 'images/file_open.png', 'add_file'),
+    FilePicker(FileType.image, 'images/file_pic.png', 'add_image'),
+    FilePicker(FileType.video, 'images/file_video.png', 'add_video'),
+    FilePicker(FileType.directory, 'images/directory.png', 'create_directory'),
+    FilePicker(FileType.local, 'images/file_Installation_pa.png', 'add_local'),
   ];
   final GlobalKey<FormTextInputState> _fileNameInputKey =
       GlobalKey<FormTextInputState>();

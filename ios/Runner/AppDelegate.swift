@@ -31,21 +31,21 @@ import ZIPFoundation
                 self.compressorQueue.async {
                     let res = self.createArchive(archiveType: req["archive_type"]!, fileName: req["file_name"]!, password: req["password"]!, fileInfos: JSON(parseJSON: req["files"]!))
                     DispatchQueue.main.async {
-                        result(res.rawString())
+                        result(res.rawString([.castNilToNSNull : true]))
                     }
                 }
             case "get_file_headers":
                 let req = call.arguments as! [String: String]
                 let res = self.getFileHeaders(archiveType: req["archive_type"]!, uri: req["uri"]!, password: req["password"]!)
-                result(res.rawString())
+                result(res.rawString([.castNilToNSNull : true]))
             case "extract_file":
                 let req = call.arguments as! [String: String]
                 let res = self.extractFile(archiveType: req["archive_type"]!, uri: req["uri"]!, password: req["password"]!, fileName: req["file_name"]!)
-                result(res.rawString())
+                result(res.rawString([.castNilToNSNull : true]))
             case "extract_all":
                 let req = call.arguments as! [String: String]
                 let res = self.extractAll(archiveType: req["archive_type"]!, uri: req["uri"]!, password: req["password"]!, targetDir: req["target_dir"]!)
-                result(res.rawString())
+                result(res.rawString([.castNilToNSNull : true]))
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -86,8 +86,8 @@ import ZIPFoundation
         let filePath = "\(path)/\(fileInfo["name"].string!)"
         if fileInfo["content_type"].string == "directory" {
             try FileManager.default.createDirectory(atPath: filePath, withIntermediateDirectories: false, attributes: nil)
-            for entry in fileInfo["files"].array! {
-                try copyFileInfo(path: filePath, fileInfo: entry)
+            for fileEntry in fileInfo["files"].dictionaryValue {
+                try copyFileInfo(path: filePath, fileInfo: fileEntry.value)
             }
             return
         }
@@ -105,9 +105,7 @@ import ZIPFoundation
                 try FileManager.default.removeItem(atPath: zipPath)
             }
             try FileManager.default.createDirectory(atPath: zipPath, withIntermediateDirectories: false, attributes: nil)
-            print("fileInfos \(fileInfos.rawString()!)")
             for fileEntry in fileInfos.dictionaryValue {
-                print("copy file \(fileEntry.key)")
                 try copyFileInfo(path: zipPath, fileInfo: fileEntry.value)
             }
             
@@ -127,6 +125,9 @@ import ZIPFoundation
                 return JSON(res)
             }
             for entry in archive {
+                if entry.path.hasSuffix("/") {
+                    continue
+                }
                 res.append([
                     "fileName": entry.path,
                     "isDirectory": false,
@@ -199,13 +200,13 @@ extension AppDelegate: UIImagePickerControllerDelegate, UINavigationControllerDe
             } catch let error {
                 print("Failed to copyItem with error: \(error.localizedDescription)")
             }
-            result?(JSON([["file_name": fileName, "uri": fileURL]]).rawString())
+            result?(JSON([["file_name": fileName, "uri": fileURL]]).rawString([.castNilToNSNull : true]))
             controller.dismiss(animated: true)
         } else if let pickedImage = info[.originalImage] as? UIImage {
             let fileName = "\(TimeUtils.getMillisecondsSince1970()).jpg"
             let fileURL = NSTemporaryDirectory().appending(fileName)
             FileManager.default.createFile(atPath: fileURL, contents: pickedImage.jpegData(compressionQuality: 1.0), attributes: nil)
-            result?(JSON([["file_name": fileName, "uri": fileURL]]).rawString())
+            result?(JSON([["file_name": fileName, "uri": fileURL]]).rawString([.castNilToNSNull : true]))
             controller.dismiss(animated: true)
         }
     }
@@ -224,7 +225,7 @@ extension AppDelegate: UIImagePickerControllerDelegate, UINavigationControllerDe
             fileInfos.arrayObject?.append(JSON(["file_name": fileName, "uri": fileURL]))
             usleep(1000)
         }
-        result?(fileInfos.rawString())
+        result?(fileInfos.rawString([.castNilToNSNull : true]))
         controller.dismiss(animated: true)
     }
 }
