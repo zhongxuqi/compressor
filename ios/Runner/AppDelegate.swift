@@ -38,6 +38,14 @@ import ZIPFoundation
                 let req = call.arguments as! [String: String]
                 let res = self.getFileHeaders(archiveType: req["archive_type"]!, uri: req["uri"]!, password: req["password"]!)
                 result(res.rawString())
+            case "extract_file":
+                let req = call.arguments as! [String: String]
+                let res = self.extractFile(archiveType: req["archive_type"]!, uri: req["uri"]!, password: req["password"]!, fileName: req["file_name"]!)
+                result(res.rawString())
+            case "extract_all":
+                let req = call.arguments as! [String: String]
+                let res = self.extractAll(archiveType: req["archive_type"]!, uri: req["uri"]!, password: req["password"]!, targetDir: req["target_dir"]!)
+                result(res.rawString())
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -129,6 +137,44 @@ import ZIPFoundation
             }
         }
         return JSON(res)
+    }
+    
+    func extractFile(archiveType: String, uri: String, password: String, fileName: String) -> JSON {
+        let targetPath = NSTemporaryDirectory().appending(fileName)
+        switch archiveType {
+        default:
+            do {
+                if FileManager.default.fileExists(atPath: targetPath) {
+                    try FileManager.default.removeItem(atPath: targetPath)
+                }
+                guard let archive = Archive(url: URL.init(fileURLWithPath: uri), accessMode: .read, preferredEncoding: nil) else  {
+                    return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
+                }
+                guard let entry = archive[fileName] else {
+                    return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
+                }
+                try archive.extract(entry, to: URL.init(fileURLWithPath: targetPath))
+            } catch {
+                print("extractFile error \(error.localizedDescription)")
+            }
+        }
+        return JSON(["err_code": "", "target_uri": targetPath])
+    }
+    
+    func extractAll(archiveType: String, uri: String, password: String, targetDir: String) -> JSON {
+        switch archiveType {
+        default:
+            do {
+                if FileManager.default.fileExists(atPath: targetDir) {
+                    try FileManager.default.removeItem(atPath: targetDir)
+                }
+                try FileManager.default.createDirectory(at: URL.init(fileURLWithPath: targetDir), withIntermediateDirectories: true, attributes: nil)
+                try FileManager.default.unzipItem(at: URL.init(fileURLWithPath: uri), to: URL.init(fileURLWithPath: targetDir))
+            } catch {
+                print("extractAll error \(error.localizedDescription)")
+            }
+        }
+        return JSON(["err_code": "", "target_uri": targetDir])
     }
 }
 
