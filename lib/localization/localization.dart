@@ -292,6 +292,10 @@ class AppLocalizations {
       'en': 'Save',
       'zh': '保存',
     },
+    'uncompressing': {
+      'en': 'Uncompressing',
+      'zh': '解压中',
+    },
   };
 
   String getLanguageText(String textID) {

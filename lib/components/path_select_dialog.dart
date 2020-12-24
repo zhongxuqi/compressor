@@ -58,158 +58,171 @@ class _PathSelectDialogState extends State<PathSelectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return SimpleDialog(
-      contentPadding: EdgeInsets.only(bottom: 10),
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(left: 10),
-                  child: Text(
-                    AppLocalizations.of(context)
-                        .getLanguageText('select_target_directory'),
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: ColorUtils.textColor,
+    return Dialog(
+      backgroundColor: ColorUtils.transparent,
+      elevation: 0,
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: ColorUtils.white,
+            borderRadius: BorderRadius.all(Radius.circular(10.0))
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.only(left: 10),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .getLanguageText('select_target_directory'),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: ColorUtils.textColor,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    InkWell(
+                      child: Container(
+                        height: 40,
+                        width: 50,
+                        child: Icon(
+                          IconFonts.close,
+                          color: ColorUtils.textColor,
+                          size: 22,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
                 ),
               ),
-              InkWell(
-                child: Container(
-                  height: 40,
-                  width: 50,
-                  child: Icon(
-                    IconFonts.close,
-                    color: ColorUtils.textColor,
-                    size: 22,
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: ColorUtils.divider,
+                    ),
                   ),
+                ],
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
+                child: FormTextInput(
+                  key: _directoryNameInputKey,
+                  keyName: AppLocalizations.of(context).getLanguageText('uncompress_dir_name'),
+                  value: directoryName,
+                  hintText: AppLocalizations.of(context).getLanguageText('input_file_name_hint'),
+                  maxLines: 1,
+                  onChange: (value) {
+                    directoryName = value;
+                    _directoryNameInputKey.currentState.setTextError('');
+                  },
                 ),
-                onTap: () {
-                  Navigator.of(context).pop();
+              ),
+              Location(
+                directories: paths,
+                goBack: () {
+                  if (paths.length <= 0) return;
+                  paths.removeLast();
+                  initData();
                 },
               ),
-            ],
-          ),
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 1,
-                color: ColorUtils.divider,
-              ),
-            ),
-          ],
-        ),
-        Container(
-          padding: EdgeInsets.only(top: 0, left: 15, right: 15, bottom: 15),
-          child: FormTextInput(
-            key: _directoryNameInputKey,
-            keyName: AppLocalizations.of(context).getLanguageText('uncompress_dir_name'),
-            value: directoryName,
-            hintText: AppLocalizations.of(context).getLanguageText('input_file_name_hint'),
-            maxLines: 1,
-            onChange: (value) {
-              directoryName = value;
-              _directoryNameInputKey.currentState.setTextError('');
-            },
-          ),
-        ),
-        Location(
-          directories: paths,
-          goBack: () {
-            if (paths.length <= 0) return;
-            paths.removeLast();
-            initData();
-          },
-        ),
-        Container(
-          height: MediaQuery.of(context).size.height * 5 / 12,
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  files.where((element) => element.contentType == 'directory').map((e) => FileItem(
-                    fileData: e,
-                    onClick: () {
-                      if (e.contentType == 'directory') {
-                        paths.add(e.name);
-                        initData();
-                        return;
-                      }
-                    },
-                  )).toList()
-                ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.only(top: 15, left: 10, right: 10),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: GestureDetector(
-                  child: Container(
-                    margin: EdgeInsets.only(right: 10.0),
-                    padding: EdgeInsets.all(5.0),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius:
-                      BorderRadius.all(Radius.circular(5.0)),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)
-                          .getLanguageText('cancel'),
-                      style: TextStyle(
-                        color: Colors.black,
+              Container(
+                height: MediaQuery.of(context).size.height * 5 / 12,
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildListDelegate(
+                        files.where((element) => element.contentType == 'directory').map((e) => FileItem(
+                          fileData: e,
+                          onClick: () {
+                            if (e.contentType == 'directory') {
+                              paths.add(e.name);
+                              initData();
+                              return;
+                            }
+                          },
+                        )).toList()
                       ),
                     ),
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                  ],
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: GestureDetector(
-                  child: Container(
-                    padding: EdgeInsets.all(5.0),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: ColorUtils.themeColor,
-                      borderRadius:
-                      BorderRadius.all(Radius.circular(5.0)),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)
-                          .getLanguageText('confirm'),
-                      style: TextStyle(
-                        color: Colors.white,
+              Container(
+                padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                        child: Container(
+                          margin: EdgeInsets.only(right: 10.0),
+                          padding: EdgeInsets.all(5.0),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(5.0)),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .getLanguageText('cancel'),
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
                       ),
                     ),
-                  ),
-                  onTap: () {
-                    if (files.map((e) => e.name).toList().contains(directoryName)) {
-                      _directoryNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
-                      return;
-                    }
-                    widget.callback(pathLib.join(paths.join("/"), directoryName));
-                    initData();
-                  },
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                        child: Container(
+                          padding: EdgeInsets.all(5.0),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: ColorUtils.themeColor,
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(5.0)),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .getLanguageText('confirm'),
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        onTap: () {
+                          if (files.map((e) => e.name).toList().contains(directoryName)) {
+                            _directoryNameInputKey.currentState.setTextError(AppLocalizations.of(context).getLanguageText('file_exists'));
+                            return;
+                          }
+                          widget.callback(pathLib.join(paths.join("/"), directoryName));
+                          initData();
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

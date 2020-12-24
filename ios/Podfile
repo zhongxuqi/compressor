@@ -35,6 +35,7 @@ target 'Runner' do
   pod 'SwiftyJSON', '~> 4.0'
   pod 'ZIPFoundation', '~> 0.9'
   pod 'Zip', '~> 2.1'
+  pod 'SWCompression', '~> 4.5'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end

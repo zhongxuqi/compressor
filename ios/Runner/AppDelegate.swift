@@ -128,7 +128,7 @@ import ZIPFoundation
             }
             for entry in archive {
                 res.append([
-                    "fileName": URL.init(fileURLWithPath: entry.path).lastPathComponent,
+                    "fileName": entry.path,
                     "isDirectory": false,
                     "contentType": "",
                     "lastModified": (entry.fileAttributes[.modificationDate] as! Date).timeIntervalSince1970,
@@ -147,7 +147,7 @@ import ZIPFoundation
                 if FileManager.default.fileExists(atPath: targetPath) {
                     try FileManager.default.removeItem(atPath: targetPath)
                 }
-                guard let archive = Archive(url: URL.init(fileURLWithPath: uri), accessMode: .read, preferredEncoding: nil) else  {
+                guard let archive = Archive(url: URL.init(fileURLWithPath: uri), accessMode: .read, preferredEncoding: nil) else {
                     return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
                 }
                 guard let entry = archive[fileName] else {

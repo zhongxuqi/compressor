@@ -197,7 +197,9 @@ class _FileDetailArchiveState extends State<FileDetailArchive> {
                     defaultDirName = widget.fileData.name;
                   }
                   selectPath(context: context, callback: (p) async {
+                    showLoadingDialog(context, AppLocalizations.of(context).getLanguageText('uncompressing'), barrierDismissible: true);
                     final extractRes = await extractAll(widget.archiveType, widget.fileData.uri, password, await fileUtils.getTargetPath(p));
+                    Navigator.of(context).pop();
                     if (extractRes.errCode.isNotEmpty) {
                       if (extractRes.errCode == 'wrong_password') {
                         Navigator.of(context).pop();
@@ -226,11 +228,9 @@ class _FileDetailArchiveState extends State<FileDetailArchive> {
               Container(
                 padding: EdgeInsets.only(top: 0, left: 15, right: 15),
                 child: FormTextInput(
-                  keyName: AppLocalizations.of(context)
-                      .getLanguageText('archive_password'),
+                  keyName: AppLocalizations.of(context).getLanguageText('archive_password'),
                   value: password,
-                  hintText: AppLocalizations.of(context)
-                      .getLanguageText('input_password_hint'),
+                  hintText: AppLocalizations.of(context).getLanguageText('input_password_hint'),
                   maxLines: 1,
                   onChange: (value) {
                     password = value;
@@ -253,8 +253,7 @@ class _FileDetailArchiveState extends State<FileDetailArchive> {
                             BorderRadius.all(Radius.circular(5.0)),
                           ),
                           child: Text(
-                            AppLocalizations.of(context)
-                                .getLanguageText('confirm'),
+                            AppLocalizations.of(context).getLanguageText('confirm'),
                             style: TextStyle(
                               color: Colors.white,
                             ),

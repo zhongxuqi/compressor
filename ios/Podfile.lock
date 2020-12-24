@@ -1,4 +1,5 @@
 PODS:
+  - BitByteData (1.4.3)
   - Flutter (1.0.0)
   - fluttertoast (0.0.2):
     - Flutter
@@ -15,6 +16,44 @@ PODS:
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
+  - SWCompression (4.5.7):
+    - BitByteData (~> 1.4.3)
+    - SWCompression/BZip2 (= 4.5.7)
+    - SWCompression/Deflate (= 4.5.7)
+    - SWCompression/GZip (= 4.5.7)
+    - SWCompression/LZMA (= 4.5.7)
+    - SWCompression/LZMA2 (= 4.5.7)
+    - SWCompression/SevenZip (= 4.5.7)
+    - SWCompression/TAR (= 4.5.7)
+    - SWCompression/XZ (= 4.5.7)
+    - SWCompression/ZIP (= 4.5.7)
+    - SWCompression/Zlib (= 4.5.7)
+  - SWCompression/BZip2 (4.5.7):
+    - BitByteData (~> 1.4.3)
+  - SWCompression/Deflate (4.5.7):
+    - BitByteData (~> 1.4.3)
+  - SWCompression/GZip (4.5.7):
+    - BitByteData (~> 1.4.3)
+    - SWCompression/Deflate
+  - SWCompression/LZMA (4.5.7):
+    - BitByteData (~> 1.4.3)
+  - SWCompression/LZMA2 (4.5.7):
+    - BitByteData (~> 1.4.3)
+    - SWCompression/LZMA
+  - SWCompression/SevenZip (4.5.7):
+    - BitByteData (~> 1.4.3)
+    - SWCompression/LZMA2
+  - SWCompression/TAR (4.5.7):
+    - BitByteData (~> 1.4.3)
+  - SWCompression/XZ (4.5.7):
+    - BitByteData (~> 1.4.3)
+    - SWCompression/LZMA2
+  - SWCompression/ZIP (4.5.7):
+    - BitByteData (~> 1.4.3)
+    - SWCompression/Deflate
+  - SWCompression/Zlib (4.5.7):
+    - BitByteData (~> 1.4.3)
+    - SWCompression/Deflate
   - SwiftyJSON (4.3.0)
   - Toast (4.0.0)
   - video_player (0.0.1):
@@ -31,6 +70,7 @@ DEPENDENCIES:
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
   - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - SWCompression (~> 4.5)
   - SwiftyJSON (~> 4.0)
   - video_player (from `.symlinks/plugins/video_player/ios`)
   - Zip (~> 2.1)
@@ -38,6 +78,8 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - BitByteData
+    - SWCompression
     - SwiftyJSON
     - Toast
     - Zip
@@ -64,6 +106,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/video_player/ios"
 
 SPEC CHECKSUMS:
+  BitByteData: 36729e2125ec321935754f9feb1f4b297e00b501
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   native_pdf_renderer: fa374da660730abe059e7a178e79895dd202f007
@@ -72,12 +115,13 @@ SPEC CHECKSUMS:
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  SWCompression: 10cc083b8734bca7d4bf0cf6a638a51fb14e8905
   SwiftyJSON: 6faa0040f8b59dead0ee07436cbf76b73c08fd08
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
   Zip: 414f59909701fda9a84ab774ebe0f5449b1082cc
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
-PODFILE CHECKSUM: 32645123e76beacac5bc525152edbe6140a809ca
+PODFILE CHECKSUM: b90e3ce9a949229dc7e9d42eafbc2e7e3005d8f5
 
 COCOAPODS: 1.10.0
