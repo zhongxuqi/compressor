@@ -144,18 +144,24 @@ import ZIPFoundation
         switch archiveType {
         default:
             do {
-                if FileManager.default.fileExists(atPath: targetPath) {
-                    try FileManager.default.removeItem(atPath: targetPath)
-                }
                 guard let archive = Archive(url: URL.init(fileURLWithPath: uri), accessMode: .read, preferredEncoding: nil) else {
                     return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
                 }
                 guard let entry = archive[fileName] else {
                     return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
                 }
-                try archive.extract(entry, to: URL.init(fileURLWithPath: targetPath))
+                if FileManager.default.fileExists(atPath: targetPath) {
+                    let attr = try FileManager.default.attributesOfItem(atPath: targetPath)
+                    let fileSize = attr[.size] as? Int
+                    if fileSize == entry.uncompressedSize {
+                        return JSON(["err_code": "", "target_uri": targetPath])
+                    }
+                    try FileManager.default.removeItem(atPath: targetPath)
+                }
+                _ = try archive.extract(entry, to: URL.init(fileURLWithPath: targetPath))
             } catch {
                 print("extractFile error \(error.localizedDescription)")
+                return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
             }
         }
         return JSON(["err_code": "", "target_uri": targetPath])
@@ -172,6 +178,7 @@ import ZIPFoundation
                 try FileManager.default.unzipItem(at: URL.init(fileURLWithPath: uri), to: URL.init(fileURLWithPath: targetDir))
             } catch {
                 print("extractAll error \(error.localizedDescription)")
+                return JSON(["err_code": "uncompress_error", "target_uri": targetDir])
             }
         }
         return JSON(["err_code": "", "target_uri": targetDir])

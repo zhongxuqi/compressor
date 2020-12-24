@@ -283,7 +283,7 @@ class _CompressorPageState extends State<CompressorPage> {
                 ),
               ],
             ),
-            Container(
+            Platform.isAndroid?Container(
               padding: EdgeInsets.only(top: 0, left: 15, right: 15),
               child: DropDownMenu(
                 initArchiveType: archiveType,
@@ -291,7 +291,7 @@ class _CompressorPageState extends State<CompressorPage> {
                   archiveType = value;
                 },
               ),
-            ),
+            ):Container(),
             Container(
               padding: EdgeInsets.only(top: 0, left: 15, right: 15),
               child: FormTextInput(
@@ -306,14 +306,12 @@ class _CompressorPageState extends State<CompressorPage> {
                 },
               ),
             ),
-            Container(
+            Platform.isAndroid?Container(
               padding: EdgeInsets.only(top: 0, left: 15, right: 15),
               child: FormTextInput(
-                keyName: AppLocalizations.of(context)
-                    .getLanguageText('archive_password'),
+                keyName: AppLocalizations.of(context).getLanguageText('archive_password'),
                 value: password,
-                hintText: AppLocalizations.of(context)
-                    .getLanguageText('input_password_hint'),
+                hintText: AppLocalizations.of(context).getLanguageText('input_password_hint'),
                 maxLines: 1,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp("[a-zA-Z]|[0-9]")),
@@ -323,7 +321,7 @@ class _CompressorPageState extends State<CompressorPage> {
                   password = value;
                 },
               ),
-            ),
+            ):Container(),
             Container(
               padding: EdgeInsets.only(top: 15, left: 10, right: 10),
               child: Row(
