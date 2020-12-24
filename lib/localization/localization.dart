@@ -161,8 +161,12 @@ class AppLocalizations {
       'zh': '评价反馈',
     },
     'agreement': {
-      'en': 'Agreement',
-      'zh': '用户协议与隐私协议',
+      'en': 'User Agreement',
+      'zh': '用户协议',
+    },
+    'privacy': {
+      'en': 'User Privacy',
+      'zh': '隐私政策',
     },
     'read': {
       'en': 'read',

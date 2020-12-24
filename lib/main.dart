@@ -24,6 +24,7 @@ import 'components/agreement_dialog.dart';
 import 'receive_file.dart';
 import 'components/action_dialog.dart';
 import 'components/alert_dialog.dart';
+import 'components/privacy_dialog.dart';
 
 void main() {
   runApp(MyApp());
@@ -565,6 +566,12 @@ class _MainPageState extends State<MainPage> {
                 padding: EdgeInsets.only(top: 5, left: 5, right: 5),
                 child: SideMenuBtn(iconData: IconFonts.agreement,text: AppLocalizations.of(context).getLanguageText('agreement'), callback: () {
                   showAgreementDialog(context);
+                }),
+              ):Container(),
+              AppLocalizations.of(context).getLanguage()=='zh'?Container(
+                padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+                child: SideMenuBtn(iconData: IconFonts.agreement,text: AppLocalizations.of(context).getLanguageText('privacy'), callback: () {
+                  showPrivacyDialog(context);
                 }),
               ):Container(),
             ],

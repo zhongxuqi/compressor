@@ -58,6 +58,10 @@ PODS:
   - Toast (4.0.0)
   - video_player (0.0.1):
     - Flutter
+  - wakelock (0.0.1):
+    - Flutter
+  - webview_flutter (0.0.1):
+    - Flutter
   - Zip (2.1.1)
   - ZIPFoundation (0.9.11)
 
@@ -73,6 +77,8 @@ DEPENDENCIES:
   - SWCompression (~> 4.5)
   - SwiftyJSON (~> 4.0)
   - video_player (from `.symlinks/plugins/video_player/ios`)
+  - wakelock (from `.symlinks/plugins/wakelock/ios`)
+  - webview_flutter (from `.symlinks/plugins/webview_flutter/ios`)
   - Zip (~> 2.1)
   - ZIPFoundation (~> 0.9)
 
@@ -104,6 +110,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
   video_player:
     :path: ".symlinks/plugins/video_player/ios"
+  wakelock:
+    :path: ".symlinks/plugins/wakelock/ios"
+  webview_flutter:
+    :path: ".symlinks/plugins/webview_flutter/ios"
 
 SPEC CHECKSUMS:
   BitByteData: 36729e2125ec321935754f9feb1f4b297e00b501
@@ -119,6 +129,8 @@ SPEC CHECKSUMS:
   SwiftyJSON: 6faa0040f8b59dead0ee07436cbf76b73c08fd08
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
+  wakelock: bfc7955c418d0db797614075aabbc58a39ab5107
+  webview_flutter: d2b4d6c66968ad042ad94cbb791f5b72b4678a96
   Zip: 414f59909701fda9a84ab774ebe0f5449b1082cc
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
