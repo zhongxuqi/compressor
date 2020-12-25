@@ -158,7 +158,11 @@ class AppLocalizations {
     },
     'feedback': {
       'en': 'Feedback',
-      'zh': '评价反馈',
+      'zh': '建议反馈',
+    },
+    'star_rating': {
+      'en': 'Star Rating',
+      'zh': '星级评价',
     },
     'agreement': {
       'en': 'User Agreement',
@@ -315,6 +319,14 @@ class AppLocalizations {
     'add_local': {
       'en': 'Add Local Files',
       'zh': '添加内部文件',
+    },
+    'input_text_hint': {
+      'en': 'Please input content.',
+      'zh': '请输入内容',
+    },
+    'thank_feedback': {
+      'en': 'Thank you for your feedback',
+      'zh': '感谢您的反馈',
     },
   };
 

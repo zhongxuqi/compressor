@@ -26,4 +26,6 @@ class IconFonts {
   static const IconData delete = IconData(0xe660, fontFamily: 'iconfont');
   static const IconData arrowDown = IconData(0xe644, fontFamily: 'iconfont');
   static const IconData save = IconData(0xe603, fontFamily: 'iconfont');
+  static const IconData star = IconData(0xe9df, fontFamily: 'iconfont');
+  static const IconData lock = IconData(0xe7c0, fontFamily: 'iconfont');
 }

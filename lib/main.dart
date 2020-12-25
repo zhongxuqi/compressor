@@ -15,6 +15,7 @@ import 'utils/toast.dart' as toastUtils;
 import 'components/directory_dialog.dart' as directory_dialog;
 import 'components/location.dart';
 import 'dart:io' as io;
+import 'dart:convert';
 import 'package:path/path.dart' as path;
 import './utils/file.dart' as FileUtils;
 import 'package:lpinyin/lpinyin.dart';
@@ -25,6 +26,8 @@ import 'receive_file.dart';
 import 'components/action_dialog.dart';
 import 'components/alert_dialog.dart';
 import 'components/privacy_dialog.dart';
+import 'components/feedback_dialog.dart';
+import 'utils/server.dart' as ServerUtils;
 
 void main() {
   runApp(MyApp());
@@ -559,6 +562,21 @@ class _MainPageState extends State<MainPage> {
               Container(
                 padding: EdgeInsets.only(top: 5, left: 5, right: 5),
                 child: SideMenuBtn(iconData: IconFonts.feedback,text: AppLocalizations.of(context).getLanguageText('feedback'), callback: () {
+                  showFeedbackDialog(context, callback: (msg) {
+                    if (msg == '') return;
+                    ServerUtils.feedback(msg).then((resp) {
+                      Map<String, dynamic> respObj = json.decode(utf8.decode(resp.bodyBytes));
+                      if (respObj['errno'] != 0) {
+                        return;
+                      }
+                      toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('thank_feedback'));
+                    });
+                  });
+                }),
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+                child: SideMenuBtn(iconData: IconFonts.star,text: AppLocalizations.of(context).getLanguageText('star_rating'), callback: () {
                   feedback();
                 }),
               ),
@@ -570,7 +588,7 @@ class _MainPageState extends State<MainPage> {
               ):Container(),
               AppLocalizations.of(context).getLanguage()=='zh'?Container(
                 padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-                child: SideMenuBtn(iconData: IconFonts.agreement,text: AppLocalizations.of(context).getLanguageText('privacy'), callback: () {
+                child: SideMenuBtn(iconData: IconFonts.lock,text: AppLocalizations.of(context).getLanguageText('privacy'), callback: () {
                   showPrivacyDialog(context);
                 }),
               ):Container(),
