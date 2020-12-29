@@ -24,6 +24,7 @@ import ZIPFoundation
             case "feedback":
                 SKStoreReviewController.requestReview()
             case "pick_file":
+                print("pick_file")
                 let req = call.arguments as! [String: String]
                 self.pickFile(mimeType: req["mime_type"]!, result: result)
             case "create_archive":
@@ -191,6 +192,7 @@ extension AppDelegate: UIImagePickerControllerDelegate, UINavigationControllerDe
         _ picker: UIImagePickerController,
         didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
     ) {
+        print("pick_file result")
         let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
         if let videoURL = info[.mediaURL] as? NSURL {
             let fileName = "\(TimeUtils.getMillisecondsSince1970())\((videoURL.pathExtension != nil && videoURL.pathExtension != "") ? ".\(videoURL.pathExtension!)" : "")"

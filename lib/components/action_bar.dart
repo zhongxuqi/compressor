@@ -19,7 +19,7 @@ class ActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: ColorUtils.themeColor,
-      padding: EdgeInsets.all(0),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
       child: Row(
         children: actionItems.map((e) {
           return Expanded(
