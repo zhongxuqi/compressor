@@ -1,5 +1,6 @@
 import 'package:compressor/components/action_bar.dart';
 import 'package:compressor/utils/platform_custom.dart';
+import 'package:compressor/utils/time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './localization/localization.dart';
@@ -91,8 +92,10 @@ class _MainPageState extends State<MainPage> {
   final List<String> paths = [];
   final List<File> files = List<File>();
   final Set<String> checkedFiles = Set<String>();
+  final List<String> newTagFiles = [];
   var sortBy = SortBy.name;
   var sortType = SortType.asc;
+  final lastModifyTime = getCurrentTimestamp();
 
   @override
   void initState() {
@@ -142,11 +145,23 @@ class _MainPageState extends State<MainPage> {
       }
       return 0;
     });
+    files.forEach((element) {
+      if (element.extraObj.lastModified > lastModifyTime) {
+        addFileToNew(element);
+      }
+    });
     setState(() {
       this.files.clear();
       this.files.addAll(files);
     });
     return;
+  }
+
+  void addFileToNew(File f) {
+    if (newTagFiles.contains(f.uri)) {
+      newTagFiles.remove(f.uri);
+    }
+    newTagFiles.add(f.uri);
   }
 
   void doAction(ActionType t) async {
@@ -194,6 +209,7 @@ class _MainPageState extends State<MainPage> {
           } else {
             await io.File(element.uri).copy(path.join(targetPath, fileNameMap[element.uri]));
           }
+          addFileToNew(element);
         });
         Navigator.of(context).pop();
         toastUtils.showSuccessToast(AppLocalizations.of(context).getLanguageText('add_success'));
@@ -219,6 +235,19 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    var tmpFiles = <File>[];
+    for (var newTagFile in newTagFiles) {
+      var retFiles = files.where((element) => element.uri == newTagFile);
+      if (retFiles.length > 0) {
+        tmpFiles.insert(0, retFiles.first);
+      }
+    }
+    files.forEach((element) {
+      var retFiles = tmpFiles.where((tempElement) => tempElement.uri == element.uri);
+      if (retFiles.length <= 0) {
+        tmpFiles.add(element);
+      }
+    });
     return WillPopScope(
       onWillPop: () async {
         if (paths.length > 0) {
@@ -323,8 +352,9 @@ class _MainPageState extends State<MainPage> {
                     slivers: <Widget>[
                       SliverList(
                         delegate: SliverChildListDelegate(
-                            files.map<Widget>((e) => FileItem(
+                            tmpFiles.map<Widget>((e) => FileItem(
                               fileData: e,
+                              tags: newTagFiles.contains(e.uri)?['new']:[],
                               onClick: () {
                                 if (e.contentType == 'directory') {
                                   paths.add(e.name);
