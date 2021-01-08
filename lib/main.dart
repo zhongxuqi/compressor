@@ -242,11 +242,12 @@ class _MainPageState extends State<MainPage> {
         tmpFiles.insert(0, retFiles.first);
       }
     }
+    var newUriSet = tmpFiles.map((e) => e.uri).toSet();
     files.forEach((element) {
-      var retFiles = tmpFiles.where((tempElement) => tempElement.uri == element.uri);
-      if (retFiles.length <= 0) {
-        tmpFiles.add(element);
+      if (newUriSet.contains(element.uri)) {
+        return;
       }
+      tmpFiles.add(element);
     });
     return WillPopScope(
       onWillPop: () async {
