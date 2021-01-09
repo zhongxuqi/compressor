@@ -180,10 +180,10 @@ import LzmaSDK_ObjC
                         continue
                     }
                     res.append([
-                        "fileName": item.fileName ?? "",
+                        "fileName": item.directoryPath != nil ? "\(item.directoryPath!)/\(item.fileName!)" : item.fileName!,
                         "isDirectory": false,
                         "contentType": "",
-                        "lastModified": item.modificationDate!.timeIntervalSince1970,
+                        "lastModified": item.creationDate?.timeIntervalSince1970 ?? 0,
                         "fileSize": item.originalSize,
                     ])
                 }
@@ -220,14 +220,15 @@ import LzmaSDK_ObjC
                 var items = [LzmaSDKObjCItem]()  // Array with selected items.
                 // Iterate all archive items, track what items do you need & hold them in array.
                 reader.iterate(handler: {(item: LzmaSDKObjCItem, error: Error?) -> Bool in
-                    if item.fileName == fileName {
+                    if (item.directoryPath != nil ? "\(item.directoryPath!)/\(item.fileName!)" : item.fileName!) == fileName {
                         items.append(item) // If needed, store to array.
                         return false
                     }
                     return true // true - continue iterate, false - stop iteration
                 })
-                if reader.extract(items, toPath: targetPath, withFullPaths: true) {
-                    print("Extract failed: \(reader.lastError?.localizedDescription)")
+                reader.extract(items, toPath: NSTemporaryDirectory(), withFullPaths: true)
+                if !FileManager.default.fileExists(atPath: targetPath) {
+                    print("Extract failed: \(items.count) \(reader.lastError?.localizedDescription)")
                     return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
                 }
             } catch let error as NSError {
@@ -271,10 +272,7 @@ import LzmaSDK_ObjC
                     items.append(item) // If needed, store to array.
                     return true // true - continue iterate, false - stop iteration
                 })
-                if reader.extract(items, toPath: targetDir, withFullPaths: true) {
-                    print("Extract failed: \(reader.lastError?.localizedDescription)")
-                    return JSON(["err_code": "uncompress_error", "target_uri": targetDir])
-                }
+                reader.extract(items, toPath: targetDir, withFullPaths: true)
             } catch let error as NSError {
                 print("Can't open archive: \(error.localizedDescription) ")
                 return JSON(["err_code": "uncompress_error", "target_uri": targetDir])

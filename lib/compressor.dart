@@ -247,8 +247,7 @@ class _CompressorPageState extends State<CompressorPage> {
                     child: Container(
                       margin: EdgeInsets.only(left: 10),
                       child: Text(
-                        AppLocalizations.of(context)
-                            .getLanguageText('zip_file_info'),
+                        AppLocalizations.of(context).getLanguageText('zip_file_info'),
                         style: TextStyle(
                           fontSize: 18,
                           color: ColorUtils.textColor,
@@ -283,7 +282,7 @@ class _CompressorPageState extends State<CompressorPage> {
                 ),
               ],
             ),
-            Platform.isAndroid?Container(
+            Container(
               padding: EdgeInsets.only(top: 0, left: 15, right: 15),
               child: DropDownMenu(
                 initArchiveType: archiveType,
@@ -291,7 +290,7 @@ class _CompressorPageState extends State<CompressorPage> {
                   archiveType = value;
                 },
               ),
-            ):Container(),
+            ),
             Container(
               padding: EdgeInsets.only(top: 0, left: 15, right: 15),
               child: FormTextInput(
@@ -550,8 +549,7 @@ class _CompressorPageState extends State<CompressorPage> {
                       child: Container(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          AppLocalizations.of(context)
-                              .getLanguageText('compress_title'),
+                          AppLocalizations.of(context).getLanguageText('compress_title'),
                           style: TextStyle(
                             color: ColorUtils.textColor,
                             fontSize: 18,

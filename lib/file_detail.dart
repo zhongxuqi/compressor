@@ -58,7 +58,7 @@ class _FileDetailPageState extends State<FileDetailPage> {
       return FileDetailArchive(archiveType: 'zip', fileData: fileData, callback: widget.callback);
     } else if (io.Platform.isAndroid && fileData.contentType.startsWith("application/x-rar-compressed")) {
       return FileDetailArchive(archiveType: 'rar', fileData: fileData, callback: widget.callback);
-    } else if (io.Platform.isAndroid && fileData.contentType.startsWith("application/x-7z-compressed")) {
+    } else if (fileData.contentType.startsWith("application/x-7z-compressed")) {
       return FileDetailArchive(archiveType: '7z', fileData: fileData, callback: widget.callback);
     }
     return FileDetailUnknown();
