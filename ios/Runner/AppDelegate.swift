@@ -4,6 +4,7 @@ import SwiftyJSON
 import StoreKit
 import MobileCoreServices
 import ZIPFoundation
+import LzmaSDK_ObjC
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -78,6 +79,8 @@ import ZIPFoundation
     
     func createArchive(archiveType: String, fileName: String, password: String, fileInfos: JSON) -> JSON {
         switch archiveType {
+        case "7z":
+            return create7zArchive(fileName: fileName, password: password, fileInfos: fileInfos)
         default:
             return createZipArchive(fileName: fileName, password: password, fileInfos: fileInfos)
         }
@@ -118,9 +121,75 @@ import ZIPFoundation
         return JSON(["archive_type": "zip", "file_name": fileName, "uri": targetPath])
     }
     
+    func addFile27z(writer: LzmaSDKObjCWriter, path: String, fileInfo: JSON) {
+        var filePath = ""
+        if path.isEmpty {
+            filePath = fileInfo["name"].string!
+        } else {
+            filePath = "\(path)/\(fileInfo["name"].string!)"
+        }
+        if fileInfo["content_type"].string == "directory" {
+            for fileEntry in fileInfo["files"].dictionaryValue {
+                addFile27z(writer: writer, path: filePath, fileInfo: fileEntry.value)
+            }
+            return
+        }
+        writer.addPath(fileInfo["uri"].string!, forPath: filePath)
+    }
+    
+    func create7zArchive(fileName: String, password: String, fileInfos: JSON) -> JSON {
+        let targetPath = NSTemporaryDirectory().appending(fileName)
+        let writer = LzmaSDKObjCWriter(fileURL: URL.init(fileURLWithPath: targetPath))
+        for fileEntry in fileInfos.dictionaryValue {
+            addFile27z(writer: writer, path: "", fileInfo: fileEntry.value)
+        }
+        writer.method = LzmaSDKObjCMethodLZMA2
+        writer.solid = true
+        writer.compressionLevel = 9
+        writer.encodeContent = true
+        writer.encodeHeader = true
+        writer.compressHeader = true
+        writer.compressHeaderFull = true
+        writer.writeModificationTime = false
+        writer.writeCreationTime = false
+        writer.writeAccessTime = false
+        do {
+            try writer.open()
+        } catch let error as NSError {
+            print(error.localizedDescription)
+        }
+        writer.write()
+        return JSON(["archive_type": "7z", "file_name": fileName, "uri": targetPath])
+    }
+    
     func getFileHeaders(archiveType: String, uri: String, password: String) -> JSON {
         var res = [Any]()
         switch archiveType {
+        case "7z":
+            let reader = LzmaSDKObjCReader(fileURL: URL.init(fileURLWithPath: uri), andType: LzmaSDKObjCFileType7z)
+            do {
+                try reader.open()
+                var items = [LzmaSDKObjCItem]()  // Array with selected items.
+                // Iterate all archive items, track what items do you need & hold them in array.
+                reader.iterate(handler: {(item: LzmaSDKObjCItem, error: Error?) -> Bool in
+                    items.append(item) // If needed, store to array.
+                    return true // true - continue iterate, false - stop iteration
+                })
+                for item in items {
+                    if item.isDirectory {
+                        continue
+                    }
+                    res.append([
+                        "fileName": item.fileName ?? "",
+                        "isDirectory": false,
+                        "contentType": "",
+                        "lastModified": item.modificationDate!.timeIntervalSince1970,
+                        "fileSize": item.originalSize,
+                    ])
+                }
+            } catch let error as NSError {
+                print("Can't open archive: \(error.localizedDescription) ")
+            }
         default:
             guard let archive = Archive(url: URL.init(fileURLWithPath: uri), accessMode: .read, preferredEncoding: nil) else  {
                 return JSON(res)
@@ -144,6 +213,27 @@ import ZIPFoundation
     func extractFile(archiveType: String, uri: String, password: String, fileName: String) -> JSON {
         let targetPath = NSTemporaryDirectory().appending(fileName)
         switch archiveType {
+        case "7z":
+            let reader = LzmaSDKObjCReader(fileURL: URL.init(fileURLWithPath: uri), andType: LzmaSDKObjCFileType7z)
+            do {
+                try reader.open()
+                var items = [LzmaSDKObjCItem]()  // Array with selected items.
+                // Iterate all archive items, track what items do you need & hold them in array.
+                reader.iterate(handler: {(item: LzmaSDKObjCItem, error: Error?) -> Bool in
+                    if item.fileName == fileName {
+                        items.append(item) // If needed, store to array.
+                        return false
+                    }
+                    return true // true - continue iterate, false - stop iteration
+                })
+                if reader.extract(items, toPath: targetPath, withFullPaths: true) {
+                    print("Extract failed: \(reader.lastError?.localizedDescription)")
+                    return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
+                }
+            } catch let error as NSError {
+                print("Can't open archive: \(error.localizedDescription) ")
+                return JSON(["err_code": "uncompress_error", "target_uri": targetPath])
+            }
         default:
             do {
                 guard let archive = Archive(url: URL.init(fileURLWithPath: uri), accessMode: .read, preferredEncoding: nil) else {
@@ -171,6 +261,24 @@ import ZIPFoundation
     
     func extractAll(archiveType: String, uri: String, password: String, targetDir: String) -> JSON {
         switch archiveType {
+        case "7z":
+            let reader = LzmaSDKObjCReader(fileURL: URL.init(fileURLWithPath: uri), andType: LzmaSDKObjCFileType7z)
+            do {
+                try reader.open()
+                var items = [LzmaSDKObjCItem]()  // Array with selected items.
+                // Iterate all archive items, track what items do you need & hold them in array.
+                reader.iterate(handler: {(item: LzmaSDKObjCItem, error: Error?) -> Bool in
+                    items.append(item) // If needed, store to array.
+                    return true // true - continue iterate, false - stop iteration
+                })
+                if reader.extract(items, toPath: targetDir, withFullPaths: true) {
+                    print("Extract failed: \(reader.lastError?.localizedDescription)")
+                    return JSON(["err_code": "uncompress_error", "target_uri": targetDir])
+                }
+            } catch let error as NSError {
+                print("Can't open archive: \(error.localizedDescription) ")
+                return JSON(["err_code": "uncompress_error", "target_uri": targetDir])
+            }
         default:
             do {
                 if FileManager.default.fileExists(atPath: targetDir) {
