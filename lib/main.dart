@@ -90,7 +90,7 @@ class _MainPageState extends State<MainPage> {
     Action(ActionType.archive, 'images/file_zip.png', 'create_archive'),
   ];
   final List<String> paths = [];
-  final List<File> files = List<File>();
+  final List<File> files = <File>[];
   final Set<String> checkedFiles = Set<String>();
   final List<String> newTagFiles = [];
   var sortBy = SortBy.name;
