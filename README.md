@@ -1,6 +1,6 @@
 # compressor
 
-A new Flutter project.
+ZIP Compressor APP
 
 ## Getting Started
 
